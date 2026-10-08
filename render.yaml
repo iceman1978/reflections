@@ -2,7 +2,7 @@
 # pick this repository. You'll be asked for the values marked sync: false.
 services:
   - type: web
-    name: reflections            # → https://reflections.onrender.com (if the name is free)
+    name: reflections            # → https://reflections-j7o5.onrender.com (Render added "-j7o5": the plain name was taken)
     runtime: docker
     plan: starter                # needed for the persistent disk (about US$7/month)
     region: ohio
@@ -16,7 +16,7 @@ services:
       - key: APP_NAME
         value: Reflections
       - key: PUBLIC_HOST
-        value: reflections.onrender.com
+        value: reflections-j7o5.onrender.com
       - key: TIMEZONE
         value: America/Toronto
       - key: REFLECTIONS_PER_DAY
