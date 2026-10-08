@@ -1,7 +1,7 @@
 # The hosted journal (Render builds this; see render.yaml and README → "Hosting on Render").
 FROM python:3.14-slim
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.0/uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.23 /uv /uvx /usr/local/bin/
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/app/.venv \
     PYTHONUNBUFFERED=1 PATH="/app/.venv/bin:$PATH"
 
