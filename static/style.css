@@ -223,7 +223,14 @@ a { color: var(--accent); }
   backdrop-filter: blur(6px);
   color: var(--muted);
 }
-.today { font-family: var(--hand); font-size: 1.45rem; color: var(--ink); line-height: 1.2; white-space: nowrap; }
+/* The app's name and logo, at the left of the header strip. */
+.header-brand { display: flex; align-items: center; gap: 10px; margin-right: auto; text-decoration: none; min-width: 0; }
+.header-logo { width: 34px; height: 34px; border-radius: 8px; flex: none; box-shadow: 0 0 0 1px var(--rule); }
+.header-name { font-family: var(--hand); font-size: 1.45rem; line-height: 1; color: #2a4b71; white-space: nowrap; padding-top: 4px; }
+html[data-theme="evening"] .header-name { color: var(--accent); }   /* the dark blue would vanish on the dark strip */
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] .header-name { color: var(--accent); } }
+/* Today's date, written at the top of the writing page. */
+.today { font-family: var(--hand); font-size: 1.3rem; color: var(--ink); line-height: 1.2; margin: 0 0 6px; }
 .stats { font-size: 0.85rem; color: var(--muted); text-align: right; flex: 1; font-style: italic; }
 .stats .nudge { color: var(--accent); }
 
@@ -317,6 +324,12 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
     0 1px 2px var(--shadow),
     16px 24px 48px -10px var(--shadow);    /* the book's shadow on the desk */
 }
+/* The page edges and cover stick out past the paper (see box-shadow above), so
+   the journal's pages are that much narrower: the cover's outer edge then lines
+   up with the header strip and Past entries. */
+.book { --book-edge: 15px; }
+.book .page { margin-right: var(--book-edge); }
+
 .page::before {  /* the binding */
   content: "";
   position: absolute;
@@ -842,8 +855,9 @@ textarea.feedback-text:focus { border-color: var(--accent); }
 .landing-quote { margin: 6px 0 0; padding-left: 16px; border-left: 2px solid hsl(var(--hue) calc(var(--sat) + 20%) 78% / 0.6); max-width: 560px; }
 .landing-quote blockquote { margin: 0; font-family: var(--hand); font-size: 2rem; line-height: 1.35; }
 .landing-quote figcaption { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
-/* The sign-in card: a plain, modern card (not the notebook page), in a sans-serif. */
-.vault.landing .vault-card.page {
+/* The lock-screen card (welcome, passphrase, recovery): a plain, modern card
+   in a sans-serif, not the notebook page. */
+.vault .vault-card.page {
   --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif;
   font-family: var(--sans);
   font-size: 1.05rem;
@@ -854,13 +868,17 @@ textarea.feedback-text:focus { border-color: var(--accent); }
   padding: 40px 40px 28px;
   box-shadow: 0 1px 2px var(--shadow), 0 18px 48px -18px var(--shadow);
 }
-.vault.landing .vault-card.page::before { content: none; }
-.vault.landing .vault-card input, .vault.landing .vault-card button { font-family: inherit; }
-.vault.landing .signin-heading {
+.vault .vault-card.page::before { content: none; }
+.vault .vault-card input, .vault .vault-card button { font-family: inherit; }
+.vault .vault-card input[type="password"], .vault .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
+.vault .vault-card button { border-radius: 8px; }
+.vault .vault-title {
   font-family: var(--sans);
   font-weight: 600;
-  font-size: 1.75rem !important;
+  font-size: 1.75rem;
+  line-height: 1.25;
   letter-spacing: -0.01em;
+  color: var(--ink);
   margin: 0 0 12px;
 }
 .signin-action { margin: 26px 0; }
@@ -883,10 +901,10 @@ a.button-link.google-btn {
 a.button-link.google-btn:hover { background: #f2f4f7; }
 a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .signin-note { font-size: 0.92rem; line-height: 1.5; }
-.vault.landing .vault-footer { font-size: 0.9rem; }
+.vault .vault-footer { font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .vault.landing .vault-card.page { padding: 28px 22px 20px; box-shadow: 0 10px 30px -14px var(--shadow); }
+  .vault .vault-card.page { padding: 28px 22px 20px; box-shadow: 0 10px 30px -14px var(--shadow); }
 }
 
 @media (max-width: 860px) {
@@ -968,6 +986,11 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 }
 
 /* ---- Small screens ---- */
+/* Narrow phones: name and buttons on the first row, entry count and streak on a second. */
+@media (max-width: 520px) {
+  .book-header { border-radius: 14px; row-gap: 2px; }
+  .stats { text-align: left; flex-basis: 100%; order: 3; padding-left: 44px; }
+}
 @media (max-width: 640px) {
   html { font-size: 17px; }
   .book { margin-top: 16px; }
@@ -979,8 +1002,8 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
       8px 8px 0 1px var(--cover), 0 1px 2px var(--shadow), 10px 18px 36px -10px var(--shadow);
   }
   .page::before { width: 16px; }
-  .book-header { border-radius: 12px; flex-wrap: wrap; }
-  .stats { text-align: left; flex-basis: 100%; order: 3; }
+  .book { --book-edge: 9px; }
+  .book-header { flex-wrap: wrap; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .past { padding: 12px 16px 6px; }

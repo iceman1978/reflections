@@ -1213,6 +1213,13 @@
   renderGreeting();
   loadBackground();
   $("settings-btn").addEventListener("click", showSettings);
+  // The logo and name in the header lead back to the writing page (no reload).
+  $("home-link").addEventListener("click", (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    if (!$("settings-view").hidden) restoreSavedLook();  // leaving settings unsaved = Discard
+    showWrite();
+  });
   $("settings-back-btn").addEventListener("click", () => {
     restoreSavedLook();  // Discard: undo any unsaved preview, save nothing
     leaveSettings();
@@ -1424,6 +1431,15 @@
 
   // ---- The lock screen: set up a password, unlock, or recover -----------
 
+  // The heading on each lock-screen card.
+  const VAULT_TITLES = {
+    signin: "Welcome",
+    setup: "Secret Passphrase",
+    recovery: "Your Recovery Key",
+    unlock: "Secret Passphrase",
+    recover: "Forgot Your Passphrase?",
+  };
+
   function showVaultPanel(name) {
     $("vault").hidden = false;
     $("book").hidden = true;
@@ -1435,7 +1451,7 @@
     const welcome = name === "signin";
     $("vault").classList.toggle("landing", welcome);
     if ($("landing")) $("landing").hidden = !welcome;
-    $("vault-title").hidden = welcome;
+    $("vault-title").textContent = VAULT_TITLES[name] || CFG.appName;
     for (const el of document.querySelectorAll(".vault-error")) el.hidden = true;
     const first = $(`vault-${name}`).querySelector("input");
     if (first) first.focus();

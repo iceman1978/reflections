@@ -20,10 +20,35 @@ Run it again whenever the logo changes, then push.
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "static" / "brand"
+
+# The browser-tab icon is simpler than the logo, so it's readable at 16 px:
+# the "R" from the handwriting font, white on the app's blue.
+TAB_LETTER = "R"
+TAB_FONT = ROOT / "static" / "fonts" / "HomemadeApple-Regular.ttf"
+TAB_BLUE = (0x2A, 0x4B, 0x71)
+
+
+def letter_icon(size=512, fill=0.74, radius=0.2, weight=0.03):
+    """The letter centred on a rounded blue square, drawn large and scaled
+    down by the caller (smoother than drawing tiny)."""
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle((0, 0, size - 1, size - 1), int(size * radius), fill=TAB_BLUE + (255,))
+    # Find the font size at which the letter's actual ink fills `fill` of the square.
+    probe = ImageFont.truetype(str(TAB_FONT), 1000)
+    l, t, r, b = probe.getbbox(TAB_LETTER)
+    scale = fill * size / max(r - l, b - t)
+    font = ImageFont.truetype(str(TAB_FONT), int(1000 * scale))
+    l, t, r, b = font.getbbox(TAB_LETTER)
+    # A white outline thickens the fine pen strokes so they survive at 16 px.
+    stroke = max(1, int(size * weight))
+    draw.text(((size - (r - l)) / 2 - l, (size - (b - t)) / 2 - t), TAB_LETTER, font=font, fill="white",
+              stroke_width=stroke, stroke_fill="white")
+    return img
 
 
 def resized(img, size):
@@ -56,8 +81,9 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     save = dict(optimize=True)
     resized(img, 384).save(OUT / "logo.png", **save)
-    resized(img, 32).save(OUT / "favicon-32.png", **save)
-    resized(img, 48).save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    tab = letter_icon()
+    tab.resize((32, 32), Image.LANCZOS).save(OUT / "favicon-32.png", **save)
+    tab.resize((48, 48), Image.LANCZOS).save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
     resized(img, 180).save(OUT / "apple-touch-icon.png", **save)
     resized(img, 192).save(OUT / "icon-192.png", **save)
     resized(img, 512).save(OUT / "icon-512.png", **save)

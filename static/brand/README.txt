@@ -10,7 +10,8 @@ To change the logo: replace brand-source/logo-original.png, run the script,
 then push. It writes:
 
   logo.png                welcome page (next to the app name)
-  favicon.ico, favicon-32.png   browser tab
+  favicon.ico, favicon-32.png   browser tab: the handwriting "R", white on blue
+                          (simpler than the logo, so it reads at 16 px)
   apple-touch-icon.png    iPhone / iPad "Add to Home Screen"
   icon-192.png, icon-512.png    "Install app" on Android and computers
   icon-maskable-512.png   Android's circle / rounded-square crops
