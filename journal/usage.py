@@ -47,8 +47,7 @@ def check(user_id, kind):
 
 
 def record(user_id, kind):
-    if not LIMITS.get(kind):
-        return
+    """Count one successful use (always: the limits use it, and so do the usage stats)."""
     with db.write_lock:
         con = db.connect()
         try:

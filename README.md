@@ -164,11 +164,12 @@ Open the entry and click **Delete**. You'll be asked to confirm, then to choose:
 
 Click the **⚙** in the top-right corner to change your name (used in the greeting) and the other settings. **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
 
-Your personal choices (name, day/evening, colour, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
+Your personal choices (name, journal name, day/evening, colour, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
 
 | Setting | What it does | Default |
 |---|---|---|
 | `user_name` | Your name in the greeting ("Hi …, what's on your mind?") | *(empty)* |
+| `journal_name` | The title at the top of your journal, in the theme colour (blank = *Reflections*) | *(empty)* |
 | `port` | The number in the browser address | `5050` |
 | `open_browser_on_start` | Open the browser automatically | `true` |
 | `timezone` | Time zone for dates and streaks | `America/Toronto` |
@@ -287,6 +288,16 @@ Add (or remove) their address in **both** places: Google's *Test users*, and `AL
 The **speech bubble** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.
 
 You read it in **Settings → Feedback received**: newest first, with a **Done** tick-box to clear things you've handled, and **Download (CSV)** for a spreadsheet. Only addresses in `ADMIN_EMAILS` on Render see that section (on your own computer, you always do). Each person can send up to 20 a day.
+
+### Usage stats
+
+**Settings → Usage** (only for addresses in `ADMIN_EMAILS`; on your own computer, you always see it) shows how Reflections is being used:
+
+- **Tiles:** people (signed up / set up / invited), active today, this week, this month, how many are *coming back* (used it on 2 or more different days in the last 30), average days active, and entries and reflections in the last 30 days.
+- **Chart:** how many people used it each day for the last 30 days.
+- **Table:** one row per person: last visit (*today*, *3 days ago*…), days active in the last 30, entries (last 30 days and all time), reflections, and when they joined.
+
+Only counts are kept, per person per day: that they opened their journal, how many entries they wrote, and how many reflections and prompts they asked for. Nothing anyone writes, no titles, no times of day. The privacy page says so. Counting started when this feature was added, so earlier days show as empty.
 
 ### Trying changes before they go live: `test-web.bat`
 

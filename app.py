@@ -22,7 +22,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (config, export, feedback, importer, migrate, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, migrate, reflection, stats, store, usage, users, vault,
                      wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -128,6 +128,7 @@ def _guard():
     vault.use(s)
     if request.headers.get(PASSIVE_HEADER) != "1":
         vault.touch(g.token)
+        activity.seen(g.user_id)   # for the usage stats: which days people use the app
 
 
 def _lock_own_session(reason="locked"):
@@ -205,6 +206,7 @@ def index():
         hosted=HOSTED,
         is_admin=_is_admin(uid),
         user_name=prefs["user_name"],
+        journal_name=prefs["journal_name"] or config.APP_NAME,
         autosave_seconds=prefs["draft_autosave_seconds"],
         timezone=settings["timezone"],
         theme=prefs["theme"],
@@ -408,6 +410,7 @@ def vault_setup():
         return jsonify(error=str(e)), 400
     vault.use(vault.session(token))
     imported, problem, cleanup_failed = _import_legacy_if_any()
+    activity.seen(g.user_id)
     return _with_session({"recovery_key": recovery_key, "imported": imported,
                           "import_problem": problem, "cleanup_failed": cleanup_failed}, token)
 
@@ -424,6 +427,7 @@ def vault_unlock():
     _lock_own_session("replaced by a new unlock")  # this browser's previous session, if any
     vault.use(vault.session(token))
     imported, problem, cleanup_failed = _import_legacy_if_any()
+    activity.seen(g.user_id)
     return _with_session({"ok": True, "imported": imported, "import_problem": problem,
                           "cleanup_failed": cleanup_failed}, token)
 
@@ -541,6 +545,7 @@ def create_entry():
     # Saved (encrypted) before Claude is ever called.
     entry = store.create_entry(text, prompt, reflect=bool(data.get("reflect")), title=data.get("title"))
     log.info("Saved entry %s (%d words)", entry["id"], entry["word_count"])
+    activity.entry_written(g.user_id)
     store.clear_draft()
     return jsonify(entry=_for_page(entry)), 201
 
@@ -802,6 +807,19 @@ def export_feedback():
     data = feedback.as_csv().encode("utf-8")
     return send_file(io.BytesIO(data), as_attachment=True, mimetype="text/csv",
                      download_name=f"reflections-feedback-{datetime.now(TZ):%Y-%m-%d}.csv")
+
+
+# ---- Usage stats (admins) -------------------------------------------------
+
+@app.get("/api/admin/usage")
+def usage_stats():
+    """Who uses the app and how often: days active, entries and reflections
+    (counts only; nothing anyone wrote)."""
+    if (resp := _need_admin()):
+        return resp
+    stats = activity.summary()
+    stats["invited"] = len(config.ALLOWED_EMAILS) if HOSTED else None
+    return jsonify(stats)
 
 
 # ---- Drafts ---------------------------------------------------------------

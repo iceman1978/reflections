@@ -1059,6 +1059,7 @@
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
     }
     refreshHidden();
+    refreshUsage();
     refreshFeedbackList();
   }
 
@@ -1075,6 +1076,7 @@
     try {
       const res = await api("PUT", "/api/settings", out);
       CFG.userName = res.settings.user_name;
+      $("journal-name").textContent = res.settings.journal_name || CFG.appName;
       CFG.autosaveSeconds = res.settings.draft_autosave_seconds;
       savedLook.theme = res.settings.theme;
       savedLook.palette = res.settings.colour_theme;
@@ -1335,6 +1337,72 @@
     }
   }
   if ($("feedback-show-done")) $("feedback-show-done").addEventListener("change", refreshFeedbackList);
+
+  // Settings → Usage (only on the page for whoever runs the app).
+  function daysAgo(n) {
+    if (n == null) return "never";
+    return n === 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
+  }
+
+  async function refreshUsage() {
+    if (!$("usage-tiles")) return;
+    let u;
+    try { u = await api("GET", "/api/admin/usage"); } catch (_) { return; }
+    const tile = (label, value, note) => {
+      const d = document.createElement("div");
+      d.className = "usage-tile";
+      const v = document.createElement("div"); v.className = "usage-value"; v.textContent = value;
+      const l = document.createElement("div"); l.className = "usage-label"; l.textContent = label;
+      d.append(v, l);
+      if (note) { const n = document.createElement("div"); n.className = "usage-note"; n.textContent = note; d.append(n); }
+      return d;
+    };
+    $("usage-tiles").replaceChildren(
+      tile("People", u.people, u.invited != null ? `${u.set_up} set up · ${u.invited} invited` : `${u.set_up} set up`),
+      tile("Active today", u.active_today),
+      tile("This week", u.active_week, "last 7 days"),
+      tile("This month", u.active_month, "last 30 days"),
+      tile("Coming back", u.returning, "on 2+ different days"),
+      tile("Days active", u.avg_active_days, "average per active person"),
+      tile("Entries", u.entries_recent, "last 30 days"),
+      tile("Reflections", u.reflections_recent, "last 30 days"),
+    );
+    $("usage-since").textContent = u.tracking_since
+      ? `Visits counted since ${longDate(u.tracking_since + "T12:00:00")}.` : "No visits counted yet.";
+
+    // People active each day: one bar per day.
+    const max = Math.max(1, ...u.series.map((d) => d.users));
+    const chart = $("usage-chart");
+    chart.replaceChildren();
+    for (const d of u.series) {
+      const bar = document.createElement("div");
+      bar.className = "usage-bar" + (d.day === u.today ? " today" : "");
+      bar.style.height = `${Math.max(d.users ? 8 : 2, (d.users / max) * 100)}%`;
+      bar.title = `${longDate(d.day + "T12:00:00")}: ${plural(d.users, "person").replace("persons", "people")}`;
+      chart.append(bar);
+    }
+
+    // One row per person.
+    const table = $("usage-table");
+    table.replaceChildren();
+    const head = table.createTHead().insertRow();
+    for (const h of ["Person", "Last visit", "Days active", "Entries (all)", "Reflections", "Joined"]) {
+      const th = document.createElement("th"); th.textContent = h; head.append(th);
+    }
+    const body = table.createTBody();
+    for (const r of u.rows) {
+      const tr = body.insertRow();
+      const cells = [
+        r.who.replace("@", "@​") + (r.set_up ? "" : " (not set up)"),  // long emails break after the @
+        daysAgo(r.days_since),
+        String(r.active_days),
+        `${r.entries_recent} (${r.entries_total})`,
+        String(r.reflections_recent),
+        r.joined,
+      ];
+      for (const c of cells) tr.insertCell().textContent = c;
+    }
+  }
 
   // Import entries from a CSV made with Export.
   $("import-btn").addEventListener("click", () => $("import-file").click());

@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if not os.environ.get("JOURNAL_DATA_DIR"):
     raise unittest.SkipTest("Set JOURNAL_DATA_DIR to a throwaway folder to run the vault tests.")
 
-from journal import (config, crypto, db, export, feedback, importer, migrate, sources, store, usage, users,  # noqa: E402
+from journal import (activity, config, crypto, db, export, feedback, importer, migrate, sources, store, usage, users,  # noqa: E402
                      vault, wipe)
 from journal.db import LOCAL_USER  # noqa: E402
 
@@ -28,6 +28,7 @@ PASSWORD = "correct horse battery"
 def fresh_journal():
     vault.lock_all()
     vault.use(None)
+    activity._seen.clear()
     vault._failures.clear()
     for p in config.DATA_DIR.glob("journal.db*"):
         p.unlink()
@@ -295,6 +296,45 @@ class FeedbackTests(unittest.TestCase):
         with self.assertRaises(feedback.FeedbackProblem):
             feedback.add("u1", None, None, "fix", "one too many")
         feedback.add("u2", None, None, "fix", "someone else is fine")
+
+
+class ActivityTests(unittest.TestCase):
+    def setUp(self):
+        fresh_journal()
+
+    def test_summary(self):
+        from datetime import timedelta
+        today = activity._today()
+        ann = users.from_google("sub-ann", "ann@example.com", "Ann")
+        bob = users.from_google("sub-bob", "bob@example.com", "Bob")
+        users.from_google("sub-cat", "cat@example.com", "Cat")            # signed in once, never used it
+        con = db.connect()
+        with con:
+            for d, n in ((0, 2), (3, 1), (10, 0), (45, 5)):                # Ann: 3 days in the last 30, one older
+                con.execute("INSERT INTO activity VALUES (?, ?, ?)", (ann, (today - timedelta(days=d)).isoformat(), n))
+            con.execute("INSERT INTO activity VALUES (?, ?, ?)", (bob, (today - timedelta(days=2)).isoformat(), 1))
+        con.close()
+        activity.seen(ann)                                                 # already recorded today: no change
+        usage.record(ann, "reflection")
+        s = activity.summary()
+        self.assertEqual((s["people"], s["active_today"], s["active_week"], s["active_month"]), (3, 1, 2, 2))
+        self.assertEqual(s["returning"], 1)                                # only Ann came back on another day
+        self.assertEqual(s["avg_active_days"], 2.0)                        # (3 + 1) / 2
+        self.assertEqual(s["entries_recent"], 4)                           # 2 + 1 + 0 (Ann) + 1 (Bob)
+        self.assertEqual(s["reflections_recent"], 1)
+        rows = {r["who"]: r for r in s["rows"]}
+        self.assertEqual((rows["ann@example.com"]["days_since"], rows["ann@example.com"]["first_seen"]),
+                         (0, (today - timedelta(days=45)).isoformat()))
+        self.assertEqual(rows["bob@example.com"]["days_since"], 2)
+        self.assertIsNone(rows["cat@example.com"]["last_seen"])
+        self.assertEqual(len(s["series"]), 30)
+        self.assertEqual(s["series"][-1], {"day": today.isoformat(), "users": 1})
+
+    def test_entry_written_counts(self):
+        uid = users.ensure_local()
+        activity.entry_written(uid)
+        activity.entry_written(uid)
+        self.assertEqual(activity.summary()["entries_recent"], 2)
 
 
 class UpgradeTests(unittest.TestCase):

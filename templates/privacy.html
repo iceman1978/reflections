@@ -53,6 +53,13 @@
       <p>No analytics, advertising or tracking scripts are used. The only cookies keep you signed in and
         remember that this browser has unlocked your journal.</p>
 
+      <h2>What's counted</h2>
+      <p>So {% if hosted %}whoever runs {{ app_name }}{% else %}you{% endif %} can see how it's being used, the
+        server keeps a few simple counts for each person: which days they opened their journal, how many entries
+        they wrote each day, and how many reflections and writing prompts they asked for. {% if hosted %}These are
+        shown with your email address, only to the person who runs the site.{% endif %} That's all: nothing you
+        write, no titles, no times of day, and nothing about what you read or click.</p>
+
       {% if hosted %}
       <h2>Limits</h2>
       <p>To share one Claude account fairly, each person gets {{ reflections_per_day }} reflections and
