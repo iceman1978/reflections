@@ -1213,13 +1213,6 @@
   renderGreeting();
   loadBackground();
   $("settings-btn").addEventListener("click", showSettings);
-  // The logo and name in the header lead back to the writing page (no reload).
-  $("home-link").addEventListener("click", (e) => {
-    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-    e.preventDefault();
-    if (!$("settings-view").hidden) restoreSavedLook();  // leaving settings unsaved = Discard
-    showWrite();
-  });
   $("settings-back-btn").addEventListener("click", () => {
     restoreSavedLook();  // Discard: undo any unsaved preview, save nothing
     leaveSettings();

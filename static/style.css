@@ -223,14 +223,7 @@ a { color: var(--accent); }
   backdrop-filter: blur(6px);
   color: var(--muted);
 }
-/* The app's name and logo, at the left of the header strip. */
-.header-brand { display: flex; align-items: center; gap: 10px; margin-right: auto; text-decoration: none; min-width: 0; }
-.header-logo { width: 34px; height: 34px; border-radius: 8px; flex: none; box-shadow: 0 0 0 1px var(--rule); }
-.header-name { font-family: var(--hand); font-size: 1.45rem; line-height: 1; color: #2a4b71; white-space: nowrap; padding-top: 4px; }
-html[data-theme="evening"] .header-name { color: var(--accent); }   /* the dark blue would vanish on the dark strip */
-@media (prefers-color-scheme: dark) { html[data-theme="auto"] .header-name { color: var(--accent); } }
-/* Today's date, written at the top of the writing page. */
-.today { font-family: var(--hand); font-size: 1.3rem; color: var(--ink); line-height: 1.2; margin: 0 0 6px; }
+.today { font-family: var(--hand); font-size: 1.45rem; color: var(--ink); line-height: 1.2; white-space: nowrap; }
 .stats { font-size: 0.85rem; color: var(--muted); text-align: right; flex: 1; font-style: italic; }
 .stats .nudge { color: var(--accent); }
 
@@ -991,11 +984,6 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 }
 
 /* ---- Small screens ---- */
-/* Narrow phones: name and buttons on the first row, entry count and streak on a second. */
-@media (max-width: 520px) {
-  .book-header { border-radius: 14px; row-gap: 2px; }
-  .stats { text-align: left; flex-basis: 100%; order: 3; padding-left: 44px; }
-}
 @media (max-width: 640px) {
   html { font-size: 17px; }
   .book { margin-top: 16px; }
@@ -1008,7 +996,8 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   }
   .page::before { width: 16px; }
   .book { --book-edge: 9px; }
-  .book-header { flex-wrap: wrap; }
+  .book-header { border-radius: 12px; flex-wrap: wrap; }
+  .stats { text-align: left; flex-basis: 100%; order: 3; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .past { padding: 12px 16px 6px; }
