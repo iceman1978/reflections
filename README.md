@@ -220,7 +220,7 @@ uv run python -m unittest discover tests
 
 ## Hosting on Render
 
-This puts the journal at **https://reflections.onrender.com** for a few people you invite. Each person signs in with Google, then sets their own passphrase. Their entries are encrypted with it, so neither you nor Render can read them. Reflections use *your* Claude API key, with a limit of **3 reflections and 10 writing prompts per person per day**.
+This puts the journal at **https://reflections-j7o5.onrender.com** (Render added -j7o5 because the plain name was taken) for a few people you invite. Each person signs in with Google, then sets their own passphrase. Their entries are encrypted with it, so neither you nor Render can read them. Reflections use *your* Claude API key, with a limit of **3 reflections and 10 writing prompts per person per day**.
 
 **Cost:** Render's *Starter* plan with a 1 GB disk, about US$7/month (the free plan has no disk, so entries would vanish on every restart). Claude usage is billed to your Anthropic account as usual.
 
