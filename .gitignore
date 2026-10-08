@@ -1,0 +1,12 @@
+# Secrets
+.env
+
+# Your journal data, backups and logs
+data/
+logs/
+config/settings.json
+
+# Python
+.venv/
+__pycache__/
+*.pyc

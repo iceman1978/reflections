@@ -1,0 +1,35 @@
+# Render "Blueprint" for the hosted journal. In Render: New → Blueprint →
+# pick this repository. You'll be asked for the values marked sync: false.
+services:
+  - type: web
+    name: reflections            # → https://reflections.onrender.com (if the name is free)
+    runtime: docker
+    plan: starter                # needed for the persistent disk (about US$7/month)
+    region: ohio
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: journal-data
+      mountPath: /var/data       # entries (encrypted), backups, logs
+      sizeGB: 1
+    envVars:
+      - key: APP_NAME
+        value: Reflections
+      - key: PUBLIC_HOST
+        value: reflections.onrender.com
+      - key: TIMEZONE
+        value: America/Toronto
+      - key: REFLECTIONS_PER_DAY
+        value: "3"
+      - key: PROMPTS_PER_DAY
+        value: "10"
+      - key: SECRET_KEY          # signs the sign-in cookie
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_EMAILS      # comma-separated Google addresses allowed to sign in
+        sync: false

@@ -1,0 +1,264 @@
+{
+  "_about": [
+    "Curated source map for quotes in reflections. Claude may only quote these works,",
+    "and the app (never Claude) builds every link from this file.",
+    "",
+    "After editing, run:  uv run python tools/build_sources.py",
+    "That checks every link and downloads the texts used to verify quote wording.",
+    "To (re)build just some works:  uv run python tools/build_sources.py republic ethics_spinoza",
+    "",
+    "Fields:",
+    "  pages:  how the work is split into linkable pages on Wikisource. One of:",
+    "            {'single': title}  the whole work is one page",
+    "            {'template': title, 'levels': [...]}  {n} = number, {roman} = Roman",
+    "                numeral; 'levels' gives the count at each level, or a list of",
+    "                counts per parent (Discourses: 4 books, 30/26/26/13 chapters)",
+    "            {'prefix': title, 'pattern': regex}  every subpage whose remaining",
+    "                title matches the regex; its groups become the page's location",
+    "                (Roman numerals and number words become numbers; 'aliases'",
+    "                renames groups, e.g. a Summa part to 'I-II')",
+    "  sections:  how passages inside a page are numbered, if the app can tell:",
+    "             'numbered_paragraphs' (paragraphs start '3.'), 'roman_headings', or null",
+    "  location_from_section:  show only the section number as the location",
+    "             (for works numbered straight through, like Beyond Good and Evil)",
+    "  note:   extra guidance for Claude about this work"
+  ],
+  "site": "https://en.wikisource.org/wiki/",
+  "works": {
+    "apology": {
+      "author": "Plato",
+      "title": "Apology",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "Stephanus number if you know it, e.g. 38a; otherwise leave empty",
+      "note": "Socrates' defence speech at his trial. Introduce quotes as Socrates speaking.",
+      "work_page": "The Dialogues of Plato (Jowett)/Apology",
+      "pages": {"single": "The Dialogues of Plato (Jowett)/Apology"},
+      "sections": null
+    },
+    "crito": {
+      "author": "Plato",
+      "title": "Crito",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "Stephanus number if you know it, e.g. 49b; otherwise leave empty",
+      "note": "Socrates in prison, on justice and obligation. Introduce quotes as Socrates speaking.",
+      "work_page": "The Dialogues of Plato (Jowett)/Crito",
+      "pages": {"single": "The Dialogues of Plato (Jowett)/Crito"},
+      "sections": null
+    },
+    "phaedo": {
+      "author": "Plato",
+      "title": "Phaedo",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "Stephanus number if you know it, e.g. 64a; otherwise leave empty",
+      "note": "Socrates' last day, on death and the soul.",
+      "work_page": "The Dialogues of Plato (Jowett)/Phaedo",
+      "pages": {"single": "The Dialogues of Plato (Jowett)/Phaedo"},
+      "sections": null
+    },
+    "symposium": {
+      "author": "Plato",
+      "title": "Symposium",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "Stephanus number if you know it, e.g. 210a; otherwise leave empty",
+      "note": "Speeches on love; Socrates recounts Diotima's teaching.",
+      "work_page": "The Dialogues of Plato (Jowett)/Symposium",
+      "pages": {"single": "The Dialogues of Plato (Jowett)/Symposium"},
+      "sections": null
+    },
+    "republic": {
+      "author": "Plato",
+      "title": "Republic",
+      "translation": "Benjamin Jowett (1901)",
+      "location_format": "book number, e.g. 7 (Stephanus numbers can follow: 7, 514a)",
+      "note": "Socrates is the main speaker.",
+      "work_page": "The Republic of Plato",
+      "pages": {"template": "The Republic of Plato/Book {n}", "levels": [10]},
+      "sections": null
+    },
+    "nicomachean_ethics": {
+      "author": "Aristotle",
+      "title": "Nicomachean Ethics",
+      "translation": "D. P. Chase (1847, rev. 1861)",
+      "location_format": "book.chapter, e.g. 2.6",
+      "work_page": "Nicomachean Ethics (Chase)",
+      "pages": {"prefix": "Nicomachean Ethics (Chase)/", "pattern": "^Book (\\w+)$"},
+      "sections": null
+    },
+    "confessions": {
+      "author": "Augustine",
+      "title": "Confessions",
+      "translation": "J. G. Pilkington (1886)",
+      "location_format": "book.chapter, e.g. 1.1",
+      "work_page": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions",
+      "pages": {"prefix": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions/", "pattern": "^Book ([IVXL]+)/Chapter (\\d+)$"},
+      "sections": null
+    },
+    "summa": {
+      "author": "Thomas Aquinas",
+      "title": "Summa Theologiae",
+      "translation": "Fathers of the English Dominican Province (1917)",
+      "location_format": "part.question.article, e.g. I-II.2.8 (only the moral parts I-II and II-II are available)",
+      "note": "Quote the body of an article or a reply, not the objections, which state views Aquinas rejects.",
+      "work_page": "Summa Theologiae",
+      "pages": {"prefix": "Summa Theologiae/", "pattern": "^(First Part of the Second Part|Second Part of the Second Part)/Question (\\d+)$",
+                "aliases": {"First Part of the Second Part": "I-II", "Second Part of the Second Part": "II-II"}},
+      "sections": null
+    },
+    "descartes_meditations": {
+      "author": "René Descartes",
+      "title": "Meditations on First Philosophy",
+      "translation": "John Veitch (1853)",
+      "location_format": "meditation number, e.g. 2",
+      "work_page": "Meditations on First Philosophy",
+      "pages": {"prefix": "Meditations on First Philosophy/", "pattern": "^Meditation ([IV]+)$"},
+      "sections": null
+    },
+    "discourse_on_method": {
+      "author": "René Descartes",
+      "title": "Discourse on the Method",
+      "translation": "John Veitch (1853)",
+      "location_format": "part number, e.g. 3",
+      "work_page": "Discourse on the Method",
+      "pages": {"template": "Discourse on the Method/Part {n}", "levels": [6]},
+      "sections": null
+    },
+    "ethics_spinoza": {
+      "author": "Baruch Spinoza",
+      "title": "Ethics",
+      "translation": "R. H. M. Elwes (1883)",
+      "location_format": "part.proposition, e.g. 4.67 (add 'note' or 'appendix' if relevant: 3, definitions of the emotions)",
+      "work_page": "Ethics (Spinoza)",
+      "pages": {"template": "Ethics (Spinoza)/Part {n}", "levels": [5]},
+      "sections": null
+    },
+    "locke_essay": {
+      "author": "John Locke",
+      "title": "An Essay Concerning Human Understanding",
+      "translation": "English original (1853 printing)",
+      "location_format": "book.chapter.section, e.g. 2.27.9",
+      "work_page": "An Essay Concerning Human Understanding (Troutman & Hayes 1853)",
+      "pages": {"prefix": "An Essay Concerning Human Understanding (Troutman & Hayes 1853)/", "pattern": "^Book (\\d)/Chapter (\\w+)$"},
+      "sections": null
+    },
+    "hume_enquiry": {
+      "author": "David Hume",
+      "title": "An Enquiry Concerning Human Understanding",
+      "translation": "English original, first edition (1748, titled Philosophical Essays Concerning Human Understanding)",
+      "location_format": "section number, e.g. 5",
+      "note": "Wording of this first edition differs slightly from later editions.",
+      "work_page": "Philosophical Essays Concerning Human Understanding",
+      "pages": {"template": "Philosophical Essays Concerning Human Understanding/Essay {n}", "levels": [12]},
+      "sections": null
+    },
+    "hume_treatise": {
+      "author": "David Hume",
+      "title": "A Treatise of Human Nature",
+      "translation": "English original (Selby-Bigge edition, 1888)",
+      "location_format": "book.part.section, e.g. 2.3.3",
+      "work_page": "Treatise of Human Nature",
+      "pages": {"prefix": "Treatise of Human Nature/", "pattern": "^Book (\\d): [^/]+/Part (\\d)/Section (\\d+)$"},
+      "sections": null
+    },
+    "kant_groundwork": {
+      "author": "Immanuel Kant",
+      "title": "Groundwork of the Metaphysics of Morals",
+      "translation": "Thomas Kingsmill Abbott (1873)",
+      "location_format": "section name, e.g. First Section",
+      "work_page": "Groundwork of the Metaphysics of Morals",
+      "pages": {"single": "Groundwork of the Metaphysics of Morals"},
+      "sections": null
+    },
+    "kant_practical_reason": {
+      "author": "Immanuel Kant",
+      "title": "Critique of Practical Reason",
+      "translation": "Thomas Kingsmill Abbott (1873)",
+      "location_format": "part or section name, e.g. Conclusion",
+      "work_page": "Critique of Practical Reason",
+      "pages": {"single": "Critique of Practical Reason"},
+      "sections": null
+    },
+    "beyond_good_and_evil": {
+      "author": "Friedrich Nietzsche",
+      "title": "Beyond Good and Evil",
+      "translation": "Helen Zimmern (1907)",
+      "location_format": "aphorism number, e.g. 146",
+      "work_page": "Beyond Good and Evil",
+      "pages": {"template": "Beyond Good and Evil/Chapter {roman}", "levels": [9]},
+      "sections": "numbered_paragraphs",
+      "location_from_section": true
+    },
+    "zarathustra": {
+      "author": "Friedrich Nietzsche",
+      "title": "Thus Spake Zarathustra",
+      "translation": "Thomas Common (1909)",
+      "location_format": "Prologue.section (e.g. Prologue.4), or part number and discourse title (e.g. 1, The Way of the Creating One)",
+      "work_page": "Thus Spake Zarathustra",
+      "pages": {"prefix": "Thus Spake Zarathustra/", "pattern": "^(Prologue|Part One|Part Two|Part Three|Part Four)$",
+                "aliases": {"Part One": "1", "Part Two": "2", "Part Three": "3", "Part Four": "4"}},
+      "sections": null
+    },
+    "genealogy_of_morals": {
+      "author": "Friedrich Nietzsche",
+      "title": "The Genealogy of Morals",
+      "translation": "Horace B. Samuel (1913)",
+      "location_format": "essay.section, e.g. 2.1",
+      "work_page": "The Genealogy of Morals",
+      "pages": {"prefix": "The Genealogy of Morals/", "pattern": "^(First|Second|Third) Essay$"},
+      "sections": "numbered_paragraphs"
+    },
+    "meditations": {
+      "author": "Marcus Aurelius",
+      "title": "Meditations",
+      "translation": "George Long (1862)",
+      "location_format": "book.section, e.g. 4.3",
+      "work_page": "The Thoughts of the Emperor Marcus Aurelius Antoninus",
+      "pages": {"template": "The Thoughts of the Emperor Marcus Aurelius Antoninus/Book {roman}", "levels": [12]},
+      "sections": "numbered_paragraphs"
+    },
+    "enchiridion": {
+      "author": "Epictetus",
+      "title": "Enchiridion",
+      "translation": "George Long (1877)",
+      "location_format": "chapter, e.g. 5",
+      "work_page": "The Discourses of Epictetus; with the Encheiridion and Fragments/The Encheiridion or Manual",
+      "pages": {"single": "The Discourses of Epictetus; with the Encheiridion and Fragments/The Encheiridion or Manual"},
+      "sections": "roman_headings"
+    },
+    "discourses": {
+      "author": "Epictetus",
+      "title": "Discourses",
+      "translation": "George Long (1877)",
+      "location_format": "book.chapter, e.g. 1.1",
+      "work_page": "The Discourses of Epictetus; with the Encheiridion and Fragments",
+      "pages": {"template": "The Discourses of Epictetus; with the Encheiridion and Fragments/Book {n}/Chapter {n}", "levels": [4, [30, 26, 26, 13]]},
+      "sections": null
+    },
+    "letters": {
+      "author": "Seneca",
+      "title": "Letters to Lucilius",
+      "translation": "Richard M. Gummere (1917–1925)",
+      "location_format": "letter number, e.g. 13",
+      "work_page": "Moral letters to Lucilius",
+      "pages": {"template": "Moral letters to Lucilius/Letter {n}", "levels": [124]},
+      "sections": null
+    },
+    "shortness_of_life": {
+      "author": "Seneca",
+      "title": "On the Shortness of Life",
+      "translation": "John W. Basore (1932)",
+      "location_format": "chapter, e.g. 1",
+      "work_page": "On the shortness of life",
+      "pages": {"template": "On the shortness of life/Chapter {roman}", "levels": [20]},
+      "sections": null
+    },
+    "on_anger": {
+      "author": "Seneca",
+      "title": "On Anger",
+      "translation": "Aubrey Stewart (1900)",
+      "location_format": "book.chapter, e.g. 2.10",
+      "work_page": "Of Anger",
+      "pages": {"template": "Of Anger/Book {roman}", "levels": [3]},
+      "sections": null
+    }
+  }
+}

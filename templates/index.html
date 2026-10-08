@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en" data-theme="{{ theme }}" data-palette="{{ colour_theme }}" data-photo="{{ 'on' if background_photo else 'off' }}"
+      style="--photo-blur: {{ photo_blur | int }}px; --veil-strength: {{ (100 - photo_visibility | int) / 100 }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_name }}</title>
+  {% if logo_url %}<link rel="icon" href="{{ logo_url }}">{% endif %}
+  <link rel="preload" href="/static/fonts/EBGaramond-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <!-- Today's nature photo, softly blurred behind the book -->
+  <div id="backdrop" class="backdrop" aria-hidden="true"></div>
+  <div id="banner" class="banner" hidden></div>
+
+  <!-- The lock screen: nothing from the journal is on the page until it's unlocked -->
+  <div id="vault" class="vault" hidden>
+    {% if hosted %}
+    <!-- Welcome page (signed out): what the app is, on the left; sign-in on the right -->
+    <section id="landing" class="landing-intro{% if hero_url %} has-hero{% endif %}" hidden
+             {% if hero_url %}style="--hero: url('{{ hero_url }}')"{% endif %}>
+      <div class="brand">
+        {% if logo_url %}
+        <img class="brand-logo" src="{{ logo_url }}" alt="">
+        {% else %}
+        <div class="brand-logo brand-logo-placeholder" title="Add your logo as static/brand/logo.png (or .svg)">Logo</div>
+        {% endif %}
+        <h1 class="brand-name">{{ app_name }}</h1>
+      </div>
+      <p class="landing-lead">A quiet place to write each day, with a thoughtful reflection waiting after every entry.</p>
+      <ul class="landing-points">
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8.5 14.5l2.2 2.2 4.8-4.8"/></svg>
+          <div><strong>Build a habit of daily personal reflection</strong>
+            <span>A few minutes of writing a day. Your streak keeps count, and a prompt is there when the page feels blank.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 4h14M6 4v-.5h12V4M7 7v11M10.3 7v11M13.7 7v11M17 7v11M5.5 18h13M5.5 7h13"/></svg>
+          <div><strong>Ground yourself in two millennia of Western philosophy</strong>
+            <span>Reflections draw on Socrates, the Stoics, Augustine, Spinoza, Kant, Nietzsche and more, with links to the original texts.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.4v.4M12 16.6v.1"/></svg>
+          <div><strong>Explore past reflections with prompted questions</strong>
+            <span>Every reflection ends with a question to carry forward. Browse back by date, or keep favourites close.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/></svg>
+          <div><strong>A fully private, encrypted journal</strong>
+            <span>Entries are locked with a passphrase only you know. Download your whole journal at any time.</span></div>
+        </li>
+      </ul>
+      <figure class="landing-quote">
+        <blockquote>“The unexamined life is not worth living.”</blockquote>
+        <figcaption>Socrates, in Plato’s <cite>Apology</cite></figcaption>
+      </figure>
+    </section>
+    {% endif %}
+
+    <div class="vault-card page">
+      <h1 id="vault-title" class="vault-title">{{ app_name }}</h1>
+
+      <p id="vault-offline" class="vault-error" hidden>{% if hosted %}Can't reach {{ app_name }} right now. Check your internet connection and reload the page.{% else %}Can't reach the journal app. Is the start.bat window open?{% endif %}</p>
+
+      {% if hosted %}
+      <div id="vault-signin" hidden>
+        <h2 class="signin-heading">Welcome</h2>
+        <p>Sign in with Google to open your journal. The first time, you'll choose a passphrase that keeps your entries private.</p>
+        <p class="signin-action"><a class="button-link primary google-btn" href="/login">
+          <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20c11.05 0 20-8.95 20-20S35.05 4 24 4z"/><path fill="#4285F4" d="M39.6 24.4c0-1.1-.1-2.2-.3-3.2H24v6.1h8.8c-.4 2-1.5 3.7-3.2 4.8v4h5.2c3-2.8 4.8-6.9 4.8-11.7z"/><path fill="#34A853" d="M24 40c4.3 0 8-1.4 10.7-3.9l-5.2-4c-1.4 1-3.3 1.6-5.5 1.6-4.2 0-7.7-2.8-9-6.6H9.6v4.1C12.3 36.5 17.7 40 24 40z"/><path fill="#FBBC05" d="M15 27.1c-.3-1-.5-2-.5-3.1s.2-2.1.5-3.1v-4.1H9.6C8.6 18.9 8 21.4 8 24s.6 5.1 1.6 7.2l5.4-4.1z"/><path fill="#EA4335" d="M24 14.3c2.4 0 4.5.8 6.2 2.4l4.6-4.6C32 9.5 28.3 8 24 8c-6.3 0-11.7 3.5-14.4 8.8l5.4 4.1c1.3-3.8 4.8-6.6 9-6.6z"/></svg>
+          Continue with Google</a></p>
+        <p id="signin-error" class="vault-error" hidden></p>
+        <p class="subtle signin-note"><strong>New here?</strong> {{ app_name }} is invitation-only for now. Signing in for the first time creates your journal, as long as your Google address has been invited.</p>
+        <p class="subtle signin-note">Google only confirms who you are. It never sees what you write.</p>
+      </div>
+      <p id="vault-account" class="vault-account subtle" hidden><span id="vault-email"></span> · <a href="/logout">Not you? Sign out</a></p>
+      {% endif %}
+
+      <form id="vault-setup" hidden novalidate>
+        <p>Choose a passphrase for your journal. Everything you write is encrypted with it and can only be read after you unlock it.</p>
+        {% if hosted %}<p class="vault-note">Nobody else can read your entries, not even whoever runs this site. That also means nobody can reset this passphrase for you: keep the recovery key you'll be shown next.</p>{% endif %}
+        <p id="legacy-note" class="vault-note" hidden></p>
+        <label>Passphrase <input id="setup-pw" type="password" autocomplete="new-password"></label>
+        <label>Type it again <input id="setup-pw2" type="password" autocomplete="new-password"></label>
+        <p class="subtle">At least 8 characters. A short phrase (“quiet morning, strong tea”) is easier to remember and harder to guess than a single word.</p>
+        <p id="setup-error" class="vault-error" hidden></p>
+        <button type="submit" class="primary">Encrypt my journal</button>
+      </form>
+
+      <div id="vault-recovery" hidden>
+        <h2>Your recovery key</h2>
+        <p>If you ever forget your passphrase, this key is the only way back into your journal. Write it down or save it in a password manager, and keep it somewhere safe. It won't be shown again.</p>
+        <div id="recovery-key" class="recovery-key"></div>
+        <p><button type="button" id="copy-recovery">Copy</button></p>
+        <p id="recovery-import-note" class="vault-note"></p>
+        <label class="checkbox"><input id="recovery-saved" type="checkbox"> I've saved my recovery key somewhere safe</label>
+        <button type="button" id="recovery-done" class="primary" disabled>Open my journal</button>
+      </div>
+
+      <form id="vault-unlock" hidden novalidate>
+        <label>Passphrase <input id="unlock-pw" type="password" autocomplete="current-password"></label>
+        <p id="unlock-error" class="vault-error" hidden></p>
+        <div class="vault-buttons">
+          <button type="button" id="show-recover" class="quiet">Forgot your passphrase?</button>
+          <button type="submit" class="primary">Unlock</button>
+        </div>
+      </form>
+
+      <form id="vault-recover" hidden novalidate>
+        <p>Enter your recovery key and choose a new passphrase.</p>
+        <label>Recovery key <input id="recover-key" type="text" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></label>
+        <label>New passphrase <input id="recover-pw" type="password" autocomplete="new-password"></label>
+        <label>Type it again <input id="recover-pw2" type="password" autocomplete="new-password"></label>
+        <p id="recover-error" class="vault-error" hidden></p>
+        <div class="vault-buttons">
+          <button type="button" id="back-to-unlock" class="quiet">Back</button>
+          <button type="submit" class="primary">Unlock and set passphrase</button>
+        </div>
+      </form>
+
+      <p class="vault-footer subtle"><a href="/privacy">Privacy</a></p>
+    </div>
+  </div>
+
+  <main id="book" class="book" hidden>
+    <header class="book-header">
+      <div id="today" class="today"></div>
+      <div id="stats" class="stats" aria-live="polite"></div>
+      <button id="lock-btn" class="icon-btn lock-btn" title="Lock the journal" aria-label="Lock the journal">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      </button>
+      <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings">&#9881;</button>
+    </header>
+
+    <!-- Writing a new entry -->
+    <section id="write-view" class="page">
+      <div class="greeting-row">
+        <h1 id="greeting" class="prompt-heading greeting">What's on your mind?</h1>
+        <button id="prompt-btn" type="button" class="quiet prompt-btn">Give me a prompt</button>
+      </div>
+      <div id="prompt-card" class="prompt-card" hidden>
+        <p id="prompt-text" class="prompt-text"></p>
+        <div class="prompt-meta">
+          <span id="prompt-source" class="subtle"></span>
+          <button id="another-prompt-btn" type="button" class="quiet">Another one</button>
+          <button id="dismiss-prompt-btn" type="button" class="icon-btn"
+                  title="Don't use this prompt" aria-label="Don't use this prompt">×</button>
+        </div>
+      </div>
+      <p id="prompt-status" class="prompt-status subtle" aria-live="polite" hidden></p>
+      <input id="title-input" class="title-input" type="text" maxlength="120"
+             placeholder="Title (optional; leave blank and one will be suggested)">
+      <textarea id="editor" placeholder="Start writing…" autofocus spellcheck="true"></textarea>
+      <div class="page-footer">
+        <span id="draft-state" class="subtle"></span>
+        <span id="word-count" class="subtle">0 words</span>
+        <button id="finish-btn" class="primary">Finish &amp; reflect</button>
+      </div>
+    </section>
+
+    <!-- Reading / editing a saved entry -->
+    <section id="entry-view" class="page" hidden>
+      <nav class="entry-nav" aria-label="Browse entries">
+        <button id="prev-btn" type="button" class="nav-btn" title="Older entry (← key)">‹ Older</button>
+        <span id="nav-pos" class="subtle"></span>
+        <button id="next-btn" type="button" class="nav-btn" title="Newer entry (→ key)">Newer ›</button>
+      </nav>
+      <div class="entry-meta">
+        <span id="entry-date"></span>
+        <span id="entry-words" class="subtle"></span>
+      </div>
+      <div class="title-row">
+        <h1 id="entry-title" class="entry-title"></h1>
+        <button id="star-btn" class="star-btn" type="button" aria-pressed="false"
+                title="Add to favourites" aria-label="Add to favourites">☆</button>
+      </div>
+      <div id="entry-when-edit" class="when-edit" hidden>
+        <label>Date <input id="entry-date-input" type="date"></label>
+        <label>Time <input id="entry-time-input" type="time"></label>
+      </div>
+      <input id="entry-title-input" class="title-input" type="text" maxlength="120"
+             placeholder="Title (leave blank for No Title)" hidden>
+      <p id="entry-prompt" class="entry-prompt" hidden></p>
+      <div id="entry-text" class="entry-text"></div>
+      <textarea id="entry-editor" hidden></textarea>
+      <div class="page-footer">
+        <span class="subtle" id="entry-status"></span>
+        <button id="delete-btn" class="quiet">Delete</button>
+        <button id="edit-btn">Edit</button>
+        <button id="cancel-edit-btn" hidden>Cancel</button>
+        <button id="save-edit-btn" class="primary" hidden>Save changes</button>
+        <button id="new-btn" class="primary">New entry</button>
+      </div>
+
+      <!-- Claude's reflection, like a note in the margin -->
+      <aside id="reflection" class="reflection" hidden>
+        <div id="reflection-working" class="reflection-working" hidden>
+          <span class="dot-pulse" aria-hidden="true"></span>
+          <span>Reflecting on your entry… this usually takes 20–40 seconds.</span>
+        </div>
+        <div id="reflection-missing" class="reflection-missing" hidden>
+          <p id="reflection-missing-text"></p>
+          <button id="reflect-btn" class="primary">Try reflection again</button>
+        </div>
+        <div id="reflection-body" hidden>
+          <div id="support-note" class="support-note" hidden></div>
+          <div id="insight" class="insight"></div>
+          <p id="question" class="question"></p>
+          <ul id="citations" class="citations"></ul>
+          <div class="reflection-footer">
+            <button id="reflect-again-btn" class="quiet">Reflect again</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Settings -->
+    <section id="settings-view" class="page" hidden>
+      <h1 class="prompt-heading">Settings</h1>
+      <form id="settings-form" class="settings-form" novalidate>
+        <label>Your name
+          <input name="user_name" type="text" maxlength="40" placeholder="Used in the greeting">
+        </label>
+        <label>Day or evening
+          <select name="theme">
+            <option value="auto">Automatic (follows your computer)</option>
+            <option value="day">Day</option>
+            <option value="evening">Evening</option>
+          </select>
+        </label>
+        <fieldset class="colour-field">
+          <legend>Colour</legend>
+          <div class="swatches" role="radiogroup">
+            {% for key, name in colour_themes %}
+            <label class="swatch" data-palette="{{ key }}">
+              <input type="radio" name="colour_theme" value="{{ key }}">
+              <span>{{ name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <label class="checkbox">
+          <input name="background_photo" type="checkbox"> Background photo
+        </label>
+        <div id="photo-sliders" class="photo-sliders">
+          <label>Photo blur
+            <span class="slider"><input name="photo_blur" type="range" min="0" max="30" step="1">
+              <output id="photo-blur-value"></output></span>
+            <span class="hint">0 is sharp; higher is softer.</span>
+          </label>
+          <label>Photo visibility
+            <span class="slider"><input name="photo_visibility" type="range" min="0" max="100" step="5">
+              <output id="photo-visibility-value"></output></span>
+            <span class="hint">How clearly the photo shows through. Lower fades it into the paper colour.</span>
+          </label>
+        </div>
+        <label>Save my draft every
+          <span class="inline"><input name="draft_autosave_seconds" type="number" min="1" max="60"> seconds</span>
+        </label>
+        <label>Lock the journal after
+          <select name="lock_minutes">
+            {% for m in lock_choices %}
+            <option value="{{ m }}">{% if m == 0 %}{% if hosted %}only when I lock it or sign out{% else %}only when the app closes{% endif %}{% elif m < 60 %}{{ m }} minutes without activity{% elif m == 60 %}1 hour without activity{% else %}{{ m // 60 }} hours without activity{% endif %}</option>
+            {% endfor %}
+          </select>
+        </label>
+        {% if not hosted %}
+        <label>Daily backups to keep
+          <span class="inline"><input name="backups_to_keep" type="number" min="1" max="365"> days</span>
+        </label>
+        <label>Claude model
+          <input name="model" type="text">
+        </label>
+        <label>Reflection depth
+          <select name="reflection_effort">
+            <option value="low">Light (fastest, cheapest)</option>
+            <option value="medium">Medium</option>
+            <option value="high">Deep (best reflections)</option>
+          </select>
+        </label>
+        <div class="key-test">
+          <button type="button" id="test-key-btn">Test my API key</button>
+          <span id="test-key-result" class="subtle"></span>
+        </div>
+
+        <h2>Applied after restarting the app</h2>
+        <label>Time zone
+          <input name="timezone" type="text" placeholder="America/Toronto">
+        </label>
+        <label>Port
+          <input name="port" type="number" min="1024" max="65535">
+        </label>
+        <label class="checkbox">
+          <input name="open_browser_on_start" type="checkbox"> Open the browser when the app starts
+        </label>
+        {% endif %}
+
+        <div class="page-footer">
+          <span id="settings-state" class="subtle"></span>
+          <button type="button" id="settings-back-btn" title="Leave without saving changes">Discard</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+
+      <h2>Hidden entries</h2>
+      <ul id="hidden-list" class="hidden-list"></ul>
+
+      {% if hosted %}
+      <h2>Account</h2>
+      <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
+      <p id="limits-note" class="hint"></p>
+      {% endif %}
+
+      <h2>Passphrase</h2>
+      <form id="password-form" class="settings-form vault-settings" novalidate>
+        <label>Current passphrase <input id="pw-current" type="password" autocomplete="current-password"></label>
+        <label>New passphrase <input id="pw-new" type="password" autocomplete="new-password"></label>
+        <label>Type the new one again <input id="pw-new2" type="password" autocomplete="new-password"></label>
+        <div class="key-test"><button type="submit">Change passphrase</button><span id="password-result" class="subtle"></span></div>
+      </form>
+      <form id="new-recovery-form" class="settings-form vault-settings" novalidate>
+        <label>Create a new recovery key <span class="hint">The old one stops working. Enter your passphrase to confirm.</span>
+          <input id="recovery-pw" type="password" autocomplete="current-password" placeholder="Your passphrase"></label>
+        <div class="key-test"><button type="submit">Create new recovery key</button><span id="new-recovery-result" class="subtle"></span></div>
+        <div id="new-recovery-box" hidden>
+          <div id="new-recovery-key" class="recovery-key"></div>
+          <p class="hint">Save this somewhere safe now; it won't be shown again.</p>
+        </div>
+      </form>
+
+      <h2>Your data</h2>
+      <div class="data-actions">
+        <div>
+          <a id="export-btn" class="button-link" href="/api/export" download>Export (CSV)</a>
+          <span class="hint">Downloads your whole journal as a spreadsheet file that opens in Excel.
+            It's <strong>not encrypted</strong>: keep it somewhere safe, or delete it when you're done.</span>
+        </div>
+        <div>
+          <button type="button" id="import-btn">Import (CSV)…</button>
+          <input id="import-file" type="file" accept=".csv,text/csv" hidden>
+          <span class="hint">Adds the entries from a file made with Export, e.g. to bring a journal
+            {% if hosted %}from your own computer{% else %}back after a wipe{% endif %}. Entries already here are skipped.</span>
+          <span id="import-result" class="subtle"></span>
+        </div>
+        <div>
+          <button type="button" id="wipe-btn" class="danger-outline">Wipe journal…</button>
+          <span class="hint">Permanently deletes all entries. You'll be asked to confirm.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="past" class="past">
+      <div class="past-header">
+        <h2>Past entries</h2>
+        <div class="filter" role="group" aria-label="Show">
+          <button id="filter-all" type="button" class="filter-btn" aria-pressed="true">All</button>
+          <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false">★ Favourites</button>
+          <button id="calendar-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
+                  aria-haspopup="dialog" aria-controls="calendar">Calendar</button>
+        </div>
+
+        <!-- Date filter: pops up under the Calendar button -->
+        <div id="calendar" class="calendar" role="dialog" aria-label="Filter by date" hidden>
+          <div class="cal-head">
+            <button id="cal-prev" type="button" class="icon-btn" aria-label="Previous month">‹</button>
+            <button id="cal-label" type="button" class="cal-label" title="Show this whole month"></button>
+            <button id="cal-next" type="button" class="icon-btn" aria-label="Next month">›</button>
+          </div>
+          <div id="cal-grid" class="cal-grid" role="grid"></div>
+          <p id="cal-hint" class="cal-hint subtle"></p>
+          <div class="cal-foot">
+            <button id="cal-clear-btn" type="button" class="quiet">Clear dates</button>
+            <button id="cal-month-btn" type="button">Whole month</button>
+          </div>
+        </div>
+      </div>
+      <p id="filter-note" class="filter-note subtle" hidden></p>
+      <ul id="entry-list"></ul>
+    </section>
+
+    <footer class="book-footer">
+      <span>{{ app_name }}</span>
+      · <a href="/privacy" target="_blank" rel="noopener">Privacy</a>
+      {% if hosted %}· <a href="/logout">Sign out</a>{% endif %}
+    </footer>
+  </main>
+
+  <dialog id="wipe-dialog" class="dialog wipe-dialog" aria-labelledby="wipe-title">
+    <h2 id="wipe-title">Wipe your journal?</h2>
+    <p>This permanently deletes <strong>all <span id="wipe-count"></span></strong>, including hidden
+      ones and their reflections, your unsaved draft, and the backup copies of your journal. It can't be undone.</p>
+    <p class="subtle">{% if hosted %}Your account, passphrase and settings are kept.{% else %}Your settings, API key, photos and quote sources are kept.{% endif %}
+      Want a copy first? <a href="/api/export" download>Export (CSV)</a>.</p>
+    <form id="wipe-form" novalidate>
+      <label for="wipe-answer">To confirm, type this number in words, one digit at a time:</label>
+      <div class="wipe-number" id="wipe-number" aria-live="polite"></div>
+      <p class="subtle wipe-example">For example, 352 would be “three five two”.</p>
+      <input id="wipe-answer" type="text" autocomplete="off" spellcheck="false">
+      <p id="wipe-error" class="wipe-error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="wipe-cancel-btn">Cancel</button>
+        <button type="submit" id="wipe-confirm-btn" class="danger" disabled>Wipe everything</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialog" class="dialog">
+    <h2 id="dialog-title"></h2>
+    <div id="dialog-body"></div>
+    <div id="dialog-buttons" class="dialog-buttons"></div>
+  </dialog>
+
+  <script>window.JOURNAL = {
+    hosted: {{ hosted | tojson }},
+    userName: {{ user_name | tojson }},
+    autosaveSeconds: {{ autosave_seconds | int }},
+    timezone: {{ timezone | tojson }},
+    photoBlur: {{ photo_blur | int }},
+    photoVisibility: {{ photo_visibility | int }}
+  };</script>
+  <script src="{{ static_url('app.js') }}"></script>
+</body>
+</html>

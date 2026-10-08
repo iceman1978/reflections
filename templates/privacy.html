@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="auto" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy · {{ app_name }}</title>
+  {% if logo_url %}<link rel="icon" href="{{ logo_url }}">{% endif %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy">
+    <section class="page">
+      <p class="privacy-brand">{{ app_name }}</p>
+      <h1 class="prompt-heading">How your writing is kept private</h1>
+
+      <h2>Who can read your entries</h2>
+      <p>Only you. Every entry is encrypted with a key that is locked by your passphrase.
+        The server stores only the encrypted version, so whoever runs this site (or the hosting company)
+        sees unreadable data. {% if hosted %}Signing in with Google only proves who you are; Google never sees your journal.{% endif %}</p>
+      <p>Because of this, <strong>nobody can reset your passphrase</strong>. If you forget it, your recovery key
+        is the only way back in. Without either, the entries can't be recovered by anyone.</p>
+
+      <h2>When something leaves the journal</h2>
+      <ul>
+        <li><strong>Reflections and writing prompts:</strong> the text of the entry (or, for prompts, a few recent
+          entries) is sent to Anthropic's Claude API to write the reflection. Anthropic doesn't use API data to
+          train its models by default.</li>
+        <li><strong>Export (CSV):</strong> downloads an unencrypted copy to your device, only when you ask for it.</li>
+      </ul>
+      <p>No analytics, advertising or tracking scripts are used. The only cookies keep you signed in and
+        remember that this browser has unlocked your journal.</p>
+
+      {% if hosted %}
+      <h2>Limits</h2>
+      <p>To share one Claude account fairly, each person gets {{ reflections_per_day }} reflections and
+        {{ prompts_per_day }} writing prompts a day. Entries are always saved, with or without a reflection.</p>
+
+      <h2>Leaving</h2>
+      <p>Use Settings → Export to keep a copy, then Settings → Wipe journal to delete your entries,
+        including from the server's backup copies.</p>
+      {% endif %}
+
+      <p><a href="/">← Back to {{ app_name }}</a></p>
+    </section>
+  </main>
+</body>
+</html>
