@@ -179,7 +179,7 @@ Your personal choices (name, day/evening, colour, photo, draft saving, lock time
 | `reflection_effort` | Reflection depth: `low`, `medium` or `high` | `high` |
 | `api_timeout_seconds` | How long to wait for Claude before giving up | `60` |
 | `api_retries` | Automatic retries when a Claude request fails | `2` |
-| `theme` | Day or evening: `auto`, `day` or `evening` | `auto` |
+| `theme` | Day or evening: `day`, `evening` or `auto` | `day` |
 | `colour_theme` | `lake`, `walnut`, `sage`, `amber`, `claret`, `lavender`, `sea-glass` or `graphite` | `lake` |
 | `background_photo` | Background photo behind the journal (off: a deep shade of the colour theme) | `true` |
 | `photo_blur` | Photo blur in pixels, 0–30 | `10` |
@@ -195,7 +195,7 @@ The key is read fresh each time, so no restart is needed after changing it. `.en
 
 ## Look and feel
 
-- **Day or evening:** *Settings → Day or evening* chooses **Day**, **Evening**, or **Automatic** (follows your computer's light/dark setting).
+- **Day or evening:** *Settings → Day or evening* chooses **Day** (the default), **Evening**, or **Automatic** (follows your device's light/dark setting).
 - **Colour:** *Settings → Colour* picks one of eight colour themes: **Lake** (cool blue, the default), **Walnut** (warm brown), **Sage** (green), **Amber** (orange), **Claret** (deep red), **Lavender** (purple), **Sea glass** (teal) and **Graphite** (neutral grey). The colour tints the buttons, links, paper, margin notes, desk and the veil over the photo, and works in both day and evening. Clicking a swatch previews it straight away; **Save** keeps it, **Discard** returns to what you had.
 - **Adding a colour:** in `static/style.css`, copy one line from the *Colour themes* block (e.g. `[data-palette="lake"] { --hue: 212; ... }`), give it a new name and hue (0–360 around the colour wheel: 0 red, 30 orange, 60 yellow, 120 green, 200 blue, 270 purple), then add the name to `COLOUR_THEMES` in `journal/config.py`.
 - **Background photo:** a softly blurred photo sits behind the journal. Every time the page loads or refreshes, a random photo from `static/backgrounds/` appears (never the one you just saw), and finishing an entry fades in another. Turn it off with *Settings → Background photo*; the journal then sits on a deep shade of your colour theme (e.g. navy for Lake), the same in Day and Evening. Day / Evening only changes the journal itself.
@@ -207,7 +207,7 @@ The key is read fresh each time, so no restart is needed after changing it. `.en
 
 Background photos are your own. (The journal originally shipped with five public-domain / CC0 photos from Wikimedia Commons by W.carter, George Chernilevsky and Jebulon; they've since been replaced.)
 
-Fonts, stored in `static/fonts/` (nothing loads from the internet): [EB Garamond](https://github.com/googlefonts/ebgaramond) and [Caveat](https://github.com/googlefonts/caveat), both under the SIL Open Font License (copies alongside the fonts).
+Fonts, stored in `static/fonts/` (nothing loads from the internet): [EB Garamond](https://github.com/googlefonts/ebgaramond) (SIL Open Font License) for the text, and [Homemade Apple](https://fonts.google.com/specimen/Homemade+Apple) by Font Diner (Apache License 2.0) for the handwriting. Copies of the licenses are alongside the fonts.
 
 ## Tests
 
@@ -260,6 +260,7 @@ This puts the journal at **https://reflections-j7o5.onrender.com** (Render added
    | `GOOGLE_CLIENT_SECRET` | from step 2 |
    | `ANTHROPIC_API_KEY` | your Claude API key |
    | `ALLOWED_EMAILS` | the invited addresses, comma-separated: `you@gmail.com, mum@gmail.com` |
+   | `ADMIN_EMAILS` | your own address: who can read feedback (Settings → Feedback received) |
 
    `SECRET_KEY` is generated for you. The time zone and daily limits are set in `render.yaml` (change them there or in Render's *Environment* tab).
 4. Wait for the first deploy (a few minutes), then open https://reflections.onrender.com.
@@ -270,7 +271,8 @@ If the name `reflections` is taken on Render, it will give the service a slightl
 
 Signed-out visitors see a welcome page: what Reflections is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
 
-- **Logo:** put `logo.png` (or `.svg`, `.webp`, `.jpg`) in `static/brand/`. Square, at least 256 × 256, ideally with a transparent background. It's also used as the browser-tab icon. Until then a dashed *Logo* placeholder shows.
+- **Logo and app icons:** the master is `brand-source/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon and the "Install app" icons in `static/brand/`.
+- **Installing:** because of those icons and a small web app manifest, Chrome and Edge (computer or Android) offer **Install app** in the address bar or menu, and on iPhone *Share → Add to Home Screen* adds Reflections with its icon. It then opens in its own window, like an app.
 - **Picture behind the left side (optional):** `static/brand/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
 - **Name:** *Reflections* by default (browser tab, welcome page, privacy page). To change it, set `APP_NAME` in `render.yaml` (or in `.env` on your own computer).
 
@@ -279,6 +281,23 @@ Files in `static/brand/` are public (the welcome page is visible to anyone), unl
 ### Inviting someone, or removing them
 
 Add (or remove) their address in **both** places: Google's *Test users*, and `ALLOWED_EMAILS` on Render (saving it restarts the app in about a minute). Someone removed from `ALLOWED_EMAILS` is signed out on their next click; their encrypted entries stay on the disk.
+
+### Feedback
+
+The **speech bubble** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.
+
+You read it in **Settings → Feedback received**: newest first, with a **Done** tick-box to clear things you've handled, and **Download (CSV)** for a spreadsheet. Only addresses in `ADMIN_EMAILS` on Render see that section (on your own computer, you always do). Each person can send up to 20 a day.
+
+### Trying changes before they go live: `test-web.bat`
+
+Double-click **`test-web.bat`** to run a test copy of the *web* version on your computer at <http://localhost:5061> (it opens in your browser). It's marked **Test copy** in the corner and **[TEST]** in the browser tab.
+
+- Instead of Google, a **Sign in as** box: pick `you@example.com`, `mum@example.com` or `dad@example.com` to try it as different family members (each gets their own journal and passphrase), or type any other address to see the "not invited" message.
+- Its data is in `data\test-web`, separate from your journal and from the live site. Delete that folder to start over.
+- Reflections and prompts are real (they use the key in `.env`), with the web's daily limits.
+- The sign-in box only exists in this test copy; on Render it's switched off.
+
+`start.bat` (your own journal, port 5050) and `test-web.bat` (port 5061) can run at the same time.
 
 ### Updating the web version
 

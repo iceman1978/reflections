@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 if not os.environ.get("JOURNAL_DATA_DIR"):
     raise unittest.SkipTest("Set JOURNAL_DATA_DIR to a throwaway folder to run the vault tests.")
 
-from journal import (config, crypto, db, export, importer, migrate, sources, store, usage, users,  # noqa: E402
+from journal import (config, crypto, db, export, feedback, importer, migrate, sources, store, usage, users,  # noqa: E402
                      vault, wipe)
 from journal.db import LOCAL_USER  # noqa: E402
 
@@ -263,6 +263,38 @@ class AccountTests(unittest.TestCase):
         usage.check(self.bob, "reflection")                     # Bob's allowance is separate
         usage.LIMITS["reflection"] = 0
         self.assertIsNone(usage.remaining(self.ann, "reflection"))   # no limit (your own computer)
+
+
+class FeedbackTests(unittest.TestCase):
+    def setUp(self):
+        fresh_journal()
+
+    def test_send_list_done_export(self):
+        feedback.add("u1", "ann@example.com", "Ann", "fix", "  The title box is cut off on my phone.  ", "write", "Phone")
+        feedback.add("u2", None, "Bob", "feature", "Line one\nA comma, and “quotes”")
+        items = feedback.all_feedback()
+        self.assertEqual([f["kind"] for f in items], ["feature", "fix"])          # newest first
+        self.assertEqual(items[1]["text"], "The title box is cut off on my phone.")
+        feedback.set_done(items[1]["id"], True)
+        self.assertTrue(feedback.all_feedback()[1]["done"])
+        rows = list(csv.reader(io.StringIO(feedback.as_csv()[1:])))
+        self.assertEqual(rows[0][:5], ["Date", "Time", "From", "Type", "Feedback"])
+        self.assertEqual(rows[1][4], "Line one\nA comma, and “quotes”")
+        self.assertEqual(rows[2][2:4], ["ann@example.com", "Fix or improvement"])
+        with self.assertRaises(KeyError):
+            feedback.set_done(9999, True)
+
+    def test_refuses_bad_input(self):
+        for kind, text in [("fix", "   "), ("praise", "hello"), ("feature", "x" * (feedback.MAX_CHARS + 1))]:
+            with self.assertRaises(feedback.FeedbackProblem):
+                feedback.add("u1", None, None, kind, text)
+
+    def test_daily_cap(self):
+        for i in range(feedback.PER_DAY):
+            feedback.add("u1", None, None, "fix", f"note {i}")
+        with self.assertRaises(feedback.FeedbackProblem):
+            feedback.add("u1", None, None, "fix", "one too many")
+        feedback.add("u2", None, None, "fix", "someone else is fine")
 
 
 class UpgradeTests(unittest.TestCase):

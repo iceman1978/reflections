@@ -22,8 +22,8 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (config, export, importer, migrate, reflection, stats, store, usage, users, vault, wipe,
-                     writing_prompts)
+from journal import (config, export, feedback, importer, migrate, reflection, stats, store, usage, users, vault,
+                     wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
 
@@ -77,6 +77,7 @@ else:
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
 PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/healthz",
+                "/favicon.ico", "/manifest.webmanifest",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/background", "/api/shutdown"}
 
@@ -149,8 +150,10 @@ def _static_versions():
         path = ROOT / "static" / filename
         version = int(path.stat().st_mtime) if path.exists() else 0
         return f"/static/{filename}?v={version}"
-    return {"static_url": static_url, "app_name": config.APP_NAME,
-            "logo_url": _brand_file("logo"), "hero_url": _brand_file("hero")}
+    return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "test_login": bool(HOSTED and TEST_LOGIN),
+            "test_emails": sorted(config.ALLOWED_EMAILS),
+            "logo_url": _brand_file("logo"), "hero_url": _brand_file("hero"),
+            "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR}
 
 
 BRAND_DIR = ROOT / "static" / "brand"
@@ -200,6 +203,7 @@ def index():
     return render_template(
         "index.html",
         hosted=HOSTED,
+        is_admin=_is_admin(uid),
         user_name=prefs["user_name"],
         autosave_seconds=prefs["draft_autosave_seconds"],
         timezone=settings["timezone"],
@@ -222,6 +226,42 @@ def privacy():
 @app.get("/healthz")
 def healthz():
     return "ok"
+
+
+# ---- Icons and "Install app" ----------------------------------------------
+# Made from brand-source/logo-original.png by tools/make_icons.py.
+
+THEME_COLOUR = "#2a4865"   # the deep blue of the logo (title bar, splash screen)
+
+
+@app.get("/favicon.ico")
+def favicon():
+    path = BRAND_DIR / "favicon.ico"
+    if not path.exists():
+        return "", 404
+    return send_file(path, mimetype="image/x-icon", max_age=86400)
+
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    """What a phone or computer needs to offer "Install app" / "Add to Home Screen"."""
+    icons = [{"src": f"/static/brand/{name}", "sizes": size, "type": "image/png", "purpose": purpose}
+             for name, size, purpose in (("icon-192.png", "192x192", "any"), ("icon-512.png", "512x512", "any"),
+                                         ("icon-maskable-512.png", "512x512", "maskable"))
+             if (BRAND_DIR / name).exists()]
+    resp = jsonify({
+        "name": config.APP_NAME,
+        "short_name": config.APP_NAME,
+        "description": "A private journal, with a thoughtful reflection after every entry.",
+        "start_url": "/",
+        "scope": "/",
+        "display": "standalone",
+        "background_color": THEME_COLOUR,
+        "theme_color": THEME_COLOUR,
+        "icons": icons,
+    })
+    resp.mimetype = "application/manifest+json"
+    return resp
 
 
 # ---- Signing in with Google (hosted) ---------------------------------------
@@ -706,6 +746,64 @@ def put_settings():
     return jsonify(settings=merged, needs_restart=needs_restart)
 
 
+# ---- Feedback -------------------------------------------------------------
+
+def _is_admin(uid):
+    """Can read the feedback everyone sends: you, on your own computer;
+    the addresses in ADMIN_EMAILS, on the web."""
+    if not HOSTED:
+        return True
+    user = users.get(uid) if uid else None
+    return bool(user and (user["email"] or "").lower() in config.ADMIN_EMAILS)
+
+
+@app.post("/api/feedback")
+def send_feedback():
+    data = request.get_json(silent=True) or {}
+    user = users.get(g.user_id) or {}
+    try:
+        fid = feedback.add(g.user_id, user.get("email"), users.prefs(g.user_id)["user_name"] or user.get("name"),
+                           data.get("kind"), data.get("text"), data.get("screen"),
+                           request.headers.get("User-Agent"))
+    except feedback.FeedbackProblem as e:
+        return jsonify(error=str(e)), 400
+    log.info("Feedback #%d received (%s)", fid, g.user_id)
+    return jsonify(ok=True)
+
+
+def _need_admin():
+    if not _is_admin(g.user_id):
+        return jsonify(error="Not found"), 404
+    return None
+
+
+@app.get("/api/feedback")
+def list_feedback():
+    if (resp := _need_admin()):
+        return resp
+    return jsonify(feedback.all_feedback())
+
+
+@app.post("/api/feedback/<int:feedback_id>/done")
+def feedback_done(feedback_id):
+    if (resp := _need_admin()):
+        return resp
+    try:
+        feedback.set_done(feedback_id, bool((request.get_json(silent=True) or {}).get("done")))
+    except KeyError:
+        return jsonify(error="Not found"), 404
+    return jsonify(ok=True)
+
+
+@app.get("/api/feedback/export")
+def export_feedback():
+    if (resp := _need_admin()):
+        return resp
+    data = feedback.as_csv().encode("utf-8")
+    return send_file(io.BytesIO(data), as_attachment=True, mimetype="text/csv",
+                     download_name=f"reflections-feedback-{datetime.now(TZ):%Y-%m-%d}.csv")
+
+
 # ---- Drafts ---------------------------------------------------------------
 
 @app.get("/api/draft")
@@ -735,8 +833,8 @@ def delete_draft():
 
 @app.post("/api/shutdown")
 def shutdown():
-    """Lets a newly started copy of the app replace this one (not when hosted)."""
-    if HOSTED:
+    """Lets a newly started copy of the app replace this one (not on the server)."""
+    if HOSTED and not TEST_LOGIN:
         return jsonify(error="Not found"), 404
     log.info("Shutting down so a new copy of the app can start")
     vault.lock_all("locked (app closing)")

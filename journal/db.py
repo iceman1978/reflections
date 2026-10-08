@@ -8,6 +8,8 @@ Tables
   entries  one row per entry: a random ID, its owner, and the encrypted entry
   drafts   at most one encrypted draft per person
   usage    how many reflections / prompts each person used per day (for limits)
+  feedback suggestions sent with the Feedback button. NOT encrypted: they're
+           meant to be read by whoever runs the app (Settings → Feedback received)
 
 Entry contents (text, title, dates, reflection, flags...) exist only inside
 the encrypted `data` column, each person's under their own key.
@@ -33,6 +35,9 @@ CREATE INDEX IF NOT EXISTS entries_by_user ON entries (user_id);
 CREATE TABLE IF NOT EXISTS drafts  (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS usage   (user_id TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL,
                                     count INTEGER NOT NULL, PRIMARY KEY (user_id, day, kind));
+CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT,
+                                    name TEXT, created_at TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL,
+                                    screen TEXT, device TEXT, done INTEGER NOT NULL DEFAULT 0);
 """
 
 LOCAL_USER = "local"

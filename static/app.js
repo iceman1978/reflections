@@ -221,6 +221,7 @@
     state.current = null;
     showView("write");
     $("editor").focus();
+    schedulePromptNudge();
   }
 
   function showEntry(entry) {
@@ -830,6 +831,8 @@
 
   async function getPrompt() {
     const buttons = [$("prompt-btn"), $("another-prompt-btn")];
+    clearTimeout(promptNudgeTimer);
+    $("prompt-btn").classList.remove("nudge-glow");
     buttons.forEach((b) => { b.disabled = true; });
     setPromptStatus("Thinking of a prompt…");
     try {
@@ -862,6 +865,22 @@
     $("word-count").textContent = plural(wordCount(text), "word");
     localSet(currentDraft());  // instant, survives a closed tab
     state.draftDirty = true;   // server copy follows on the next tick
+    schedulePromptNudge();
+  }
+
+  // After 30 seconds on a blank page without typing, gently highlight
+  // "Give me a prompt" so it's clear help is there. Typing clears it.
+  const PROMPT_NUDGE_MS = 30000;
+  let promptNudgeTimer = null;
+  function schedulePromptNudge() {
+    clearTimeout(promptNudgeTimer);
+    $("prompt-btn").classList.remove("nudge-glow");
+    promptNudgeTimer = setTimeout(() => {
+      const blank = !$("editor").value.trim() && !$("title-input").value.trim();
+      if (!blank || $("write-view").hidden || state.prompt || $("prompt-btn").disabled) return;
+      if (document.hidden) { schedulePromptNudge(); return; }  // wait until they're looking
+      $("prompt-btn").classList.add("nudge-glow");
+    }, PROMPT_NUDGE_MS);
   }
 
   async function saveDraftToServer() {
@@ -880,20 +899,18 @@
     let server = {};
     try { server = await api("GET", "/api/draft"); } catch (_) {}
     const local = localGet();
+    // Only the writing comes back: a prompt shows only when asked for with
+    // "Give me a prompt", never on its own after a refresh.
     const pick = [server, local]
-      .filter((d) => d && ((d.text && d.text.trim()) || d.prompt))
+      .filter((d) => d && ((d.text && d.text.trim()) || (d.title && d.title.trim())))
       .sort((a, b) => (b.saved_at || "").localeCompare(a.saved_at || ""))[0];
     if (pick) {
       $("editor").value = pick.text || "";
       $("title-input").value = pick.title || "";
-      if (pick.prompt) {
-        state.prompt = { prompt: pick.prompt, based_on: null };
-        state.promptsShown.push(pick.prompt);
-        renderPrompt();
-      }
       $("draft-state").textContent = "Draft restored";
-      onType();
     }
+    // Re-save the draft as it is now, so an old prompt doesn't linger in it.
+    if (pick || [server, local].some((d) => d && d.prompt)) onType();
   }
 
   async function finish() {
@@ -1042,6 +1059,7 @@
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
     }
     refreshHidden();
+    refreshFeedbackList();
   }
 
   async function saveSettings(ev) {
@@ -1228,6 +1246,95 @@
       btn.disabled = false;
     }
   });
+
+  // ---- Feedback -----------------------------------------------------------
+
+  const FEEDBACK_HINTS = {
+    fix: "What happened, or what could be better? Where in the app?",
+    feature: "What would you like it to do, and how would it help?",
+  };
+  const feedbackKind = () => document.querySelector('input[name="feedback-kind"]:checked').value;
+  const currentScreen = () => ["write", "entry", "settings"].find((n) => !$(`${n}-view`).hidden) || "";
+
+  function openFeedback() {
+    $("feedback-error").hidden = true;
+    $("feedback-text").placeholder = FEEDBACK_HINTS[feedbackKind()];
+    $("feedback-dialog").showModal();
+    $("feedback-text").focus();
+  }
+
+  async function sendFeedback(ev) {
+    ev.preventDefault();
+    const btn = $("feedback-send-btn");
+    btn.disabled = true;
+    $("feedback-error").hidden = true;
+    try {
+      await api("POST", "/api/feedback", { kind: feedbackKind(), text: $("feedback-text").value, screen: currentScreen() });
+      $("feedback-text").value = "";  // kept if sending fails, or on Cancel
+      $("feedback-dialog").close();
+      showNotice("Thank you! Your feedback has been sent.", 5000);
+      if (!$("settings-view").hidden) refreshFeedbackList();
+    } catch (err) {
+      $("feedback-error").textContent = sentence(err.message);
+      $("feedback-error").hidden = false;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  $("feedback-btn").addEventListener("click", openFeedback);
+  $("feedback-form").addEventListener("submit", sendFeedback);
+  $("feedback-cancel-btn").addEventListener("click", () => $("feedback-dialog").close());
+  for (const r of document.querySelectorAll('input[name="feedback-kind"]')) {
+    r.addEventListener("change", () => { $("feedback-text").placeholder = FEEDBACK_HINTS[feedbackKind()]; });
+  }
+
+  // Settings → Feedback received (only on the page for whoever reads feedback).
+  async function refreshFeedbackList() {
+    const ul = $("feedback-list");
+    if (!ul) return;
+    let items;
+    try { items = await api("GET", "/api/feedback"); } catch (_) { return; }
+    const showDone = $("feedback-show-done").checked;
+    const shown = items.filter((f) => showDone || !f.done);
+    ul.replaceChildren();
+    for (const f of shown) {
+      const li = document.createElement("li");
+      li.className = f.done ? "done" : "";
+      const meta = document.createElement("div");
+      meta.className = "feedback-meta";
+      const who = f.email || f.name || "You";
+      meta.textContent = `${longDate(f.created_at)}, ${timeOf(f.created_at)} · ${who} · ${f.kind_label}`
+        + (f.screen ? ` · on the ${f.screen} page` : "");
+      const text = document.createElement("p");
+      text.className = "feedback-body";
+      text.textContent = f.text;
+      const done = document.createElement("label");
+      done.className = "checkbox";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = f.done;
+      box.addEventListener("change", async () => {
+        try {
+          await api("POST", `/api/feedback/${f.id}/done`, { done: box.checked });
+          refreshFeedbackList();
+        } catch (err) {
+          box.checked = !box.checked;
+          state.clientError = `Couldn't update that: ${sentence(err.message)}`; renderBanner();
+        }
+      });
+      done.append(box, document.createTextNode(" Done"));
+      li.append(meta, text, done);
+      ul.append(li);
+    }
+    if (!shown.length) {
+      const li = document.createElement("li");
+      li.className = "subtle";
+      li.textContent = items.length ? "Everything is marked done." : "No feedback yet.";
+      ul.append(li);
+    }
+  }
+  if ($("feedback-show-done")) $("feedback-show-done").addEventListener("change", refreshFeedbackList);
 
   // Import entries from a CSV made with Export.
   $("import-btn").addEventListener("click", () => $("import-file").click());
@@ -1454,6 +1561,7 @@
     refreshList();
     pollStatus();
     $("editor").focus();
+    schedulePromptNudge();
   }
 
   (async function boot() {

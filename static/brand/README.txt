@@ -1,21 +1,22 @@
-Your logo and welcome picture
-=============================
+Logo and icons
+==============
 
-Drop files here; no restart needed (refresh the page).
+These files are MADE FROM the master logo by a script; don't edit them by hand.
 
-logo.svg / logo.png / logo.webp / logo.jpg
-    Shown next to the app name on the welcome (sign-in) page, and used as the
-    browser-tab icon. Square works best, at least 256 x 256 pixels; a PNG or
-    SVG with a transparent background looks best on the blue panel.
-    Until a logo is added, a dashed "Logo" placeholder is shown.
+  Master:  brand-source/logo-original.png   (square, 1024 px or larger)
+  Script:  uv run --with pillow python tools/make_icons.py
 
-hero.jpg / hero.png / hero.webp
-    Optional picture behind the left half of the welcome page (it is darkened
-    so the text stays readable). Landscape or portrait, about 1600 x 1200,
-    under 1 MB. Without one, the panel is a deep blue gradient.
+To change the logo: replace brand-source/logo-original.png, run the script,
+then push. It writes:
 
-These files are public (anyone can see the welcome page), unlike the
-background photos in static/backgrounds/, which only signed-in people see.
+  logo.png                welcome page (next to the app name)
+  favicon.ico, favicon-32.png   browser tab
+  apple-touch-icon.png    iPhone / iPad "Add to Home Screen"
+  icon-192.png, icon-512.png    "Install app" on Android and computers
+  icon-maskable-512.png   Android's circle / rounded-square crops
 
-The app name ("Reflections") can be changed with the APP_NAME setting
-(in .env on your own computer, or in render.yaml / Render's Environment tab).
+Optional: hero.jpg / hero.png / hero.webp here puts a darkened picture behind
+the left half of the welcome page (about 1600 x 1200, under 1 MB).
+
+Everything in this folder is public (the welcome page is visible to anyone),
+unlike static/backgrounds/, which only signed-in people can see.

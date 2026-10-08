@@ -1,5 +1,6 @@
 # Secrets
 .env
+client_secret*.json
 
 # Your journal data, backups and logs
 data/

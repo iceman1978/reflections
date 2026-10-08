@@ -25,9 +25,12 @@ if TEST_DIR:
     SETTINGS_PATH = Path(TEST_DIR) / "settings.json"
 
 APP_NAME = os.environ.get("APP_NAME", "Reflections")   # shown in the browser tab and on the welcome page
+COPYRIGHT = "Copyright © 2026, Aaron de Vries"           # shown at the foot of every page
 HOSTED = bool(os.environ.get("GOOGLE_CLIENT_ID"))
 ALLOWED_EMAILS = {e.strip().lower() for e in os.environ.get("ALLOWED_EMAILS", "").split(",") if e.strip()}
 PUBLIC_HOST = os.environ.get("PUBLIC_HOST", "").strip().lower()   # e.g. reflections.onrender.com
+# Who can read the feedback people send (hosted). On your own computer, you can.
+ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "").split(",") if e.strip()}
 
 # Daily limits per person (hosted only; your own computer has none).
 REFLECTIONS_PER_DAY = int(os.environ.get("REFLECTIONS_PER_DAY", "3")) if HOSTED else 0
@@ -50,7 +53,7 @@ DEFAULTS = {
     "reflection_effort": "high",
     "api_timeout_seconds": 60,
     "api_retries": 2,
-    "theme": "auto",
+    "theme": "day",
     "colour_theme": "lake",
     "background_photo": True,
     "photo_blur": 10,         # pixels

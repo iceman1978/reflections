@@ -4,12 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ app_name }}</title>
-  {% if logo_url %}<link rel="icon" href="{{ logo_url }}">{% endif %}
+  <title>{% if test_login %}[TEST] {% endif %}{{ app_name }}</title>
+  {% include "_icons.html" %}
   <link rel="preload" href="/static/fonts/EBGaramond-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="{{ static_url('style.css') }}">
 </head>
 <body>
+  {% if test_login %}<div class="test-ribbon" title="Started with test-web.bat: throwaway data, not the live site">Test copy</div>{% endif %}
   <!-- Today's nature photo, softly blurred behind the book -->
   <div id="backdrop" class="backdrop" aria-hidden="true"></div>
   <div id="banner" class="banner" hidden></div>
@@ -38,7 +39,7 @@
         <li>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 4h14M6 4v-.5h12V4M7 7v11M10.3 7v11M13.7 7v11M17 7v11M5.5 18h13M5.5 7h13"/></svg>
           <div><strong>Ground yourself in two millennia of Western philosophy</strong>
-            <span>Reflections draw on Socrates, the Stoics, Augustine, Spinoza, Kant, Nietzsche and more, with links to the original texts.</span></div>
+            <span>From Socrates, Plato and Aristotle, through the Stoics, Augustine and Aquinas, to Descartes, Spinoza, Locke, Hume, Kant and Nietzsche, with links to the original texts.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.4v.4M12 16.6v.1"/></svg>
@@ -67,9 +68,20 @@
       <div id="vault-signin" hidden>
         <h2 class="signin-heading">Welcome</h2>
         <p>Sign in with Google to open your journal. The first time, you'll choose a passphrase that keeps your entries private.</p>
+        {% if test_login %}
+        <form class="signin-action test-signin" action="/auth/test-login" method="get">
+          <label>Sign in as (test copy: no Google, no password)
+            <input name="email" type="text" list="test-emails" value="{{ test_emails[0] if test_emails else '' }}" autocomplete="off" spellcheck="false">
+          </label>
+          <datalist id="test-emails">{% for e in test_emails %}<option value="{{ e }}">{% endfor %}</datalist>
+          <button type="submit" class="primary">Sign in</button>
+          <p class="subtle signin-note">Invited in this test copy: {{ test_emails | join(', ') }}. Try another address to see the “not invited” message.</p>
+        </form>
+        {% else %}
         <p class="signin-action"><a class="button-link primary google-btn" href="/login">
           <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20c11.05 0 20-8.95 20-20S35.05 4 24 4z"/><path fill="#4285F4" d="M39.6 24.4c0-1.1-.1-2.2-.3-3.2H24v6.1h8.8c-.4 2-1.5 3.7-3.2 4.8v4h5.2c3-2.8 4.8-6.9 4.8-11.7z"/><path fill="#34A853" d="M24 40c4.3 0 8-1.4 10.7-3.9l-5.2-4c-1.4 1-3.3 1.6-5.5 1.6-4.2 0-7.7-2.8-9-6.6H9.6v4.1C12.3 36.5 17.7 40 24 40z"/><path fill="#FBBC05" d="M15 27.1c-.3-1-.5-2-.5-3.1s.2-2.1.5-3.1v-4.1H9.6C8.6 18.9 8 21.4 8 24s.6 5.1 1.6 7.2l5.4-4.1z"/><path fill="#EA4335" d="M24 14.3c2.4 0 4.5.8 6.2 2.4l4.6-4.6C32 9.5 28.3 8 24 8c-6.3 0-11.7 3.5-14.4 8.8l5.4 4.1c1.3-3.8 4.8-6.6 9-6.6z"/></svg>
           Continue with Google</a></p>
+        {% endif %}
         <p id="signin-error" class="vault-error" hidden></p>
         <p class="subtle signin-note"><strong>New here?</strong> {{ app_name }} is invitation-only for now. Signing in for the first time creates your journal, as long as your Google address has been invited.</p>
         <p class="subtle signin-note">Google only confirms who you are. It never sees what you write.</p>
@@ -79,7 +91,7 @@
 
       <form id="vault-setup" hidden novalidate>
         <p>Choose a passphrase for your journal. Everything you write is encrypted with it and can only be read after you unlock it.</p>
-        {% if hosted %}<p class="vault-note">Nobody else can read your entries, not even whoever runs this site. That also means nobody can reset this passphrase for you: keep the recovery key you'll be shown next.</p>{% endif %}
+        {% if hosted %}<p class="vault-note">Nobody else can read your entries, not even whoever runs this site. That also means nobody can reset this passphrase for you: keep the recovery key you'll be shown next. <a href="/privacy#why-passphrase" target="_blank" rel="noopener">Why a passphrase as well as Google?</a></p>{% endif %}
         <p id="legacy-note" class="vault-note" hidden></p>
         <label>Passphrase <input id="setup-pw" type="password" autocomplete="new-password"></label>
         <label>Type it again <input id="setup-pw2" type="password" autocomplete="new-password"></label>
@@ -119,7 +131,7 @@
         </div>
       </form>
 
-      <p class="vault-footer subtle"><a href="/privacy">Privacy</a></p>
+      <p class="vault-footer subtle"><a href="/privacy">Privacy</a><br><span class="copyright">{{ copyright }}</span></p>
     </div>
   </div>
 
@@ -127,6 +139,9 @@
     <header class="book-header">
       <div id="today" class="today"></div>
       <div id="stats" class="stats" aria-live="polite"></div>
+      <button id="feedback-btn" class="icon-btn lock-btn" title="Send feedback" aria-label="Send feedback">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>
+      </button>
       <button id="lock-btn" class="icon-btn lock-btn" title="Lock the journal" aria-label="Lock the journal">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
       </button>
@@ -150,7 +165,8 @@
       </div>
       <p id="prompt-status" class="prompt-status subtle" aria-live="polite" hidden></p>
       <input id="title-input" class="title-input" type="text" maxlength="120"
-             placeholder="Title (optional; leave blank and one will be suggested)">
+             placeholder="Title (optional)"
+             title="Leave it blank and a title will be suggested from what you write">
       <textarea id="editor" placeholder="Start writing…" autofocus spellcheck="true"></textarea>
       <div class="page-footer">
         <span id="draft-state" class="subtle"></span>
@@ -180,7 +196,7 @@
         <label>Time <input id="entry-time-input" type="time"></label>
       </div>
       <input id="entry-title-input" class="title-input" type="text" maxlength="120"
-             placeholder="Title (leave blank for No Title)" hidden>
+             placeholder="Title (optional)" title="Leave blank for No Title" hidden>
       <p id="entry-prompt" class="entry-prompt" hidden></p>
       <div id="entry-text" class="entry-text"></div>
       <textarea id="entry-editor" hidden></textarea>
@@ -224,9 +240,9 @@
         </label>
         <label>Day or evening
           <select name="theme">
-            <option value="auto">Automatic (follows your computer)</option>
             <option value="day">Day</option>
             <option value="evening">Evening</option>
+            <option value="auto">Automatic (follows your device)</option>
           </select>
         </label>
         <fieldset class="colour-field">
@@ -312,6 +328,14 @@
       <p id="limits-note" class="hint"></p>
       {% endif %}
 
+      {% if is_admin %}
+      <h2>Feedback received</h2>
+      <p class="hint">What people have sent with the Feedback button (the speech bubble at the top){% if hosted %} (only you can see this){% endif %}.
+        <a class="button-link" href="/api/feedback/export" download>Download (CSV)</a></p>
+      <div class="key-test"><label class="checkbox"><input id="feedback-show-done" type="checkbox"> Show ones marked done</label></div>
+      <ul id="feedback-list" class="feedback-list"></ul>
+      {% endif %}
+
       <h2>Passphrase</h2>
       <form id="password-form" class="settings-form vault-settings" novalidate>
         <label>Current passphrase <input id="pw-current" type="password" autocomplete="current-password"></label>
@@ -383,6 +407,7 @@
       <span>{{ app_name }}</span>
       · <a href="/privacy" target="_blank" rel="noopener">Privacy</a>
       {% if hosted %}· <a href="/logout">Sign out</a>{% endif %}
+      <br><span class="copyright">{{ copyright }}</span>
     </footer>
   </main>
 
@@ -401,6 +426,35 @@
       <div class="dialog-buttons">
         <button type="button" id="wipe-cancel-btn">Cancel</button>
         <button type="submit" id="wipe-confirm-btn" class="danger" disabled>Wipe everything</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="feedback-dialog" class="dialog feedback-dialog" aria-labelledby="feedback-title">
+    <form id="feedback-form" novalidate>
+      <h2 id="feedback-title">Send feedback</h2>
+      <fieldset class="feedback-kinds">
+        <legend>What kind of feedback?</legend>
+        <label class="feedback-kind">
+          <input type="radio" name="feedback-kind" value="fix" checked>
+          <span><strong>Fix or improve something</strong>
+            <span class="subtle">Something that's broken, confusing, or could work better.</span></span>
+        </label>
+        <label class="feedback-kind">
+          <input type="radio" name="feedback-kind" value="feature">
+          <span><strong>Suggest a new feature</strong>
+            <span class="subtle">Something you'd like {{ app_name }} to do.</span></span>
+        </label>
+      </fieldset>
+      <label for="feedback-text" class="feedback-label">Your feedback</label>
+      <textarea id="feedback-text" class="feedback-text" maxlength="5000" rows="6"></textarea>
+      <p class="subtle feedback-note">Read by {% if hosted %}whoever runs {{ app_name }}{% else %}you, under Settings → Feedback received{% endif %}.
+        Feedback isn't encrypted like your entries, so leave out anything private. It's sent with the screen you
+        were on and your browser type, to help track down problems.</p>
+      <p id="feedback-error" class="wipe-error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="feedback-cancel-btn">Cancel</button>
+        <button type="submit" id="feedback-send-btn" class="primary">Send</button>
       </div>
     </form>
   </dialog>

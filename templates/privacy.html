@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="auto" data-palette="lake" data-photo="off">
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy · {{ app_name }}</title>
-  {% if logo_url %}<link rel="icon" href="{{ logo_url }}">{% endif %}
+  {% include "_icons.html" %}
   <link rel="stylesheet" href="{{ static_url('style.css') }}">
 </head>
 <body>
@@ -20,12 +20,35 @@
       <p>Because of this, <strong>nobody can reset your passphrase</strong>. If you forget it, your recovery key
         is the only way back in. Without either, the entries can't be recovered by anyone.</p>
 
+      {% if hosted %}
+      <h2 id="why-passphrase">Why a passphrase as well as Google?</h2>
+      <p>The two do different jobs. <strong>Google answers “who are you?”</strong> It lets the site know it's really
+        you, so nobody else can get to your journal's front door. But everything Google shares at sign-in (your name,
+        email and account number) is also known to the server. A lock made from those would have its key stored right
+        next to it: anyone who ran the server, worked at the hosting company, or broke into it could open every journal.</p>
+      <p><strong>Your passphrase answers “is this really your journal to open?”</strong> It's the one secret the
+        server never keeps. Your entries are locked with a key that only your passphrase (or your recovery key) can
+        unlock. So the stored journals, the server's backups, or a stolen copy of its disk are just unreadable scrambled
+        data, and that includes to the person who runs this site.</p>
+      <p>In short: Google keeps strangers out; your passphrase keeps <em>everyone</em> out, including the people who
+        run the site. A journal is only private if both are true.</p>
+      <p class="subtle">To be fully transparent: while your journal is unlocked, the server uses your key to show you
+        your entries and to ask Claude for reflections, and it forgets the key when the journal locks. Someone who took
+        control of the server and secretly changed its code could, in principle, watch for passphrases as they're
+        typed. The passphrase protects against everything short of that. A future version may let you unlock with your
+        fingerprint or face instead of typing a passphrase.</p>
+      {% endif %}
+
       <h2>When something leaves the journal</h2>
       <ul>
         <li><strong>Reflections and writing prompts:</strong> the text of the entry (or, for prompts, a few recent
           entries) is sent to Anthropic's Claude API to write the reflection. Anthropic doesn't use API data to
           train its models by default.</li>
         <li><strong>Export (CSV):</strong> downloads an unencrypted copy to your device, only when you ask for it.</li>
+        <li><strong>Feedback:</strong> what you send with the Feedback button (speech bubble) is <em>not</em> encrypted,
+          because it's meant to be read by {% if hosted %}whoever runs {{ app_name }}{% else %}you{% endif %}. It's stored
+          with {% if hosted %}your email, {% endif %}the date, the screen you were on and your browser type.
+          It's never mixed with your journal.</li>
       </ul>
       <p>No analytics, advertising or tracking scripts are used. The only cookies keep you signed in and
         remember that this browser has unlocked your journal.</p>
@@ -41,6 +64,7 @@
       {% endif %}
 
       <p><a href="/">← Back to {{ app_name }}</a></p>
+      <p class="subtle copyright">{{ copyright }}</p>
     </section>
   </main>
 </body>

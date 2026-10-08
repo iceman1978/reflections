@@ -33,3 +33,5 @@ services:
         sync: false
       - key: ALLOWED_EMAILS      # comma-separated Google addresses allowed to sign in
         sync: false
+      - key: ADMIN_EMAILS        # who can read feedback (Settings → Feedback received): your address
+        sync: false

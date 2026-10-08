@@ -1,0 +1,10 @@
+{% if has_icons %}
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/static/brand/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/static/brand/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="{{ theme_colour }}">
+  <meta name="apple-mobile-web-app-title" content="{{ app_name }}">
+{% elif logo_url %}
+  <link rel="icon" href="{{ logo_url }}">
+{% endif %}
