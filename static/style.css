@@ -901,9 +901,9 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   flex-direction: column;
   justify-content: center;
   align-items: center;      /* the column of text sits in the middle of the blue panel */
-  gap: 26px;
+  gap: clamp(14px, 2.4vh, 26px);   /* tighter on shorter screens, so it all fits */
   min-height: 100vh;
-  padding: 56px clamp(24px, 6vw, 88px);
+  padding: clamp(28px, 5vh, 56px) clamp(24px, 6vw, 88px);
   color: hsl(var(--paper-hue) 40% 94%);
   background:
     radial-gradient(ellipse at 15% 10%, hsl(var(--hue) var(--sat) 32% / 0.55), transparent 60%),
@@ -919,11 +919,9 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 }
 .landing-intro a { color: inherit; }
 .landing-intro > * { width: min(100%, 560px); }   /* one shared column; the text inside stays left-aligned */
-/* --name-size drives both the name and the logo's nudge: the handwriting's tall
-   letters (R, f, l) put the word's visual middle above the centre of its line,
-   so the logo is raised to line up with the letters, not the line box. */
-.brand { --name-size: clamp(3.2rem, 6vw, 4.4rem); display: flex; align-items: center; gap: calc(var(--name-size) * 0.45); }
-.brand-logo { transform: translateY(calc(var(--name-size) * -0.18)); width: 88px; height: 88px; border-radius: 18px; object-fit: cover; flex: none; box-shadow: 0 0 0 1px hsl(0 0% 100% / 0.22); }
+/* The logo sits above the app's name, both centred in the column. */
+.brand { --name-size: clamp(3.2rem, 6vw, 4.4rem); display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(20px, 3.2vh, 34px); }
+.brand-logo { width: 176px; height: 176px; border-radius: 36px; object-fit: cover; flex: none; box-shadow: 0 0 0 1px hsl(0 0% 100% / 0.22); }
 .brand-logo-placeholder {
   display: grid;
   place-items: center;
@@ -935,7 +933,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 }
 .brand-name { font-family: var(--hand); font-weight: 500; font-size: var(--name-size); line-height: 1; margin: 0; }
 .landing-lead { font-size: 1.25rem; line-height: 1.45; margin: 0; max-width: 560px; opacity: 0.95; }
-.landing-points { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; max-width: 560px; }
+.landing-points { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(10px, 1.8vh, 18px); max-width: 560px; }
 .landing-points li { display: flex; gap: 14px; align-items: flex-start; }
 .landing-points svg {
   flex: none;
@@ -1009,7 +1007,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .vault.landing { grid-template-columns: 1fr; }
   .landing-intro { min-height: 0; padding: 36px 20px 32px; gap: 20px; }
   .vault.landing .vault-card { width: calc(100% - 32px); margin: 24px 0 40px; }
-  .brand-logo { width: 64px; height: 64px; border-radius: 14px; }
+  .brand-logo { width: 128px; height: 128px; border-radius: 26px; }
 }
 
 /* Small links under the journal: name, privacy, sign out */
