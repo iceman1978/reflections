@@ -8,7 +8,6 @@
   "app_name": "Well Lived",
   "tagline": "A Daily Journal",
   "tab_letter": "W",
-  "tab_font": "EBGaramond-Variable.ttf",
   "description": "A private journal, with a thoughtful reflection after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",

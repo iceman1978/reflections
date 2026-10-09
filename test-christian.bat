@@ -13,8 +13,7 @@ set "JOURNAL_TEST_LOGIN=1"
 set "GOOGLE_CLIENT_ID=test-only"
 set "ALLOWED_EMAILS=you@example.com, mum@example.com, dad@example.com"
 set "ADMIN_EMAILS=you@example.com"
-rem No daily limit while testing (0 = no limit). PUT BACK to 3 when done testing.
-set "REFLECTIONS_PER_DAY=0"
+set "REFLECTIONS_PER_DAY=3"
 set "PROMPTS_PER_DAY=10"
 start "" cmd /c "timeout /t 4 /nobreak >nul & start http://localhost:5062"
 uv run --quiet python app.py
