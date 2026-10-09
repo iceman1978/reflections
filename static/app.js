@@ -1074,8 +1074,34 @@
 
   // ---- Settings ---------------------------------------------------------
 
+  // Settings tabs: Basic, Theme, Security & Data, Admin (admins only).
+  const settingsTabs = () => [...document.querySelectorAll('#settings-view [role="tab"]')];
+
+  function selectSettingsTab(name, { focus = false } = {}) {
+    for (const tab of settingsTabs()) {
+      const on = tab.id === `tab-${name}`;
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+      tab.tabIndex = on ? 0 : -1;
+      $(tab.getAttribute("aria-controls")).hidden = !on;
+      if (on && focus) tab.focus();
+    }
+    state.settingsTab = name;
+  }
+
+  for (const tab of settingsTabs()) {
+    tab.addEventListener("click", () => selectSettingsTab(tab.id.slice(4)));
+    tab.addEventListener("keydown", (e) => {   // ← / → move between tabs
+      const tabs = settingsTabs(), i = tabs.indexOf(tab);
+      const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      selectSettingsTab(tabs[(i + step + tabs.length) % tabs.length].id.slice(4), { focus: true });
+    });
+  }
+
   async function showSettings() {
     showView("settings");
+    selectSettingsTab(state.settingsTab || "basic");   // back to the tab you were on
     $("settings-state").textContent = "";
     try {
       const { settings } = await api("GET", "/api/settings");
@@ -1407,6 +1433,7 @@
       });
       $("invite-email").value = $("invite-name").value = $("invite-note").value = "";
       renderMyInvites(res.invites);
+      $("invite-dialog").close();   // the thank-you shows on the page, not behind the dialog
       showNotice("Thanks! Your invitation request has been sent.", 5000);
     } catch (err) {
       $("invite-error").textContent = sentence(err.message);

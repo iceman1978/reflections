@@ -173,7 +173,7 @@ Open the entry and click **Delete**. You'll be asked to confirm, then to choose:
 
 ## Settings
 
-Click the **⚙** in the top-right corner to change your name (used in the greeting) and the other settings. **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
+Click the **⚙** in the top-right corner. Settings has tabs: **Basic** (your account, name, journal name, draft saving, auto-lock; on your own computer also the app-wide settings under *This computer*), **Theme** (day or evening, colour, background photo), **Security & Data** (passphrase, recovery key, export, import, wipe, hidden entries) and, for admins, **Admin** (usage, invitation requests, feedback). **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
 
 Your personal choices (name, journal name, day/evening, colour, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
 

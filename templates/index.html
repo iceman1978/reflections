@@ -39,7 +39,7 @@
         <li>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 4h14M6 4v-.5h12V4M7 7v11M10.3 7v11M13.7 7v11M17 7v11M5.5 18h13M5.5 7h13"/></svg>
           <div><strong>Ground yourself in over two millennia of Western philosophy</strong>
-            <span>From Socrates, Plato and Aristotle, through Epicurus, Cicero and the Stoics, Augustine, Boethius, Anselm, Aquinas and Dante, to Descartes, Pascal, Spinoza, Locke, Hume, Kant, Kierkegaard and Mill, with links to the original texts.</span></div>
+            <span>Draw wisdom from classical virtue ethics, Stoicism, medieval scholasticism, Enlightenment thought, and modern existentialism—with direct links to original texts.</span></div>
         </li>
         <li>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.4v.4M12 16.6v.1"/></svg>
@@ -240,129 +240,108 @@
     <!-- Settings -->
     <section id="settings-view" class="page" hidden>
       <h1 class="prompt-heading">Settings</h1>
+      <div class="settings-tabs" role="tablist" aria-label="Settings">
+        <button type="button" role="tab" id="tab-basic" aria-controls="panel-basic" aria-selected="true">Basic</button>
+        <button type="button" role="tab" id="tab-theme" aria-controls="panel-theme" aria-selected="false" tabindex="-1">Theme</button>
+        <button type="button" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">Security &amp; Data</button>
+        {% if is_admin %}<button type="button" role="tab" id="tab-admin" aria-controls="panel-admin" aria-selected="false" tabindex="-1">Admin</button>{% endif %}
+      </div>
+
       <form id="settings-form" class="settings-form" novalidate>
-        <label>Your name
-          <input name="user_name" type="text" maxlength="40" placeholder="Used in the greeting">
-        </label>
-        <label>Journal name
-          <input name="journal_name" type="text" maxlength="30" placeholder="{{ app_name }}">
-          <span class="hint">The title at the top of your journal. Leave blank for “{{ app_name }}”.</span>
-        </label>
-        <label>Day or evening
-          <select name="theme">
-            <option value="day">Day</option>
-            <option value="evening">Evening</option>
-            <option value="auto">Automatic (follows your device)</option>
-          </select>
-        </label>
-        <fieldset class="colour-field">
-          <legend>Colour</legend>
-          <div class="swatches" role="radiogroup">
-            {% for key, name in colour_themes %}
-            <label class="swatch" data-palette="{{ key }}">
-              <input type="radio" name="colour_theme" value="{{ key }}">
-              <span>{{ name }}</span>
-            </label>
-            {% endfor %}
+        <div id="panel-basic" role="tabpanel" aria-labelledby="tab-basic" class="settings-panel">
+          {% if hosted %}
+        <h2>Account</h2>
+        <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
+        <p id="limits-note" class="hint"></p>
+          {% endif %}
+          <label>Your name
+            <input name="user_name" type="text" maxlength="40" placeholder="Used in the greeting">
+          </label>
+          <label>Journal name
+            <input name="journal_name" type="text" maxlength="30" placeholder="{{ app_name }}">
+            <span class="hint">The title at the top of your journal. Leave blank for “{{ app_name }}”.</span>
+          </label>
+          <label>Save my draft every
+            <span class="inline"><input name="draft_autosave_seconds" type="number" min="1" max="60"> seconds</span>
+          </label>
+          <label>Lock the journal after
+            <select name="lock_minutes">
+              {% for m in lock_choices %}
+              <option value="{{ m }}">{% if m == 0 %}{% if hosted %}only when I lock it or sign out{% else %}only when the app closes{% endif %}{% elif m < 60 %}{{ m }} minutes without activity{% elif m == 60 %}1 hour without activity{% else %}{{ m // 60 }} hours without activity{% endif %}</option>
+              {% endfor %}
+            </select>
+          </label>
+          {% if not hosted %}
+          <h2>This computer</h2>
+          <label>Daily backups to keep
+            <span class="inline"><input name="backups_to_keep" type="number" min="1" max="365"> days</span>
+          </label>
+          <label>Claude model
+            <input name="model" type="text">
+          </label>
+          <label>Reflection depth
+            <select name="reflection_effort">
+              <option value="low">Light (fastest, cheapest)</option>
+              <option value="medium">Medium</option>
+              <option value="high">Deep (best reflections)</option>
+            </select>
+          </label>
+          <div class="key-test">
+            <button type="button" id="test-key-btn">Test my API key</button>
+            <span id="test-key-result" class="subtle"></span>
           </div>
-        </fieldset>
-        <label class="checkbox">
-          <input name="background_photo" type="checkbox"> Background photo
-        </label>
-        <div id="photo-sliders" class="photo-sliders">
-          <label>Photo blur
-            <span class="slider"><input name="photo_blur" type="range" min="0" max="30" step="1">
-              <output id="photo-blur-value"></output></span>
-            <span class="hint">0 is sharp; higher is softer.</span>
+
+          <h3 class="settings-sub">Applied after restarting the app</h3>
+          <label>Time zone
+            <input name="timezone" type="text" placeholder="America/Toronto">
           </label>
-          <label>Photo visibility
-            <span class="slider"><input name="photo_visibility" type="range" min="0" max="100" step="5">
-              <output id="photo-visibility-value"></output></span>
-            <span class="hint">How clearly the photo shows through. Lower fades it into the paper colour.</span>
+          <label>Port
+            <input name="port" type="number" min="1024" max="65535">
           </label>
-        </div>
-        <label>Save my draft every
-          <span class="inline"><input name="draft_autosave_seconds" type="number" min="1" max="60"> seconds</span>
-        </label>
-        <label>Lock the journal after
-          <select name="lock_minutes">
-            {% for m in lock_choices %}
-            <option value="{{ m }}">{% if m == 0 %}{% if hosted %}only when I lock it or sign out{% else %}only when the app closes{% endif %}{% elif m < 60 %}{{ m }} minutes without activity{% elif m == 60 %}1 hour without activity{% else %}{{ m // 60 }} hours without activity{% endif %}</option>
-            {% endfor %}
-          </select>
-        </label>
-        {% if not hosted %}
-        <label>Daily backups to keep
-          <span class="inline"><input name="backups_to_keep" type="number" min="1" max="365"> days</span>
-        </label>
-        <label>Claude model
-          <input name="model" type="text">
-        </label>
-        <label>Reflection depth
-          <select name="reflection_effort">
-            <option value="low">Light (fastest, cheapest)</option>
-            <option value="medium">Medium</option>
-            <option value="high">Deep (best reflections)</option>
-          </select>
-        </label>
-        <div class="key-test">
-          <button type="button" id="test-key-btn">Test my API key</button>
-          <span id="test-key-result" class="subtle"></span>
+          <label class="checkbox">
+            <input name="open_browser_on_start" type="checkbox"> Open the browser when the app starts
+          </label>
+          {% endif %}
         </div>
 
-        <h2>Applied after restarting the app</h2>
-        <label>Time zone
-          <input name="timezone" type="text" placeholder="America/Toronto">
-        </label>
-        <label>Port
-          <input name="port" type="number" min="1024" max="65535">
-        </label>
-        <label class="checkbox">
-          <input name="open_browser_on_start" type="checkbox"> Open the browser when the app starts
-        </label>
-        {% endif %}
-
-        <div class="page-footer">
-          <span id="settings-state" class="subtle"></span>
-          <button type="button" id="settings-back-btn" title="Leave without saving changes">Discard</button>
-          <button type="submit" class="primary">Save</button>
+        <div id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" class="settings-panel" hidden>
+          <label>Day or evening
+            <select name="theme">
+              <option value="day">Day</option>
+              <option value="evening">Evening</option>
+              <option value="auto">Automatic (follows your device)</option>
+            </select>
+          </label>
+          <fieldset class="colour-field">
+            <legend>Colour</legend>
+            <div class="swatches" role="radiogroup">
+              {% for key, name in colour_themes %}
+              <label class="swatch" data-palette="{{ key }}">
+                <input type="radio" name="colour_theme" value="{{ key }}">
+                <span>{{ name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <label class="checkbox">
+            <input name="background_photo" type="checkbox"> Background photo
+          </label>
+          <div id="photo-sliders" class="photo-sliders">
+            <label>Photo blur
+              <span class="slider"><input name="photo_blur" type="range" min="0" max="30" step="1">
+                <output id="photo-blur-value"></output></span>
+              <span class="hint">0 is sharp; higher is softer.</span>
+            </label>
+            <label>Photo visibility
+              <span class="slider"><input name="photo_visibility" type="range" min="0" max="100" step="5">
+                <output id="photo-visibility-value"></output></span>
+              <span class="hint">How clearly the photo shows through. Lower fades it into the paper colour.</span>
+            </label>
+          </div>
         </div>
       </form>
 
-      <h2>Hidden entries</h2>
-      <ul id="hidden-list" class="hidden-list"></ul>
-
-      {% if hosted %}
-      <h2>Account</h2>
-      <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
-      <p id="limits-note" class="hint"></p>
-      {% endif %}
-
-      {% if is_admin %}
-      <h2>Usage</h2>
-      <p class="hint">Counts only, never what anyone writes. Last 30 days unless noted{% if hosted %}; only you can see this{% endif %}.
-        <span id="usage-since"></span></p>
-      <div id="usage-tiles" class="usage-tiles"></div>
-      <div id="usage-chart" class="usage-chart" role="img" aria-label="People using the app each day, last 30 days"></div>
-      <div class="usage-chart-axis subtle"><span>30 days ago</span><span>Today</span></div>
-      <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
-
-      {% if hosted %}
-      <h2>Invitation requests</h2>
-      <p class="hint">People others would like to invite. To let someone in, add their address to Google's
-        <em>Test users</em> (if you haven't published the Google sign-in) and to <code>ALLOWED_EMAILS</code> on Render;
-        their request then shows <em>Has access</em> by itself.</p>
-      <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Show ones that have access or were declined</label></div>
-      <ul id="invite-requests" class="feedback-list"></ul>
-      {% endif %}
-
-      <h2>Feedback received</h2>
-      <p class="hint">What people have sent with the Feedback button (the speech bubble at the top){% if hosted %} (only you can see this){% endif %}.
-        <a class="button-link" href="/api/feedback/export" download>Download (CSV)</a></p>
-      <div class="key-test"><label class="checkbox"><input id="feedback-show-done" type="checkbox"> Show ones marked done</label></div>
-      <ul id="feedback-list" class="feedback-list"></ul>
-      {% endif %}
-
+      <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" class="settings-panel" hidden>
       <h2>Passphrase</h2>
       <form id="password-form" class="settings-form vault-settings" novalidate>
         <label>Current passphrase <input id="pw-current" type="password" autocomplete="current-password"></label>
@@ -398,6 +377,43 @@
           <button type="button" id="wipe-btn" class="danger-outline">Wipe journal…</button>
           <span class="hint">Permanently deletes all entries. You'll be asked to confirm.</span>
         </div>
+      </div>
+
+      <h2>Hidden entries</h2>
+      <ul id="hidden-list" class="hidden-list"></ul>
+      </div>
+
+      {% if is_admin %}
+      <div id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" class="settings-panel" hidden>
+      <h2>Usage</h2>
+      <p class="hint">Counts only, never what anyone writes. Last 30 days unless noted{% if hosted %}; only you can see this{% endif %}.
+        <span id="usage-since"></span></p>
+      <div id="usage-tiles" class="usage-tiles"></div>
+      <div id="usage-chart" class="usage-chart" role="img" aria-label="People using the app each day, last 30 days"></div>
+      <div class="usage-chart-axis subtle"><span>30 days ago</span><span>Today</span></div>
+      <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
+
+      {% if hosted %}
+      <h2>Invitation requests</h2>
+      <p class="hint">People others would like to invite. To let someone in, add their address to Google's
+        <em>Test users</em> (if you haven't published the Google sign-in) and to <code>ALLOWED_EMAILS</code> on Render;
+        their request then shows <em>Has access</em> by itself.</p>
+      <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Show ones that have access or were declined</label></div>
+      <ul id="invite-requests" class="feedback-list"></ul>
+      {% endif %}
+
+      <h2>Feedback received</h2>
+      <p class="hint">What people have sent with the Feedback button (the speech bubble at the top){% if hosted %} (only you can see this){% endif %}.
+        <a class="button-link" href="/api/feedback/export" download>Download (CSV)</a></p>
+      <div class="key-test"><label class="checkbox"><input id="feedback-show-done" type="checkbox"> Show ones marked done</label></div>
+      <ul id="feedback-list" class="feedback-list"></ul>
+      </div>
+      {% endif %}
+
+      <div class="page-footer settings-footer">
+        <span id="settings-state" class="subtle"></span>
+        <button type="button" id="settings-back-btn" title="Leave without saving changes">Discard</button>
+        <button type="submit" form="settings-form" class="primary">Save</button>
       </div>
     </section>
 

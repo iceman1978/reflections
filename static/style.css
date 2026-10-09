@@ -550,6 +550,7 @@ button.prompt-btn.nudge-glow {
 .settings-form label { display: block; margin-bottom: 16px; }
 .settings-form input[type="text"],
 .settings-form input[type="number"],
+.settings-form input[type="password"],
 .settings-form select {
   display: block;
   width: 100%;
@@ -760,6 +761,35 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
   user-select: all;
   word-break: break-all;
 }
+/* ---- Settings tabs ---- */
+.settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 2px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid var(--rule);
+}
+.settings-tabs [role="tab"] {
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  padding: 6px 12px;
+  margin-bottom: -1px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.settings-tabs [role="tab"]:hover { color: var(--ink); background: none; }
+.settings-tabs [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.settings-panel > h2:first-child, .settings-panel > form:first-child > h2:first-child { margin-top: 0; }
+.settings-sub { font-size: 1rem; font-weight: 500; margin: 18px 0 8px; }
+.settings-footer { margin-top: 24px; }
+@media (max-width: 640px) {
+  .settings-tabs [role="tab"] { padding: 6px 8px; font-size: 0.95rem; }
+}
+
 /* ---- Usage stats (Settings, admins) ---- */
 .usage-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 10px 0 16px; }
 .usage-tile { background: var(--note); border-radius: 8px; padding: 10px 12px; }
