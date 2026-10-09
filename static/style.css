@@ -499,7 +499,8 @@ button.prompt-btn.nudge-glow {
   animation: fade-in 0.5s ease-out;
 }
 .insight p { margin: 0 0 12px; }
-.question { margin: 18px 0 8px; font-family: var(--hand); font-size: 1.55rem; line-height: 1.3; color: var(--accent); }
+/* Claude's closing question: the reflection's own font and size, in italic and the theme colour. */
+.question { margin: 18px 0 8px; font-family: var(--serif); font-style: italic; font-size: inherit; line-height: 1.6; color: var(--accent); }
 .question::before {
   content: "To sit with";
   display: block;
@@ -507,6 +508,7 @@ button.prompt-btn.nudge-glow {
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  font-style: normal;
   color: var(--muted);
   margin-bottom: 2px;
 }
