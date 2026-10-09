@@ -19,7 +19,9 @@ small, web-ready copies into static/brands/<edition>/:
 Run it again whenever the logo changes, then push.
 """
 import json
+import math
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -30,8 +32,8 @@ EDITION = (sys.argv[1] if len(sys.argv) > 1 else os.environ.get("EDITION", "phil
 OUT = ROOT / "static" / "brands" / EDITION
 
 # The browser-tab icon is simpler than the logo, so it's readable at 16 px:
-# the first letter of the edition's name (or its "tab_letter") in the
-# handwriting font, white on the app's blue.
+# the edition's "tab_drawing" (a line drawing, e.g. In His Steps' sandal), or
+# else the first letter of its name (or its "tab_letter"), white on its blue.
 _edition = json.loads((ROOT / "editions" / EDITION / "edition.json").read_text(encoding="utf-8"))
 TAB_LETTER = _edition.get("tab_letter") or _edition["app_name"].removeprefix("The ")[0]
 TAB_FONT = ROOT / "static" / "fonts" / _edition.get("tab_font", "HomemadeApple-Regular.ttf")   # or EBGaramond-Variable.ttf
@@ -54,6 +56,87 @@ def letter_icon(size=512, fill=0.74, radius=0.2, weight=0.03):
     stroke = max(1, int(size * weight))
     draw.text(((size - (r - l)) / 2 - l, (size - (b - t)) / 2 - t), TAB_LETTER, font=font, fill="white",
               stroke_width=stroke, stroke_fill="white")
+    return img
+
+
+def svg_points(d, steps=24):
+    """Flatten a simple SVG path (M, L, C, S and Z, absolute or relative) into
+    lists of (x, y) points, one list per sub-path. Enough for line icons."""
+    tokens = re.findall(r"[MmLlCcSsZz]|-?\d*\.?\d+(?:e-?\d+)?", d)
+    shapes, pts, i, cmd = [], [], 0, None
+    x = y = start_x = start_y = 0.0
+    last_ctrl = None
+
+    def num():
+        nonlocal i
+        i += 1
+        return float(tokens[i - 1])
+
+    def curve(p0, p1, p2, p3):
+        for k in range(1, steps + 1):
+            s = k / steps
+            pts.append(tuple((1 - s) ** 3 * a + 3 * (1 - s) ** 2 * s * b + 3 * (1 - s) * s * s * c + s ** 3 * e
+                             for a, b, c, e in zip(p0, p1, p2, p3)))
+
+    while i < len(tokens):
+        if re.fullmatch(r"[A-Za-z]", tokens[i]):
+            cmd = tokens[i]
+            i += 1
+            if cmd in "Zz":
+                pts.append((start_x, start_y))
+                x, y = start_x, start_y
+                continue
+        rel = cmd.islower()
+        ox, oy = (x, y) if rel else (0.0, 0.0)
+        if cmd in "Mm":
+            if pts:
+                shapes.append(pts)
+            x, y = ox + num(), oy + num()
+            start_x, start_y, pts, last_ctrl = x, y, [(x, y)], None
+            cmd = "l" if rel else "L"      # further pairs after a move are lines
+        elif cmd in "Ll":
+            x, y = ox + num(), oy + num()
+            pts.append((x, y))
+            last_ctrl = None
+        elif cmd in "Cc":
+            c1 = (ox + num(), oy + num())
+            c2 = (ox + num(), oy + num())
+            end = (ox + num(), oy + num())
+            curve((x, y), c1, c2, end)
+            last_ctrl, (x, y) = c2, end
+        elif cmd in "Ss":
+            c1 = (2 * x - last_ctrl[0], 2 * y - last_ctrl[1]) if last_ctrl else (x, y)
+            c2 = (ox + num(), oy + num())
+            end = (ox + num(), oy + num())
+            curve((x, y), c1, c2, end)
+            last_ctrl, (x, y) = c2, end
+    if pts:
+        shapes.append(pts)
+    return shapes
+
+
+def drawing_icon(spec, size=512, fill=0.8, radius=0.2):
+    """A line drawing (the same paths as a welcome-page icon), white on the
+    rounded blue square: e.g. In His Steps' sandal. spec = {"paths": [...],
+    "rotate": degrees, "stroke": width in the drawing's 24-unit grid}."""
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.rounded_rectangle((0, 0, size - 1, size - 1), int(size * radius), fill=TAB_BLUE + (255,))
+    angle = math.radians(spec.get("rotate", 0))
+    turn = lambda px, py: (12 + (px - 12) * math.cos(angle) - (py - 12) * math.sin(angle),
+                           12 + (px - 12) * math.sin(angle) + (py - 12) * math.cos(angle))
+    shapes = [[turn(*pt) for pt in shape] for d in spec["paths"] for shape in svg_points(d)]
+    xs = [pt[0] for s in shapes for pt in s]
+    ys = [pt[1] for s in shapes for pt in s]
+    stroke = spec.get("stroke", 2.0)
+    scale = fill * size / (max(max(xs) - min(xs), max(ys) - min(ys)) + stroke)
+    cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+    width = max(1, round(stroke * scale))
+    for shape in shapes:
+        pts = [(size / 2 + (px - cx) * scale, size / 2 + (py - cy) * scale) for px, py in shape]
+        draw.line(pts, fill="white", width=width, joint="curve")
+        for px, py in (pts[0], pts[-1]):            # round ends
+            draw.ellipse((px - width / 2, py - width / 2, px + width / 2, py + width / 2), fill="white")
     return img
 
 
@@ -92,7 +175,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     save = dict(optimize=True)
     resized(img, 384).save(OUT / "logo.png", **save)
-    tab = letter_icon()
+    tab = drawing_icon(_edition["tab_drawing"], size=1536) if _edition.get("tab_drawing") else letter_icon()
     tab.resize((32, 32), Image.LANCZOS).save(OUT / "favicon-32.png", **save)
     tab.resize((48, 48), Image.LANCZOS).save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
     resized(img, 180).save(OUT / "apple-touch-icon.png", **save)

@@ -388,18 +388,27 @@ BACKGROUNDS_DIR = ROOT / "static" / "backgrounds"
 PHOTO_TYPES = {".jpg", ".jpeg", ".png", ".webp"}
 
 
+def background_photos():
+    """This edition's photos: the shared ones in static/backgrounds/, plus its
+    own in static/backgrounds/<edition>/ (e.g. backgrounds/christian/)."""
+    folders = [BACKGROUNDS_DIR, BACKGROUNDS_DIR / config.EDITION_NAME]
+    return sorted(p for folder in folders for p in folder.glob("*")
+                  if p.is_file() and p.suffix.lower() in PHOTO_TYPES)
+
+
 @app.get("/api/background")
 def background():
-    """A random photo from static/backgrounds/, never the one just shown
+    """A random photo for this edition, never the one just shown
     (the page passes its name as ?avoid=)."""
-    photos = sorted(p for p in BACKGROUNDS_DIR.glob("*") if p.suffix.lower() in PHOTO_TYPES)
+    photos = background_photos()
     show = users.prefs(g.user_id)["background_photo"] if g.user_id else False
     if not show or not photos:
         return jsonify(url=None)
     avoid = request.args.get("avoid")
-    choices = [p for p in photos if p.name != avoid] or photos
+    choices = [p for p in photos if p.relative_to(BACKGROUNDS_DIR).as_posix() != avoid] or photos
     photo = random.choice(choices)
-    return jsonify(url=f"/static/backgrounds/{photo.name}?v={int(photo.stat().st_mtime)}", name=photo.name)
+    name = photo.relative_to(BACKGROUNDS_DIR).as_posix()     # "lake.jpg" or "christian/cross.jpg"
+    return jsonify(url=f"/static/backgrounds/{urllib.parse.quote(name)}?v={int(photo.stat().st_mtime)}", name=name)
 
 
 # ---- The lock: passphrase, recovery key, sessions ---------------------------
