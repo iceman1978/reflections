@@ -98,6 +98,14 @@ def _signed_in_user():
     return uid
 
 
+def _old_address(host):
+    """True for addresses that should forward to PUBLIC_HOST: the service's own
+    *.onrender.com address (once a custom domain is set up) and www.<domain>."""
+    if not (HOSTED and config.PUBLIC_HOST) or config.PUBLIC_HOST.endswith(".onrender.com"):
+        return False
+    return host.endswith(".onrender.com") or host == f"www.{config.PUBLIC_HOST}"
+
+
 @app.before_request
 def _guard():
     if request.path == "/healthz":
@@ -107,6 +115,10 @@ def _guard():
     # websites can't add a custom header without the browser asking first,
     # which this app never approves.
     host = (request.host or "").rsplit(":", 1)[0].lower()
+    if host not in ALLOWED_HOSTS and _old_address(host) and request.method in ("GET", "HEAD"):
+        # The app's previous Render address, or www.: send people (and their bookmarks and
+        # installed apps) to the real one. A redirect hands out nothing, so this is safe.
+        return redirect(f"https://{config.PUBLIC_HOST}{request.full_path.rstrip('?')}", code=301)
     if host not in ALLOWED_HOSTS:
         return jsonify(error="Forbidden"), 403
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get(CLIENT_HEADER) != "1" \
