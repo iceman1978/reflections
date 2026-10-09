@@ -266,6 +266,7 @@
     document.querySelectorAll(".page-ghost").forEach((g) => g.remove());   // a quick second turn
     if (!ghost) { animatePage(el, "view-in"); return; }
     ghost.classList.add(direction < 0 ? "ghost-under" : "ghost-turning");
+    ghost.style.height = `${el.offsetHeight}px`;   // pages in a book are one size: match the new page
     el.after(ghost);
     el.classList.remove("view-in", "turn-older", "turn-newer");
     if (direction < 0) animatePage(el, "turn-older");          // the new page comes down over it
@@ -276,7 +277,8 @@
 
   function showEntry(entry) {
     const switching = !state.current || state.current.id !== entry.id;
-    const ghost = state.turn ? oldPageCopy($("entry-view")) : null;   // the page as it was, before it changes
+    const from = !$("entry-view").hidden ? $("entry-view") : $("write-view");
+    const ghost = state.turn ? oldPageCopy(from) : null;   // the page as it was, before it changes
     state.current = entry;
     showView("entry");
     if (state.turn) {
@@ -325,8 +327,10 @@
     const newer = list.find((e) => when(e) > t);
     state.olderId = older && older.id;
     state.newerId = newer && newer.id;
-    $("prev-btn").disabled = !older;
-    $("next-btn").disabled = !newer;
+    $("prev-btn").classList.toggle("at-end", !older);
+    $("prev-btn").title = older ? "Older entry (← key)" : "This is your first entry";
+    $("next-btn").textContent = newer ? "Newer ›" : "New entry ›";
+    $("next-btn").title = newer ? "Newer entry (→ key)" : "Start a new entry (→ key)";
     const i = list.findIndex((e) => e.id === state.current.id);
     const what = filterDescription();
     $("nav-pos").textContent = i >= 0 ? `${i + 1} of ${list.length}${what ? ` ${what}` : ""}` : "";
@@ -342,13 +346,49 @@
     const target = direction < 0
       ? list.filter((e) => when(e) < t).pop()
       : list.find((e) => when(e) > t);
-    if (!target) return;
+    if (!target) {
+      if (direction < 0) bumpPage($("entry-view"));
+      else turnToWritingPage();
+      return;
+    }
     state.navTarget = target.id;
     state.turn = direction;  // showEntry plays a page turn in this direction
     openEntry(target.id);
   }
   function goOlder() { step(-1); }
   function goNewer() { step(1); }
+
+  // Past the latest entry: turn the page over to a fresh writing page.
+  async function turnToWritingPage() {
+    const ghost = oldPageCopy($("entry-view"));
+    await scrollToTop();
+    showWrite();
+    turnPage($("write-view"), 1, ghost);
+  }
+
+  // Older from the writing page: back to the latest entry, but only if
+  // nothing has been written yet (a started entry is never turned away).
+  function olderFromWritingPage() {
+    if ($("editor").value.trim() || $("title-input").value.trim()) {
+      bumpPage($("write-view"));
+      showNotice("Finish or clear this entry before turning back.", 3500);
+      return;
+    }
+    const latest = shown().slice(-1)[0];
+    if (!latest) { bumpPage($("write-view")); return; }
+    state.navTarget = latest.id;
+    state.turn = -1;
+    openEntry(latest.id);
+  }
+
+  // "There's nothing further this way": the page nudges as if to turn, and settles.
+  function bumpPage(el) {
+    if (reducedMotion()) return;
+    el.classList.remove("view-in", "turn-older", "page-bump");
+    void el.offsetWidth;
+    el.classList.add("page-bump");
+    el.addEventListener("animationend", () => el.classList.remove("page-bump"), { once: true });
+  }
 
   // ---- Calendar ---------------------------------------------------------
 
@@ -795,6 +835,7 @@
     $("filter-fav").setAttribute("aria-pressed", String(state.favOnly));
     $("calendar-btn").setAttribute("aria-pressed", String(!!state.range));
     $("calendar-btn").textContent = state.range ? `Calendar: ${state.range.label}` : "Calendar";
+    state.listLimit = LIST_FIRST;
     renderList();
     updateNav();
     renderCalendar();
@@ -835,6 +876,18 @@
     renderList();
   }
 
+  // The list shows the newest 10, and 20 more each time you scroll to its end
+  // (or click "Show more"). Older / Newer, swipes and the calendar still reach
+  // every entry.
+  const LIST_FIRST = 10, LIST_MORE = 20;
+  state.listLimit = LIST_FIRST;
+  let moreObserver = null;
+
+  function showMoreEntries() {
+    state.listLimit += LIST_MORE;
+    renderList();
+  }
+
   function renderList() {
     const all = state.allEntries;
     if (!all) return;
@@ -846,7 +899,8 @@
     {
       const ul = $("entry-list");
       ul.replaceChildren();
-      for (const e of entries.reverse()) {
+      const newestFirst = entries.reverse();
+      for (const e of newestFirst.slice(0, state.listLimit)) {
         const li = document.createElement("li");
         const when = document.createElement("span");
         when.className = "when";
@@ -873,6 +927,29 @@
         }
         li.addEventListener("click", () => openEntry(e.id));
         ul.append(li);
+      }
+      if (moreObserver) { moreObserver.disconnect(); moreObserver = null; }
+      const hidden = newestFirst.length - Math.min(state.listLimit, newestFirst.length);
+      if (hidden > 0) {
+        const li = document.createElement("li");
+        li.className = "list-more";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `Show ${Math.min(LIST_MORE, hidden)} more`;
+        btn.title = `${hidden} older ${hidden === 1 ? "entry" : "entries"} not shown yet`;
+        btn.addEventListener("click", (ev) => { ev.stopPropagation(); showMoreEntries(); });
+        const count = document.createElement("span");
+        count.className = "subtle";
+        count.textContent = `${hidden} older`;
+        li.append(btn, count);
+        ul.append(li);
+        // Load more by itself when the end of the list scrolls into view.
+        if ("IntersectionObserver" in window) {
+          moreObserver = new IntersectionObserver((seen) => {
+            if (seen.some((s) => s.isIntersecting) && window.scrollY > 0) showMoreEntries();
+          }, { rootMargin: "200px" });
+          moreObserver.observe(li);
+        }
       }
       if (!entries.length) {
         const li = document.createElement("li");
@@ -1681,6 +1758,7 @@
   $("filter-fav").addEventListener("click", toggleFavourites);
   applyFilters();
   $("prev-btn").addEventListener("click", goOlder);
+  $("write-older-btn").addEventListener("click", olderFromWritingPage);
   $("next-btn").addEventListener("click", goNewer);
 
   // Swipe on a past entry (phones and tablets): right = Older, like turning
@@ -1689,23 +1767,27 @@
   // the phone (that's its own "go back" gesture).
   {
     const SWIPE_MIN = 60, EDGE = 24, MAX_MS = 800;
-    let start = null;
-    $("entry-view").addEventListener("touchstart", (e) => {
-      const t = e.touches[0];
-      const busy = e.touches.length > 1 || !$("entry-editor").hidden || $("dialog").open || state.cal.open
-        || t.clientX < EDGE || t.clientX > innerWidth - EDGE;
-      start = busy ? null : { x: t.clientX, y: t.clientY, time: Date.now() };
-    }, { passive: true });
-    $("entry-view").addEventListener("touchend", (e) => {
-      if (!start) return;
-      const t = e.changedTouches[0];
-      const dx = t.clientX - start.x, dy = t.clientY - start.y, quick = Date.now() - start.time < MAX_MS;
-      start = null;
-      if (!quick || Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < 2 * Math.abs(dy)) return;
-      if (window.getSelection && String(window.getSelection())) return;   // they were selecting text
-      if (dx > 0) goOlder(); else goNewer();
-    }, { passive: true });
-    $("entry-view").addEventListener("touchcancel", () => { start = null; }, { passive: true });
+    const onSwipe = (view, older, newer) => {
+      let start = null;
+      view.addEventListener("touchstart", (e) => {
+        const t = e.touches[0];
+        const busy = e.touches.length > 1 || !$("entry-editor").hidden || $("dialog").open || state.cal.open
+          || t.clientX < EDGE || t.clientX > innerWidth - EDGE;
+        start = busy ? null : { x: t.clientX, y: t.clientY, time: Date.now() };
+      }, { passive: true });
+      view.addEventListener("touchend", (e) => {
+        if (!start) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - start.x, dy = t.clientY - start.y, quick = Date.now() - start.time < MAX_MS;
+        start = null;
+        if (!quick || Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < 2 * Math.abs(dy)) return;
+        if (window.getSelection && String(window.getSelection())) return;   // they were selecting text
+        if (dx > 0) older(); else if (newer) newer();
+      }, { passive: true });
+      view.addEventListener("touchcancel", () => { start = null; }, { passive: true });
+    };
+    onSwipe($("entry-view"), goOlder, goNewer);
+    onSwipe($("write-view"), olderFromWritingPage, null);   // nothing is newer than a new entry
   }
   $("calendar-btn").addEventListener("click", () => toggleCalendar());
   $("cal-prev").addEventListener("click", () => shiftMonth(-1));
@@ -1727,9 +1809,10 @@
   });
   document.addEventListener("keydown", (e) => {
     // ← / → page through entries while reading (not while typing or in a dialog).
-    if ($("entry-view").hidden || !$("entry-editor").hidden || $("dialog").open) return;
-    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    if ($("dialog").open || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (!$("write-view").hidden && e.key === "ArrowLeft") { e.preventDefault(); olderFromWritingPage(); return; }
+    if ($("entry-view").hidden || !$("entry-editor").hidden) return;
     if (e.key === "ArrowLeft") { e.preventDefault(); goOlder(); }
     if (e.key === "ArrowRight") { e.preventDefault(); goNewer(); }
   });
@@ -1779,6 +1862,7 @@
     $("vault").classList.toggle("landing", welcome);
     if ($("landing")) $("landing").hidden = !welcome;
     $("vault-title").textContent = VAULT_TITLES[name] || CFG.appName;
+    $("vault-quote").hidden = name !== "unlock" && name !== "setup";   // on the Secret Passphrase screens
     for (const el of document.querySelectorAll(".vault-error")) el.hidden = true;
     const first = $(`vault-${name}`).querySelector("input");
     if (first) first.focus();

@@ -42,7 +42,7 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
 
 ## Browsing past entries
 
-- **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same, and on a phone or tablet you can **swipe**: right for Older, left for Newer.
+- **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same, and on a phone or tablet you can **swipe**: right for Older, left for Newer. Going Older from your first entry gives a little bump (there's nothing before it); going Newer from your latest entry turns to a fresh writing page. From an empty writing page, **‹ Older** (or swiping right) turns back to your latest entry; once you've started writing, it won't turn away from your draft.
 - Above the list of past entries are three filters: **All**, **★ Favourites** and **Calendar**.
   - **★ Favourites** shows only favourites (click it again to turn it off).
   - **Calendar** pops up a month view that shades the days you wrote. Use it to filter by date:
@@ -53,6 +53,7 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
   - Favourites and dates combine (e.g. favourites from September).
   - **All** clears every filter.
 - Older / Newer only steps through the entries the filters are showing.
+- The list shows your 10 newest entries (or newest matches for a filter); 20 more load as you scroll to its end, or with **Show more**. Older / Newer, swiping and the calendar still reach every entry.
 
 ## Entry count and streak
 

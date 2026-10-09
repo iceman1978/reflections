@@ -59,6 +59,12 @@
     </section>
     {% endif %}
 
+    <!-- Above the passphrase card -->
+    <figure id="vault-quote" class="vault-quote" hidden>
+      <blockquote>“Thought and speech are the same thing, except that what we call thought is a silent dialogue of the soul with itself, taking place without the voice.”</blockquote>
+      <figcaption>The Eleatic Visitor, in Plato’s <cite>Sophist</cite></figcaption>
+    </figure>
+
     <div class="vault-card page">
       <h1 id="vault-title" class="vault-title">{{ app_name }}</h1>
 
@@ -109,7 +115,7 @@
       </div>
 
       <form id="vault-unlock" hidden novalidate>
-        <label>Passphrase <input id="unlock-pw" type="password" autocomplete="current-password"></label>
+        <label><span class="sr-only">Passphrase</span><input id="unlock-pw" type="password" autocomplete="current-password"></label>
         <p id="unlock-error" class="vault-error" hidden></p>
         <div class="vault-buttons">
           <button type="button" id="show-recover" class="quiet">Forgot your passphrase?</button>
@@ -153,6 +159,9 @@
 
     <!-- Writing a new entry -->
     <section id="write-view" class="page">
+      <nav class="entry-nav write-nav" aria-label="Browse entries">
+        <button id="write-older-btn" type="button" class="nav-btn" title="Your latest entry (← key)">‹ Older</button>
+      </nav>
       <div class="entry-meta">
         <span id="today" class="entry-date"></span>
       </div>
