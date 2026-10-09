@@ -757,6 +757,9 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .vault-buttons button.quiet:hover { color: var(--accent); text-decoration: underline; }
 
 /* Passkeys: the quick way in on the passphrase screen, and the list in Settings. */
+.source-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.source-list li { padding: 7px 0; border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
+.source-list li .subtle { font-size: 0.92rem; }
 .passkey-unlock { display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
 .passkey-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; font-size: 1.05rem; }
 .passkey-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; flex: none; }

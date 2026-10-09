@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import webbrowser
 from datetime import datetime, timedelta
@@ -23,7 +24,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
 from journal import (activity, config, export, feedback, importer, invites, migrate, passkeys, reflection, stats, store, usage, users, vault,
-                     wipe, writing_prompts)
+                     sources, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
 
@@ -76,7 +77,7 @@ else:
 
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
-PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/healthz",
+PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/healthz",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/vault/passkey-options", "/api/vault/unlock-passkey",
@@ -238,6 +239,41 @@ def index():
 def privacy():
     return render_template("privacy.html", hosted=HOSTED,
                            reflections_per_day=config.REFLECTIONS_PER_DAY, prompts_per_day=config.PROMPTS_PER_DAY)
+
+
+SITE_NAMES = {"en.wikisource.org": "Wikisource", "ccel.org": "CCEL", "www.gutenberg.org": "Project Gutenberg",
+              "gutenberg.org": "Project Gutenberg", "biblehub.com": "Bible Hub"}
+
+
+def source_groups():
+    """This edition's quotable works, in the groups its edition.json gives
+    (any work not listed there goes under "Other works", so none is hidden)."""
+    works = sources.works()
+    groups, listed = [], set()
+    for group in config.EDITION.get("source_groups", []):
+        items = []
+        for work_id in group["works"]:
+            w = works.get(work_id)
+            if not w:
+                continue
+            listed.add(work_id)
+            url = sources.page_url(w["work_page"])
+            items.append({"author": w["author"], "title": w["title"],
+                          "translation": w["translation"], "url": url,
+                          "site": SITE_NAMES.get(urllib.parse.urlparse(url).hostname, "")})
+        groups.append({**group, "items": items})
+    rest = [w for w in works if w not in listed]
+    if rest:
+        groups.append({"name": "Other works", "about": "", "works": rest, "items": [
+            {"author": works[w]["author"], "title": works[w]["title"], "translation": works[w]["translation"],
+             "url": sources.page_url(works[w]["work_page"]), "site": ""} for w in rest]})
+    return groups
+
+
+@app.get("/sources")
+def sources_page():
+    return render_template("sources.html", groups=source_groups(), hosted=HOSTED,
+                           work_count=len(sources.works()))
 
 
 @app.get("/healthz")

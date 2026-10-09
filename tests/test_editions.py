@@ -31,6 +31,15 @@ class EditionFileTests(unittest.TestCase):
                 self.assertEqual(missing, [], "run tools/build_sources.py for this edition")
 
 
+    def test_sources_page_lists_every_work_once(self):
+        for folder in EDITIONS.iterdir():
+            with self.subTest(edition=folder.name):
+                ed = json.loads((folder / "edition.json").read_text(encoding="utf-8"))
+                works = json.loads((folder / "sources.json").read_text(encoding="utf-8"))["works"]
+                listed = [w for g in ed.get("source_groups", []) for w in g["works"]]
+                self.assertEqual(sorted(listed), sorted(works), "every work in exactly one group on the Sources page")
+
+
 class QuietHourLibraryTests(unittest.TestCase):
     """Uses In His Steps' library whichever edition is running."""
 

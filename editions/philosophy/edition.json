@@ -36,5 +36,72 @@
   "voices": ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",
              "Augustine", "Boethius", "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri",
              "René Descartes", "Blaise Pascal", "Baruch Spinoza", "John Locke", "David Hume", "Immanuel Kant",
-             "Søren Kierkegaard", "John Stuart Mill"]
+             "Søren Kierkegaard", "John Stuart Mill"],
+  "sources_intro": "Reflections quote only the works below, each in a public-domain translation (or original English edition) on Wikisource. Every quotation is checked word for word against that text before you see it, and links to the passage it came from.",
+  "source_groups": [
+    {
+      "name": "Classical Greece",
+      "about": "Athens, from the 5th to the 3rd century BC, where the examined life began. Socrates wrote nothing; his words come to us through Plato's dialogues.",
+      "works": [
+        "apology",
+        "crito",
+        "phaedo",
+        "symposium",
+        "republic",
+        "nicomachean_ethics",
+        "epicurus"
+      ]
+    },
+    {
+      "name": "Rome and the Stoics",
+      "about": "Cicero, and the Stoics Seneca, Epictetus and Marcus Aurelius: philosophy as a practice for living, in good fortune and bad.",
+      "works": [
+        "on_old_age",
+        "tusculan_disputations",
+        "letters",
+        "shortness_of_life",
+        "on_anger",
+        "enchiridion",
+        "discourses",
+        "meditations"
+      ]
+    },
+    {
+      "name": "Late antiquity and the Middle Ages",
+      "about": "Faith and reason together: from Augustine and Boethius to Anselm, Aquinas and Dante.",
+      "works": [
+        "confessions",
+        "consolation",
+        "proslogium",
+        "summa",
+        "inferno",
+        "purgatorio",
+        "paradiso"
+      ]
+    },
+    {
+      "name": "Early modern philosophy",
+      "about": "The 17th and 18th centuries: doubt, reason, the passions and the self.",
+      "works": [
+        "descartes_meditations",
+        "discourse_on_method",
+        "pensees",
+        "ethics_spinoza",
+        "locke_essay",
+        "hume_enquiry",
+        "hume_treatise"
+      ]
+    },
+    {
+      "name": "Modern philosophy",
+      "about": "Duty, freedom and the single individual: Kant, Kierkegaard and Mill.",
+      "works": [
+        "kant_groundwork",
+        "kant_practical_reason",
+        "kierkegaard_selections",
+        "utilitarianism",
+        "on_liberty"
+      ]
+    }
+  ]
 }

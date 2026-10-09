@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources · {{ app_name }}</title>
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy sources">
+    <section class="page">
+      <p class="privacy-brand">{{ app_name }}</p>
+      <h1 class="prompt-heading">Where the wisdom comes from</h1>
+
+      {% if edition.sources_intro %}<p>{{ edition.sources_intro }}</p>{% endif %}
+      <p>Here are all {{ work_count }} of them, with links to the full texts.</p>
+
+      {% for group in groups %}
+      <h2>{{ group.name }}</h2>
+      {% if group.about %}<p class="subtle">{{ group.about }}</p>{% endif %}
+      <ul class="source-list">
+        {% for item in group["items"] %}
+        <li>
+          <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{% if item.author %}{{ item.author }}, {% endif %}<cite>{{ item.title }}</cite></a>
+          <span class="subtle">{{ item.translation }}{% if item.site %} · {{ item.site }}{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endfor %}
+
+      {% if edition.paraphrase_only %}
+      <h2>Drawn on, never quoted</h2>
+      <p class="subtle">{{ edition.paraphrase_only.about }}</p>
+      <ul class="source-list">
+        {% for w in edition.paraphrase_only.writers %}
+        <li><strong>{{ w.author }}</strong> <span class="subtle">{{ w.works }}</span></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <h2>How quotes are checked</h2>
+      <p>Claude may only quote the works on this page. Before a reflection is shown, the app looks for every quotation
+        in its own copy of that exact edition. If the words are there, you see the source's exact wording and a link
+        to the passage. If they aren't, the reflection puts the idea in its own words and names where it came from,
+        rather than risk a misquotation. Claude never writes the links: they always come from this list.</p>
+
+      <h2>Tell us what you think</h2>
+      <p>Is there a writer or book you'd like to see here, a translation you'd prefer, or a quote that didn't seem
+        right? We'd love to hear it.{% if hosted %} <a href="/?feedback=sources">Send feedback about the sources</a>
+        (you'll be asked to unlock your journal first).{% else %} Use the feedback button at the top of the journal.{% endif %}</p>
+
+      {% if edition.welcome_quote and edition.welcome_quote.credit %}<p class="subtle">{{ edition.welcome_quote.credit }}</p>{% endif %}
+
+      <p><a href="/">← Back to {{ app_name }}</a> · <a href="/privacy">Privacy</a></p>
+      <p class="subtle copyright">{{ copyright }}</p>
+    </section>
+  </main>
+</body>
+</html>

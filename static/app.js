@@ -2277,6 +2277,16 @@
 
   // ---- Starting up --------------------------------------------------------
 
+  // "Send feedback about the sources" on the Sources page links to /?feedback=sources.
+  // Remembered for this tab, so it survives signing in with Google first.
+  const FEEDBACK_ON_START = (() => {
+    const asked = new URLSearchParams(location.search).get("feedback");
+    try {
+      if (asked) sessionStorage.setItem("journal.feedbackOnStart", asked);
+      return asked || sessionStorage.getItem("journal.feedbackOnStart");
+    } catch (_) { return asked; }
+  })();
+
   let started = false;
   function startJournal() {
     state.unlocked = true;
@@ -2286,6 +2296,12 @@
     started = true;
     restartAutosave();
     setInterval(pollStatus, 10000);
+    if (FEEDBACK_ON_START === "sources") {
+      try { sessionStorage.removeItem("journal.feedbackOnStart"); } catch (_) {}
+      history.replaceState(null, "", "/");
+      $("feedback-text").value = $("feedback-text").value || "About the sources: ";
+      setTimeout(openFeedback, 400);
+    }
     // Keep the date and streak right if the page stays open past midnight.
     setInterval(() => {
       $("today").textContent = longDate(new Date().toISOString());

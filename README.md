@@ -119,6 +119,8 @@ uv run python tools/recheck_quotes.py --apply
 
 ### The quotable works
 
+The **Sources** page (footer, between the version number and *Privacy*; also at `/sources`) lists every quotable work of the edition, grouped by tradition, with its translation and a link to the full text. Its groups, introduction and (for In His Steps) the writers who are only ever paraphrased live in `editions/<edition>/edition.json` (`sources_intro`, `source_groups`, `paraphrase_only`). A test checks that every work in `sources.json` appears in exactly one group. Its *Send feedback about the sources* link opens the feedback form once the journal is unlocked.
+
 All texts are public domain and come from [Wikisource](https://en.wikisource.org).
 
 | Thinker | Works (translation) |

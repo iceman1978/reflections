@@ -19,14 +19,15 @@
      "text": "A few minutes of honest writing each day. Your streak keeps count, and a prompt is there when the page feels blank."},
     {"icon": "book", "title": "Rooted in Scripture and the great devotional writers",
      "text": "Reflections draw from the Gospels, Paul’s letters, and the Psalms, alongside classic voices like Augustine, Luther, Calvin, Bunyan, Edwards, and Spurgeon, with links to the original texts."},
-    {"icon": "question", "title": "Grow in His Steps",
+    {"icon": "sandal", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favourites close."},
     {"icon": "lock", "title": "A fully private, encrypted journal",
      "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
   ],
   "welcome_quote": {
-    "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
-    "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"
+    "text": "“Search me, God, and know my heart; test me and know my anxious thoughts.”",
+    "cite_html": "Psalm 139:23 <cite>(NIV)</cite>",
+    "credit": "The verse on the welcome page is from the Holy Bible, New International Version® (NIV®), copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide."
   },
   "passphrase_quote": {
     "text": "“But when you pray, go into your inner room, shut your door, and pray to your Father, who is unseen. And your Father, who sees what is done in secret, will reward you.”",
@@ -43,5 +44,124 @@
   "voices": ["Augustine", "Thomas Aquinas", "Thomas à Kempis", "Martin Luther", "John Calvin",
              "Richard Baxter", "John Owen", "John Bunyan", "Brother Lawrence", "Jonathan Edwards",
              "Charles Spurgeon", "J. C. Ryle", "Andrew Murray", "Oswald Chambers", "A. W. Tozer",
-             "C. S. Lewis", "Dietrich Bonhoeffer", "Dallas Willard", "Tim Keller"]
+             "C. S. Lewis", "Dietrich Bonhoeffer", "Dallas Willard", "Tim Keller"],
+  "sources_intro": "Reflections quote only the works below. Every quotation is checked word for word against the text before you see it, and links to the passage it came from; if it can't be confirmed, the reflection puts the idea in its own words instead. Scripture is from the Berean Standard Bible (BSB), a modern translation from the Hebrew and Greek, dedicated to the public domain in 2023. The other writers are in public-domain editions from the Christian Classics Ethereal Library (CCEL), Project Gutenberg and Wikisource.",
+  "source_groups": [
+    {
+      "name": "Old Testament",
+      "about": "The Psalms for prayer in every mood, the wisdom of Proverbs and Ecclesiastes, and Isaiah's comfort.",
+      "works": [
+        "psalms",
+        "proverbs",
+        "ecclesiastes",
+        "isaiah"
+      ]
+    },
+    {
+      "name": "The Gospels",
+      "about": "The life and teaching of Jesus, including the Sermon on the Mount and the parables.",
+      "works": [
+        "matthew",
+        "mark",
+        "luke",
+        "john"
+      ]
+    },
+    {
+      "name": "Paul's letters",
+      "about": "Grace, freedom and the new life in Christ, above all in Romans, Galatians, Ephesians and Philippians.",
+      "works": [
+        "romans",
+        "1_corinthians",
+        "2_corinthians",
+        "galatians",
+        "ephesians",
+        "philippians",
+        "colossians",
+        "1_thessalonians",
+        "2_timothy"
+      ]
+    },
+    {
+      "name": "Hebrews and the general letters",
+      "about": "Faith that endures and faith that works: Hebrews, James, Peter and John.",
+      "works": [
+        "hebrews",
+        "james",
+        "1_peter",
+        "1_john"
+      ]
+    },
+    {
+      "name": "The early and medieval church",
+      "about": "Augustine's restless heart and Aquinas on grace and the virtues.",
+      "works": [
+        "confessions",
+        "summa"
+      ]
+    },
+    {
+      "name": "Devotional classics",
+      "about": "Two Catholic classics long treasured by Protestants: following Christ in humility, and practising God's presence in ordinary work.",
+      "works": [
+        "kempis_imitation",
+        "lawrence_practice"
+      ]
+    },
+    {
+      "name": "The Reformation",
+      "about": "Freedom by faith alone, and the shape of the Christian life.",
+      "works": [
+        "luther_liberty",
+        "calvin_christian_life"
+      ]
+    },
+    {
+      "name": "The Puritans",
+      "about": "Searching the heart, fighting sin by the Spirit, and the pilgrim road.",
+      "works": [
+        "owen_mortification",
+        "baxter_rest",
+        "bunyan_pilgrim",
+        "bunyan_grace"
+      ]
+    },
+    {
+      "name": "Revival and the evangelical tradition",
+      "about": "From the Great Awakening to the 20th century: true religion, daily devotion, holiness, humility and hunger for God.",
+      "works": [
+        "edwards_affections",
+        "spurgeon_morning_evening",
+        "ryle_holiness",
+        "murray_prayer",
+        "murray_humility",
+        "tozer_pursuit"
+      ]
+    }
+  ],
+  "paraphrase_only": {
+    "about": "These writers are still in copyright, so reflections may draw on their ideas in their own words, naming the writer and book, but never quote them, and there are no links.",
+    "writers": [
+      {
+        "author": "C. S. Lewis",
+        "works": "Mere Christianity, The Screwtape Letters, The Weight of Glory"
+      },
+      {
+        "author": "Dietrich Bonhoeffer",
+        "works": "The Cost of Discipleship, Life Together"
+      },
+      {
+        "author": "Oswald Chambers",
+        "works": "My Utmost for His Highest"
+      },
+      {
+        "author": "Dallas Willard",
+        "works": "The Spirit of the Disciplines, Renovation of the Heart"
+      },
+      {
+        "author": "Tim Keller",
+        "works": "The Reason for God, Counterfeit Gods, The Prodigal God"
+      }
+    ]
+  }
 }
