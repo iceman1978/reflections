@@ -26,6 +26,10 @@ if TEST_DIR:
 
 APP_NAME = os.environ.get("APP_NAME", "Reflections")   # shown in the browser tab and on the welcome page
 COPYRIGHT = "Copyright © 2026, Aaron de Vries"           # shown at the foot of every page
+# The version shown in the footer, e.g. "Beta v0.1". It lives in the VERSION
+# file at the top of the project, so releasing means editing one line there.
+_version_file = ROOT / "VERSION"
+APP_VERSION = _version_file.read_text(encoding="utf-8").strip() if _version_file.exists() else ""
 HOSTED = bool(os.environ.get("GOOGLE_CLIENT_ID"))
 ALLOWED_EMAILS = {e.strip().lower() for e in os.environ.get("ALLOWED_EMAILS", "").split(",") if e.strip()}
 PUBLIC_HOST = os.environ.get("PUBLIC_HOST", "").strip().lower()   # e.g. reflections.onrender.com

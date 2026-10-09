@@ -28,7 +28,8 @@
     return new Date(iso).toLocaleString(undefined, { timeZone: CFG.timezone, ...opts });
   }
   const longDate = (iso) => fmtDate(iso, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-  const timeOf = (iso) => fmtDate(iso, { hour: "numeric", minute: "2-digit" });
+  // "9:30 am" rather than "9:30 AM": capitals look odd in the handwriting and text.
+  const timeOf = (iso) => fmtDate(iso, { hour: "numeric", minute: "2-digit" }).replace(/\b(AM|PM)\b/, (m) => m.toLowerCase());
 
   // passive: timer-driven requests that shouldn't count as activity (so the
   // journal can still lock itself when you've walked away).
@@ -238,12 +239,48 @@
     }
   }
 
+  // ---- Page turns (Older / Newer) ----------------------------------------
+  // Like a book: the spine is on the left. Older: the previous page swings
+  // down from the left onto the page you were reading. Newer: the page you
+  // were reading lifts from its right edge and turns over to the left,
+  // uncovering the next one. A copy of the old page plays its part.
+  const reducedMotion = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function oldPageCopy(el) {
+    if (el.hidden || reducedMotion()) return null;
+    const copy = el.cloneNode(true);
+    copy.removeAttribute("id");
+    copy.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+    copy.classList.remove("view-in", "turn-older", "turn-newer");
+    copy.classList.add("page-ghost");
+    copy.setAttribute("aria-hidden", "true");
+    copy.inert = true;
+    Object.assign(copy.style, {
+      left: `${el.offsetLeft}px`, top: `${el.offsetTop}px`,
+      width: `${el.offsetWidth}px`, height: `${el.offsetHeight}px`,
+    });
+    return copy;
+  }
+
+  function turnPage(el, direction, ghost) {
+    document.querySelectorAll(".page-ghost").forEach((g) => g.remove());   // a quick second turn
+    if (!ghost) { animatePage(el, "view-in"); return; }
+    ghost.classList.add(direction < 0 ? "ghost-under" : "ghost-turning");
+    el.after(ghost);
+    el.classList.remove("view-in", "turn-older", "turn-newer");
+    if (direction < 0) animatePage(el, "turn-older");          // the new page comes down over it
+    const done = () => ghost.remove();
+    (direction < 0 ? el : ghost).addEventListener("animationend", done, { once: true });
+    setTimeout(done, 1200);                                     // in case no animation runs
+  }
+
   function showEntry(entry) {
     const switching = !state.current || state.current.id !== entry.id;
+    const ghost = state.turn ? oldPageCopy($("entry-view")) : null;   // the page as it was, before it changes
     state.current = entry;
     showView("entry");
     if (state.turn) {
-      animatePage($("entry-view"), state.turn < 0 ? "turn-older" : "turn-newer");
+      turnPage($("entry-view"), state.turn, ghost);
       state.turn = null;
     } else if (switching) {
       animatePage($("entry-view"), "view-in");
@@ -502,7 +539,9 @@
       rec.textContent = `✦ Your longest entry yet · ${plural(r.words, "word")}`;
       box.append(document.createTextNode(" "), rec);
     }
-    if (s.longest_streak > n && s.longest_streak > 1) box.append(document.createTextNode(` · best ${s.longest_streak}`));
+    if (s.longest_streak > n && s.longest_streak > 1) {
+      box.append(document.createTextNode(` · best streak ${plural(s.longest_streak, "day")}`));
+    }
     if (n > 0 && !s.wrote_today) {
       const nudge = document.createElement("span");
       nudge.className = "nudge";
@@ -607,7 +646,7 @@
         }
         if (typeof q.url === "string" && q.url.startsWith("https://")) {
           const a = document.createElement("a");
-          a.href = q.url;
+          a.href = q.kind === "quote" ? passageUrl(q.url, q.quote) : q.url;
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = q.kind === "quote" ? "Read the passage ↗" : "Read the source ↗";
@@ -621,6 +660,21 @@
       if (entry.support_note) note.innerHTML = renderSimpleMarkdown(entry.support_note);
     }
     if (entry.reflecting) pollWhileReflecting(entry.id);
+  }
+
+  // A link that opens the source page scrolled to the quote, with it
+  // highlighted: a "text fragment" (#:~:text=first words,last words), which
+  // Chrome, Edge, Safari and Firefox understand. Quotes are stored in the
+  // source's exact wording, so the words match the page. If a browser can't
+  // find them, it simply opens the page at the top.
+  function passageUrl(url, quote) {
+    const words = String(quote || "").trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return url;
+    words[0] = words[0].replace(/^[^\p{L}\p{N}]+/u, "");                      // no leading … or “
+    words[words.length - 1] = words[words.length - 1].replace(/[^\p{L}\p{N}]+$/u, "");
+    const part = (w) => encodeURIComponent(w.filter(Boolean).join(" ")).replace(/-/g, "%2D");
+    const fragment = words.length <= 8 ? part(words) : `${part(words.slice(0, 4))},${part(words.slice(-4))}`;
+    return `${url}${url.includes("#") ? ":~:text=" : "#:~:text="}${fragment}`;
   }
 
   // Only **bold** is supported; everything else is escaped.
@@ -1628,6 +1682,31 @@
   applyFilters();
   $("prev-btn").addEventListener("click", goOlder);
   $("next-btn").addEventListener("click", goNewer);
+
+  // Swipe on a past entry (phones and tablets): right = Older, like turning
+  // back a page; left = Newer. Only clear, quick, sideways swipes count, so
+  // scrolling never turns the page. Swipes from the screen's edge are left to
+  // the phone (that's its own "go back" gesture).
+  {
+    const SWIPE_MIN = 60, EDGE = 24, MAX_MS = 800;
+    let start = null;
+    $("entry-view").addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      const busy = e.touches.length > 1 || !$("entry-editor").hidden || $("dialog").open || state.cal.open
+        || t.clientX < EDGE || t.clientX > innerWidth - EDGE;
+      start = busy ? null : { x: t.clientX, y: t.clientY, time: Date.now() };
+    }, { passive: true });
+    $("entry-view").addEventListener("touchend", (e) => {
+      if (!start) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x, dy = t.clientY - start.y, quick = Date.now() - start.time < MAX_MS;
+      start = null;
+      if (!quick || Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < 2 * Math.abs(dy)) return;
+      if (window.getSelection && String(window.getSelection())) return;   // they were selecting text
+      if (dx > 0) goOlder(); else goNewer();
+    }, { passive: true });
+    $("entry-view").addEventListener("touchcancel", () => { start = null; }, { passive: true });
+  }
   $("calendar-btn").addEventListener("click", () => toggleCalendar());
   $("cal-prev").addEventListener("click", () => shiftMonth(-1));
   $("cal-next").addEventListener("click", () => shiftMonth(1));

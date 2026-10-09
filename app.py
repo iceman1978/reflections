@@ -151,7 +151,7 @@ def _static_versions():
         path = ROOT / "static" / filename
         version = int(path.stat().st_mtime) if path.exists() else 0
         return f"/static/{filename}?v={version}"
-    return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "test_login": bool(HOSTED and TEST_LOGIN),
+    return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "app_version": config.APP_VERSION, "test_login": bool(HOSTED and TEST_LOGIN),
             "test_emails": sorted(config.ALLOWED_EMAILS),
             "logo_url": _brand_file("logo"), "hero_url": _brand_file("hero"),
             "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR}

@@ -448,6 +448,7 @@
 
     <footer class="book-footer">
       <span class="footer-name">{{ app_name }}</span>
+      {% if app_version %}· <span class="app-version" title="Version">{{ app_version }}</span>{% endif %}
       · <a href="/privacy" target="_blank" rel="noopener">Privacy</a>
       {% if hosted %}· <a href="/logout">Sign out</a>{% endif %}
       <br><span class="copyright">{{ copyright }}</span>

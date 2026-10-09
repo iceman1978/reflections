@@ -42,7 +42,7 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
 
 ## Browsing past entries
 
-- **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same.
+- **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same, and on a phone or tablet you can **swipe**: right for Older, left for Newer.
 - Above the list of past entries are three filters: **All**, **★ Favourites** and **Calendar**.
   - **★ Favourites** shows only favourites (click it again to turn it off).
   - **Calendar** pops up a month view that shades the days you wrote. Use it to filter by date:
@@ -330,6 +330,10 @@ Double-click **`test-web.bat`** to run a test copy of the *web* version on your 
 - The sign-in box only exists in this test copy; on Render it's switched off.
 
 `start.bat` (your own journal, port 5050) and `test-web.bat` (port 5061) can run at the same time.
+
+### Version number
+
+The footer shows the version, e.g. **Beta v0.1**. It's the one line in the **`VERSION`** file at the top of the project: change it (say to `Beta v0.2` for a minor improvement, `v1.0` for a major one), then push. It's read when the app starts, so on your own computer restart `start.bat` to see it.
 
 ### Updating the web version
 

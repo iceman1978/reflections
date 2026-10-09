@@ -205,6 +205,7 @@ a { color: var(--accent); }
 .backdrop::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
 
 .book {
+  position: relative;   /* the reference for the old page's copy during a page turn */
   max-width: 800px;
   margin: 28px auto 48px;
   padding: 0 16px;
@@ -1070,17 +1071,33 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 @keyframes pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 @keyframes view-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 /* A page turn: the new page swings in from the side you're heading to. */
-@keyframes turn-to-older {
-  from { opacity: 0; transform: perspective(1800px) rotateY(9deg) translateX(-18px); }
-  to { opacity: 1; transform: none; }
+/* Page turns, hinged on the spine (left edge). */
+@keyframes turn-to-older {           /* the previous page swings down from the left */
+  0% { transform: perspective(2200px) rotateY(-100deg); filter: brightness(0.82); }
+  70% { filter: brightness(0.97); }
+  100% { transform: perspective(2200px) rotateY(0deg); filter: none; }
 }
-@keyframes turn-to-newer {
-  from { opacity: 0; transform: perspective(1800px) rotateY(-9deg) translateX(18px); }
-  to { opacity: 1; transform: none; }
+@keyframes turn-away {               /* the page you were reading lifts from the right and turns over */
+  0% { transform: perspective(2200px) rotateY(0deg); filter: none; }
+  100% { transform: perspective(2200px) rotateY(-100deg); filter: brightness(0.8); }
 }
 .page.view-in { animation: view-in 0.3s ease-out; }
-.page.turn-older { animation: turn-to-older 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); transform-origin: left center; }
-.page.turn-newer { animation: turn-to-newer 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); transform-origin: right center; }
+.page.turn-older {
+  animation: turn-to-older 0.6s cubic-bezier(0.3, 0.6, 0.3, 1);
+  transform-origin: left center;
+  backface-visibility: hidden;
+  position: relative;
+  z-index: 2;                         /* above the old page it lands on */
+}
+/* The old page during a turn (a copy, removed when the turn ends). */
+.page-ghost { position: absolute; margin: 0 !important; pointer-events: none; overflow: hidden; }
+.page-ghost.ghost-under { z-index: 1; }
+.page-ghost.ghost-turning {
+  z-index: 3;
+  transform-origin: left center;
+  backface-visibility: hidden;
+  animation: turn-away 0.6s cubic-bezier(0.5, 0.1, 0.7, 0.6) forwards;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
