@@ -232,13 +232,12 @@ a { color: var(--accent); }
   padding-top: 3px;
   color: var(--accent);
   -webkit-text-stroke: 0.035em currentColor;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Never clipped: the handwriting's loops and swashes reach outside the
+     letters' box. A long name wraps onto a second line instead. */
+  overflow: visible;
   min-width: 0;
-  /* room for the capital's swash, which reaches left of the letter */
-  padding-left: 0.3em;
-  margin-left: -0.3em;
+  overflow-wrap: anywhere;
+  padding-left: 0.15em;    /* a little space for the capital's opening stroke */
   margin-right: auto;      /* keeps the buttons together on the right */
 }
 .stats { font-size: 0.85rem; color: var(--muted); text-align: right; flex: 1; font-style: italic; }
