@@ -289,7 +289,7 @@ If the name `reflections` is taken on Render, it will give the service a slightl
 Signed-out visitors see a welcome page: what Reflections is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
 
 - **Logo and app icons:** the master is `brand-source/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon and the "Install app" icons in `static/brand/`.
-- **Installing:** because of those icons and a small web app manifest, Chrome and Edge (computer or Android) offer **Install app** in the address bar or menu, and on iPhone *Share → Add to Home Screen* adds Reflections with its icon. It then opens in its own window, like an app.
+- **Installing:** Reflections offers to install itself where it can. **Settings → Basic → Install as an app** always has it; and from the 3rd entry on, a small invitation appears below the header (**Not now** hides it for a month; it never shows once installed). On Chrome or Edge (Windows, Mac, Android) the **Install** button opens the browser's install dialog; on iPhone/iPad, where websites can't install themselves, it shows the two steps (*Share → Add to Home Screen*). Nothing is offered in browsers that can't install (e.g. Firefox on a computer). A tiny service worker (`static/sw.js`) makes the site installable; it stores nothing on the device.
 - **Picture behind the left side (optional):** `static/brand/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
 - **Name:** *Reflections* by default (browser tab, welcome page, privacy page). To change it, set `APP_NAME` in `render.yaml` (or in `.env` on your own computer).
 
@@ -304,6 +304,18 @@ Add (or remove) their address in **both** places: Google's *Test users*, and `AL
 The **speech bubble** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.
 
 You read it in **Settings → Feedback received**: newest first, with a **Done** tick-box to clear things you've handled, and **Download (CSV)** for a spreadsheet. Only addresses in `ADMIN_EMAILS` on Render see that section (on your own computer, you always do). Each person can send up to 20 a day.
+
+### Suggestion cards
+
+As someone's entries add up, a small card under the header suggests one thing at a time (never more than one per visit):
+
+| Entry | Card | Until |
+|---|---|---|
+| 3rd | Install as an app | installed, or *Not now* (back in a month) |
+| 5th | Send feedback (web version) | they've sent feedback, or answered the card once |
+| 10th, 20th, 40th | Invite someone (web version) | they've sent an invitation; *Not now* (or opening the form without sending) waits for the next of these, and it stops after the 40th |
+
+Whether someone has sent feedback or an invitation comes from the server; dismissals are remembered in that browser.
 
 ### Invitations
 

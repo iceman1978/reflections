@@ -262,7 +262,10 @@
     return copy;
   }
 
+  let turnCount = 0;   // so a finished turn's clean-up never touches a newer turn
+
   function turnPage(el, direction, ghost) {
+    const thisTurn = ++turnCount;
     document.querySelectorAll(".page-ghost").forEach((g) => g.remove());   // a quick second turn
     if (!ghost) { animatePage(el, "view-in"); return; }
     ghost.classList.add(direction < 0 ? "ghost-under" : "ghost-turning");
@@ -270,8 +273,16 @@
     el.after(ghost);
     el.classList.remove("view-in", "turn-older", "turn-newer");
     if (direction < 0) animatePage(el, "turn-older");          // the new page comes down over it
-    const done = () => ghost.remove();
-    (direction < 0 ? el : ghost).addEventListener("animationend", done, { once: true });
+    // When the turn ends: drop the old page's copy, and give the new page back
+    // its stack of pages and cover (hidden only while it was turning).
+    const turning = direction < 0 ? el : ghost;
+    const done = () => {
+      ghost.remove();
+      if (thisTurn === turnCount) el.classList.remove("turn-older");
+      turning.removeEventListener("animationend", onEnd);
+    };
+    const onEnd = (e) => { if (e.target === turning) done(); };   // not the page's inner animations
+    turning.addEventListener("animationend", onEnd);
     setTimeout(done, 1200);                                     // in case no animation runs
   }
 
@@ -527,6 +538,7 @@
     try { s = await api("GET", "/api/stats", null, { passive }); } catch (_) { return null; }
     state.lastStats = s;
     renderStats(s);
+    maybeInviteInstall(s);
     return s;
   }
 
@@ -779,6 +791,9 @@
     const h = $("entry-title");
     h.textContent = entry.title || "No Title";
     h.classList.toggle("untitled", !entry.title);
+    // The handwriting's capitals are ornate, so all-capital words (AI, CEO, NYC)
+    // are hard to read in it: such titles use the book font instead.
+    h.classList.toggle("plain-title", /(^|[^\p{L}])\p{Lu}{2,}(?![\p{L}])/u.test(entry.title || ""));
     renderStar(!!entry.favourite);
   }
 
@@ -1549,6 +1564,135 @@
     }
   }
   if ($("feedback-show-done")) $("feedback-show-done").addEventListener("change", refreshFeedbackList);
+
+  // ---- Install as an app ----------------------------------------------------
+  // Chrome and Edge (computers, Android) let the page offer their install
+  // dialog; on iPhone/iPad the only way is Share → Add to Home Screen, so we
+  // show those two steps. Nothing is offered where neither works, or once the
+  // app is installed.
+
+  const INSTALL_INVITE_AFTER = 3;                       // entries written
+  const INSTALL_SNOOZE_MS = 30 * 24 * 3600 * 1000;      // "Not now" = a month
+  const INSTALL_SNOOZE_KEY = "journal.installInviteSnoozed";
+  let installPrompt = null;                              // the browser's install dialog, when offered
+
+  const isInstalled = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);   // iPadOS presents as a Mac
+  function installMode() {
+    if (isInstalled()) return "installed";
+    if (installPrompt) return "prompt";
+    if (isIOS()) return "ios";
+    return "none";
+  }
+
+  function renderInstall() {
+    const mode = installMode();
+    $("install-section").hidden = mode === "installed" || mode === "none";
+    $("install-btn").hidden = mode !== "prompt";
+    $("install-ios").hidden = mode !== "ios";
+    if ((mode === "installed" || mode === "none") && activeNudge && activeNudge.nudge.id === "install") {
+      $("install-invite").hidden = true;
+    }
+  }
+
+  async function installApp() {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    installPrompt = null;   // the browser offers it only once per page
+    if (outcome === "accepted") $("install-invite").hidden = true;
+    renderInstall();
+  }
+
+  // ---- Suggestion cards ----------------------------------------------------
+  // As entries add up, one gentle card at a time (and at most one per visit):
+  //   3rd entry      install as an app ("Not now": a month)
+  //   5th entry      send feedback, if they never have (once)
+  //   10th/20th/40th invite someone, if they never have (each "Not now" waits
+  //                  for the next of these, then it stops)
+  const INVITE_AT = [10, 20, 40];
+  const esc = (text) => String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const remember = (key, value) => { try { localStorage.setItem(key, String(value)); } catch (_) {} };
+  const recall = (key) => { try { return localStorage.getItem(key); } catch (_) { return null; } };
+  let nudgeShownThisVisit = false;
+
+  const NUDGES = [
+    {
+      id: "install",
+      ready: (s) => {
+        const mode = installMode();
+        return s.total_entries >= INSTALL_INVITE_AFTER && mode !== "installed" && mode !== "none"
+          && Date.now() - (Number(recall(INSTALL_SNOOZE_KEY)) || 0) >= INSTALL_SNOOZE_MS;
+      },
+      text: () => `<strong>Writing here most days?</strong> Install ${esc(CFG.appName)} as an app, and open it straight from your home screen or desktop.`,
+      go: () => (installMode() === "ios" ? "Show me how" : "Install"),
+      onGo: () => {
+        if (installMode() === "ios") { $("invite-ios").hidden = false; $("invite-install-btn").hidden = true; return false; }
+        installApp();
+        return true;
+      },
+      later: () => remember(INSTALL_SNOOZE_KEY, Date.now()),
+    },
+    {
+      id: "feedback",
+      ready: (s) => CFG.hosted && s.total_entries >= 5 && !s.feedback_sent && !recall("journal.nudge.feedback"),
+      text: () => `<strong>How's ${esc(CFG.appName)} working for you?</strong> It's still in beta, and your ideas shape it. `
+        + "Tell us what to fix, improve or add, any time, with the speech bubble at the top.",
+      go: () => "Send feedback",
+      onGo: () => { remember("journal.nudge.feedback", 1); openFeedback(); return true; },
+      later: () => remember("journal.nudge.feedback", 1),
+    },
+    {
+      id: "invite",
+      ready: (s) => CFG.hosted && !s.invites_sent && INVITE_AT.some((n) => s.total_entries >= n && n > (Number(recall("journal.nudge.invite")) || 0)),
+      text: () => `<strong>Know someone who'd enjoy this?</strong> ${esc(CFG.appName)} is invitation-only while it's in beta, `
+        + "and grows through people like you. Invite a fellow thinker, any time, with the gift at the top.",
+      go: () => "Invite someone",
+      // Opening the form answers this milestone; if no invitation is actually sent,
+      // the card comes back at the next one (sent invitations come from the server).
+      onGo: (s) => { remember("journal.nudge.invite", Math.max(...INVITE_AT.filter((n) => s.total_entries >= n))); openInvite(); return true; },
+      later: (s) => remember("journal.nudge.invite", Math.max(...INVITE_AT.filter((n) => s.total_entries >= n))),
+    },
+  ];
+  let activeNudge = null;
+
+  function maybeInviteInstall(stats) {   // (name kept: called wherever the entry count updates)
+    if (!stats || nudgeShownThisVisit || !$("install-invite").hidden) return;
+    const nudge = NUDGES.find((n) => n.ready(stats));
+    if (!nudge) return;
+    activeNudge = { nudge, stats };
+    nudgeShownThisVisit = true;
+    $("nudge-text").innerHTML = nudge.text();
+    $("invite-ios").hidden = true;
+    $("invite-install-btn").hidden = false;
+    $("invite-install-btn").textContent = nudge.go();
+    $("install-invite").hidden = false;
+  }
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();          // we show our own button instead of the browser's mini bar
+    installPrompt = e;
+    renderInstall();
+    if (state.lastStats) maybeInviteInstall(state.lastStats);
+  });
+  window.addEventListener("appinstalled", () => {
+    installPrompt = null;
+    $("install-invite").hidden = true;
+    renderInstall();
+    showNotice("Installed. You'll find Reflections with your other apps.", 5000);
+  });
+  $("install-btn").addEventListener("click", installApp);
+  $("invite-install-btn").addEventListener("click", () => {
+    if (!activeNudge) return;
+    if (activeNudge.nudge.onGo(activeNudge.stats) !== false) $("install-invite").hidden = true;
+  });
+  $("invite-later-btn").addEventListener("click", () => {
+    if (activeNudge) activeNudge.nudge.later(activeNudge.stats);
+    $("install-invite").hidden = true;
+  });
+  renderInstall();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
 
   // ---- Invitations (web version) ------------------------------------------
 

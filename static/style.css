@@ -468,8 +468,10 @@ button.prompt-btn.nudge-glow {
 .entry-meta { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); margin-bottom: 4px; }
 #entry-date, .entry-date { font-family: var(--hand); font-size: 1.3rem; color: var(--muted); }  /* past entries and today's page alike */
 .title-row { display: flex; align-items: flex-start; gap: 12px; }
-.entry-title { flex: 1; font-weight: 500; font-size: 1.8rem; margin: 0 0 10px; line-height: 1.25; }
-.entry-title.untitled { color: var(--muted); font-style: italic; font-weight: 400; }
+/* An entry's title is handwritten, like the "what's on your mind?" greeting. */
+.entry-title { flex: 1; font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--ink); margin: 0 0 10px; line-height: 1.3; }
+.entry-title.untitled { color: var(--muted); font-weight: 400; }
+.entry-title.plain-title { font-family: var(--serif); font-size: 1.8rem; line-height: 1.25; }   /* titles with all-capital words */
 .star-btn {
   border: none;
   background: transparent;
@@ -804,6 +806,23 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 /* The end of a long Past entries list: more load as you scroll, or with the button. */
 #entry-list li.list-more { display: flex; align-items: center; justify-content: center; gap: 12px; cursor: default; border-bottom: none; padding: 14px 0 6px; }
 #entry-list li.list-more:hover { background: none; }
+
+/* ---- Install as an app ---- */
+.install-invite {
+  margin: 0 var(--book-edge, 15px) 14px 0;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--panel);
+  backdrop-filter: blur(6px);
+  border-left: 3px solid var(--accent);
+  animation: fade-in 0.4s ease-out;
+}
+.install-invite p { margin: 0 0 8px; }
+.install-invite-buttons { display: flex; justify-content: flex-end; gap: 10px; }
+.install-steps { margin: 6px 0 8px; padding-left: 22px; line-height: 1.6; }
+.install-steps li { margin-bottom: 4px; }
+.share-icon { vertical-align: -3px; color: var(--accent); }
+.install-section .install-btn { margin-bottom: 8px; }
 
 /* ---- Usage stats (Settings, admins) ---- */
 .usage-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 10px 0 16px; }

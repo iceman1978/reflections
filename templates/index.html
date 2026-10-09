@@ -157,6 +157,23 @@
       <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings">&#9881;</button>
     </header>
 
+    <!-- Suggestions as entries add up (one at a time): install the app (3rd entry),
+         send feedback (5th), invite someone (10th, 20th, 40th). -->
+    <aside id="install-invite" class="install-invite" hidden>
+      <p id="nudge-text"></p>
+      <div id="invite-ios" hidden>
+          <ol class="install-steps">
+            <li>Tap <strong>Share</strong> <svg class="share-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg> (at the bottom in Safari; at the top right in Chrome).</li>
+            <li>Scroll down, tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+          </ol>
+          <p class="hint">The app keeps its own sign-in, so the first time you open it, sign in with Google and enter your passphrase once more.</p>
+      </div>
+      <div class="install-invite-buttons">
+        <button type="button" id="invite-later-btn" class="quiet">Not now</button>
+        <button type="button" id="invite-install-btn" class="primary">Install</button>
+      </div>
+    </aside>
+
     <!-- Writing a new entry -->
     <section id="write-view" class="page">
       <nav class="entry-nav write-nav" aria-label="Browse entries">
@@ -280,6 +297,18 @@
               {% endfor %}
             </select>
           </label>
+          <div id="install-section" class="install-section" hidden>
+            <h2>Install as an app</h2>
+            <p class="hint">Open {{ app_name }} from your home screen or desktop, in its own window, like any other app.</p>
+            <button type="button" id="install-btn" class="install-btn" hidden>Install {{ app_name }}</button>
+            <div id="install-ios" hidden>
+          <ol class="install-steps">
+            <li>Tap <strong>Share</strong> <svg class="share-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg> (at the bottom in Safari; at the top right in Chrome).</li>
+            <li>Scroll down, tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+          </ol>
+          <p class="hint">The app keeps its own sign-in, so the first time you open it, sign in with Google and enter your passphrase once more.</p>
+            </div>
+          </div>
           {% if not hosted %}
           <h2>This computer</h2>
           <label>Daily backups to keep

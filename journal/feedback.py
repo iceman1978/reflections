@@ -50,6 +50,15 @@ def add(user_id, email, name, kind, text, screen=None, device=None):
             con.close()
 
 
+def count_for(user_id):
+    """How much feedback this person has sent (for the "send feedback?" suggestion)."""
+    con = db.connect()
+    try:
+        return con.execute("SELECT COUNT(*) FROM feedback WHERE user_id = ?", (user_id,)).fetchone()[0]
+    finally:
+        con.close()
+
+
 def all_feedback():
     """Everything received, newest first."""
     con = db.connect()

@@ -77,7 +77,7 @@ else:
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
 PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/healthz",
-                "/favicon.ico", "/manifest.webmanifest",
+                "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/background", "/api/shutdown"}
 
@@ -244,6 +244,15 @@ def favicon():
     return send_file(path, mimetype="image/x-icon", max_age=86400)
 
 
+@app.get("/sw.js")
+def service_worker():
+    """Lets browsers offer "Install app". It caches nothing (see static/sw.js)."""
+    resp = send_file(ROOT / "static" / "sw.js", mimetype="text/javascript", max_age=0)
+    resp.headers["Cache-Control"] = "no-cache"
+    resp.headers["Service-Worker-Allowed"] = "/"
+    return resp
+
+
 @app.get("/manifest.webmanifest")
 def manifest():
     """What a phone or computer needs to offer "Install app" / "Add to Home Screen"."""
@@ -252,6 +261,7 @@ def manifest():
                                          ("icon-maskable-512.png", "512x512", "maskable"))
              if (BRAND_DIR / name).exists()]
     resp = jsonify({
+        "id": "/",
         "name": config.APP_NAME,
         "short_name": config.APP_NAME,
         "description": "A private journal, with a thoughtful reflection after every entry.",
@@ -488,7 +498,9 @@ def _summary(e):
 
 @app.get("/api/stats")
 def api_stats():
-    return jsonify(dict(stats.journal_stats(), **_limits(g.user_id)))
+    return jsonify(dict(stats.journal_stats(), **_limits(g.user_id),
+                        feedback_sent=feedback.count_for(g.user_id),       # for the suggestion cards
+                        invites_sent=invites.count_for(g.user_id) if HOSTED else 0))
 
 
 @app.get("/api/entries")

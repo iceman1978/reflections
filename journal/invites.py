@@ -69,6 +69,15 @@ def add(user_id, requester_email, requester_name, email, name=None, note=None):
     return _row(row)
 
 
+def count_for(user_id):
+    """How many invitations this person has asked for (for the "invite someone?" suggestion)."""
+    con = db.connect()
+    try:
+        return con.execute("SELECT COUNT(*) FROM invites WHERE user_id = ?", (user_id,)).fetchone()[0]
+    finally:
+        con.close()
+
+
 def mine(user_id):
     """This person's requests, newest first (what they see in the Invite dialog)."""
     con = db.connect()
