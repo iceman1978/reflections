@@ -3,8 +3,9 @@
 Two layers of keys:
   - a random 256-bit *data key* encrypts every entry (AES-256-GCM);
   - the data key itself is stored only in wrapped (encrypted) form: once
-    under a key derived from the password, and once under a key derived
-    from the recovery key.
+    under a key derived from the password, once under a key derived from
+    the recovery key, and once for each passkey (under a secret only that
+    passkey can produce: see passkeys.py).
 
 So changing the password re-wraps one small key, nothing else. Later, for a
 web version with Google sign-in, the data key could be wrapped by a
@@ -15,7 +16,9 @@ import os
 import secrets
 
 from cryptography.exceptions import InvalidTag
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 # scrypt cost: ~0.3 s per attempt here, which makes guessing expensive.
@@ -70,6 +73,30 @@ def unwrap_data_key(stored, secret):
     """Raises WrongKey if the password / recovery key is wrong."""
     wrapping_key = derive_key(secret, base64.b64decode(stored["salt"]), stored["kdf"])
     return decrypt(wrapping_key, base64.b64decode(stored["wrapped"]), b"data-key")
+
+
+def _hkdf(secret: bytes, salt: bytes) -> bytes:
+    return HKDF(algorithm=hashes.SHA256(), length=32, salt=salt, info=b"journal passkey").derive(secret)
+
+
+def wrap_data_key_with_secret(data_key, secret: bytes):
+    """Encrypt the data key under a high-entropy secret, such as the 32 bytes a
+    passkey's PRF extension returns. No slow scrypt needed: the secret isn't
+    guessable the way a passphrase is."""
+    salt = os.urandom(16)
+    return {
+        "kdf": {"name": "hkdf-sha256"},
+        "salt": base64.b64encode(salt).decode(),
+        "wrapped": base64.b64encode(encrypt(_hkdf(secret, salt), data_key, b"data-key")).decode(),
+    }
+
+
+def unwrap_data_key_with_secret(stored, secret: bytes):
+    """Raises WrongKey if the secret is wrong."""
+    if stored.get("kdf", {}).get("name") != "hkdf-sha256":
+        raise ValueError("Not a passkey-wrapped key")
+    key = _hkdf(secret, base64.b64decode(stored["salt"]))
+    return decrypt(key, base64.b64decode(stored["wrapped"]), b"data-key")
 
 
 def new_recovery_key():

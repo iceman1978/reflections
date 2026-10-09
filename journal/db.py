@@ -44,6 +44,10 @@ CREATE TABLE IF NOT EXISTS activity (user_id TEXT NOT NULL, day TEXT NOT NULL, e
 CREATE TABLE IF NOT EXISTS invites  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL,
                                     requester_email TEXT, requester_name TEXT, email TEXT NOT NULL, name TEXT,
                                     note TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'requested');
+CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT NOT NULL,
+                                    prf_salt TEXT NOT NULL, key_wrapped TEXT NOT NULL,
+                                    created_at TEXT NOT NULL, last_used_at TEXT);
+CREATE INDEX IF NOT EXISTS passkeys_by_user ON passkeys (user_id);
 CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT,
                                     name TEXT, created_at TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL,
                                     screen TEXT, device TEXT, done INTEGER NOT NULL DEFAULT 0);

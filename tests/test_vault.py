@@ -3,6 +3,7 @@
     set JOURNAL_DATA_DIR to an empty temporary folder, then
     uv run python -m unittest discover tests
 """
+import base64
 import csv
 import io
 import json
@@ -21,6 +22,12 @@ if not os.environ.get("JOURNAL_DATA_DIR"):
 from journal import (activity, config, crypto, db, export, feedback, importer, migrate, sources, store, usage, users,  # noqa: E402
                      vault, wipe)
 from journal.db import LOCAL_USER  # noqa: E402
+from journal import passkeys  # noqa: E402
+
+
+def b64url(raw):
+    """How a browser sends passkey bytes: base64url without padding."""
+    return base64.urlsafe_b64encode(raw).decode().rstrip("=")
 
 PASSWORD = "correct horse battery"
 
@@ -264,6 +271,53 @@ class AccountTests(unittest.TestCase):
         usage.check(self.bob, "reflection")                     # Bob's allowance is separate
         usage.LIMITS["reflection"] = 0
         self.assertIsNone(usage.remaining(self.ann, "reflection"))   # no limit (your own computer)
+
+
+class PasskeyTests(unittest.TestCase):
+    """A passkey's PRF secret is one more wrapping of the journal's key."""
+    SECRET = os.urandom(32)
+
+    def setUp(self):
+        fresh_journal()
+        self.uid = users.ensure_local()
+        self.recovery, self.token = set_up_as(self.uid)
+        self.cred = b64url(os.urandom(20))
+        vault.add_passkey(self.uid, PASSWORD, self.cred, b64url(os.urandom(32)),
+                          b64url(self.SECRET), "Phone")
+
+    def test_passkey_unlocks_the_same_journal(self):
+        store.create_entry("Written before the passkey unlock.")
+        vault.lock_all()
+        token = vault.unlock_with_passkey(self.uid, self.cred, b64url(self.SECRET))
+        vault.use(vault.session(token))
+        self.assertEqual(store.all_entries()[0]["text"], "Written before the passkey unlock.")
+        self.assertIsNotNone(passkeys.list_for(self.uid)[0]["last_used_at"])
+
+    def test_wrong_secret_or_unknown_passkey_fails(self):
+        vault.lock_all()
+        vault._failures.clear()
+        with self.assertRaises(vault.VaultError):
+            vault.unlock_with_passkey(self.uid, self.cred, b64url(os.urandom(32)))
+        with self.assertRaises(vault.VaultError):
+            vault.unlock_with_passkey(self.uid, b64url(os.urandom(20)), b64url(self.SECRET))
+        vault._failures.clear()
+
+    def test_adding_needs_the_passphrase(self):
+        with self.assertRaises(vault.VaultError):
+            vault.add_passkey(self.uid, "not the passphrase", b64url(os.urandom(20)),
+                              b64url(os.urandom(32)), b64url(os.urandom(32)), "Laptop")
+        self.assertEqual(len(passkeys.list_for(self.uid)), 1)
+
+    def test_secret_is_never_stored(self):
+        self.assertNotIn(self.SECRET, raw_bytes())
+        self.assertNotIn(b64url(self.SECRET).encode(), raw_bytes())
+
+    def test_removed_passkey_no_longer_unlocks(self):
+        passkeys.remove(self.uid, self.cred)
+        vault.lock_all()
+        with self.assertRaises(vault.VaultError):
+            vault.unlock_with_passkey(self.uid, self.cred, b64url(self.SECRET))
+        vault._failures.clear()
 
 
 class FeedbackTests(unittest.TestCase):

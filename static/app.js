@@ -300,8 +300,6 @@
     }
     $("entry-date").textContent = `${longDate(entry.created_at)} · ${timeOf(entry.created_at)}`;
     showEntryWords(entry);
-    $("entry-prompt").hidden = !entry.prompt;
-    $("entry-prompt").textContent = entry.prompt ? `Prompt: ${entry.prompt}` : "";
     $("entry-text").textContent = entry.text;
     renderTitle(entry);
     $("entry-status").textContent = "";
@@ -1292,6 +1290,7 @@
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
     }
     refreshHidden();
+    refreshPasskeys();
     refreshUsage();
     refreshInviteRequests();
     refreshFeedbackList();
@@ -2118,6 +2117,164 @@
     }
   });
 
+  // ---- Passkeys -----------------------------------------------------------
+  // A passkey unlocks the journal through its PRF extension: given a salt, it
+  // produces a secret only it can make (after your fingerprint, face or PIN).
+  // The server uses that secret to unwrap your journal's key, then forgets it.
+
+  const toB64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const fromB64url = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+  const randomBytes = (n) => crypto.getRandomValues(new Uint8Array(n));
+  const passkeysPossible = () => !!(window.PublicKeyCredential && navigator.credentials && window.isSecureContext);
+
+  // Plain-language messages for what the browser's passkey prompt can report.
+  function passkeyError(err, fallback) {
+    if (err && err.name === "NotAllowedError") return "The passkey prompt was cancelled or timed out.";
+    if (err && err.name === "InvalidStateError") return "This device already has a passkey for your journal.";
+    if (err && err.name === "SecurityError") return "Passkeys don't work on this address.";
+    return (err && err.message) || fallback;
+  }
+
+  function guessDeviceName() {
+    const ua = navigator.userAgent;
+    const os = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android"
+      : /Mac OS X/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /CrOS/.test(ua) ? "Chromebook" : "this device";
+    const browser = /Edg\//.test(ua) ? "Edge" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome"
+      : /Safari\//.test(ua) ? "Safari" : "";
+    return browser ? `${browser} on ${os}` : os;
+  }
+
+  // Ask the passkey for its secret for `salt` (a second prompt, for devices
+  // that don't return the secret while creating the passkey).
+  async function passkeySecret(rpId, credentialId, salt) {
+    const got = await navigator.credentials.get({ publicKey: {
+      challenge: randomBytes(32), rpId, timeout: 60000, userVerification: "required",
+      allowCredentials: [{ type: "public-key", id: credentialId }],
+      extensions: { prf: { eval: { first: salt } } },
+    } });
+    const prf = got.getClientExtensionResults().prf;
+    return prf && prf.results ? prf.results.first : null;
+  }
+
+  function renderPasskeys(list) {
+    const ul = $("passkey-list");
+    ul.replaceChildren(...list.map((pk) => {
+      const li = document.createElement("li");
+      const name = document.createElement("strong");
+      name.textContent = pk.label;
+      const when = document.createElement("span");
+      when.className = "subtle";
+      when.textContent = ` · added ${longDate(pk.created_at)}`
+        + (pk.last_used_at ? ` · last used ${longDate(pk.last_used_at)}` : " · not used yet");
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "quiet";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", async () => {
+        const sure = await ask("Remove this passkey?", [
+          `“${pk.label}” will no longer unlock your journal. Your passphrase still will.`,
+          "The passkey itself stays on the device (in its password manager); you can delete it there too.",
+        ], [{ label: "Cancel", value: false }, { label: "Remove", value: true, style: "danger" }]);
+        if (!sure) return;
+        try {
+          renderPasskeys((await api("DELETE", `/api/passkeys/${encodeURIComponent(pk.id)}`)).passkeys);
+        } catch (err) {
+          $("passkey-result").textContent = sentence(err.message);
+        }
+      });
+      li.append(name, when, remove);
+      return li;
+    }));
+    ul.hidden = !list.length;
+  }
+
+  async function refreshPasskeys() {
+    const possible = passkeysPossible();
+    $("passkey-unsupported").hidden = possible;
+    $("passkey-form").hidden = !possible;
+    if (!$("passkey-label").value) $("passkey-label").value = guessDeviceName();
+    try {
+      state.passkeyInfo = await api("GET", "/api/passkeys");
+      renderPasskeys(state.passkeyInfo.passkeys);
+    } catch (_) { /* the rest of Settings still works */ }
+  }
+
+  $("passkey-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const out = $("passkey-result");
+    const btn = $("passkey-add-btn");
+    const password = $("passkey-pw").value;
+    btn.disabled = true;
+    out.textContent = "";
+    try {
+      // Check the passphrase first, so a typo doesn't leave a stray passkey on the device.
+      await api("POST", "/api/passkeys", { password, check_only: true });
+      const info = state.passkeyInfo || await api("GET", "/api/passkeys");
+      const salt = randomBytes(32);
+      out.textContent = "Follow your device's prompt…";
+      const cred = await navigator.credentials.create({ publicKey: {
+        rp: { id: info.rp_id, name: info.rp_name },
+        user: { id: new TextEncoder().encode(info.user_id), name: info.user_name, displayName: info.user_display },
+        challenge: randomBytes(32),
+        pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+        authenticatorSelection: { residentKey: "preferred", userVerification: "required" },
+        excludeCredentials: info.passkeys.map((pk) => ({ type: "public-key", id: fromB64url(pk.id) })),
+        timeout: 60000,
+        extensions: { prf: { eval: { first: salt } } },
+      } });
+      const prf = cred.getClientExtensionResults().prf;
+      let secret = prf && prf.results ? prf.results.first : null;
+      if (!secret && !(prf && prf.enabled === false)) {
+        out.textContent = "One more time, to finish setting it up…";
+        secret = await passkeySecret(info.rp_id, cred.rawId, salt);
+      }
+      if (!secret) {
+        throw new Error("This device made a passkey, but it can't be used to unlock journals (it doesn't support "
+          + "the feature needed). You can delete it from the device's password manager.");
+      }
+      const res = await api("POST", "/api/passkeys", {
+        password, credential_id: toB64url(cred.rawId), prf_salt: toB64url(salt),
+        prf: toB64url(secret), label: $("passkey-label").value,
+      });
+      $("passkey-pw").value = "";
+      state.passkeyInfo = { ...info, passkeys: res.passkeys };
+      renderPasskeys(res.passkeys);
+      out.textContent = "Passkey added. Next time, choose “Unlock with passkey”.";
+      try { localStorage.setItem("journal.passkey", "1"); } catch (_) {}
+    } catch (err) {
+      out.textContent = sentence(passkeyError(err, "Couldn't add the passkey."));
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $("passkey-unlock-btn").addEventListener("click", async () => {
+    const btn = $("passkey-unlock-btn");
+    btn.disabled = true;
+    $("unlock-error").hidden = true;
+    try {
+      const { rp_id: rpId, credentials } = await api("GET", "/api/vault/passkey-options");
+      if (!credentials.length) throw new Error("No passkeys are set up for this journal yet");
+      const got = await navigator.credentials.get({ publicKey: {
+        challenge: randomBytes(32), rpId, timeout: 60000, userVerification: "required",
+        allowCredentials: credentials.map((c) => ({ type: "public-key", id: fromB64url(c.id) })),
+        extensions: { prf: { evalByCredential: Object.fromEntries(
+          credentials.map((c) => [c.id, { first: fromB64url(c.salt) }])) } },
+      } });
+      const prf = got.getClientExtensionResults().prf;
+      const secret = prf && prf.results ? prf.results.first : null;
+      if (!secret) throw new Error("This device's passkey can't unlock the journal. Use your passphrase instead");
+      await api("POST", "/api/vault/unlock-passkey", { credential_id: toB64url(got.rawId), prf: toB64url(secret) });
+      try { localStorage.setItem("journal.passkey", "1"); } catch (_) {}
+      startJournal();
+    } catch (err) {
+      vaultError("unlock-error", passkeyError(err, "The passkey didn't unlock the journal"));
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
   // ---- Starting up --------------------------------------------------------
 
   let started = false;
@@ -2179,5 +2336,9 @@
       return showVaultPanel("setup");
     }
     showVaultPanel("unlock");
+    if (v.passkeys && passkeysPossible()) {
+      $("passkey-unlock").hidden = false;
+      $("passkey-unlock-btn").focus();   // the quickest way in, when there is one
+    }
   })();
 })();

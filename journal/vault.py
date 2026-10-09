@@ -1,4 +1,4 @@
-"""Each person's lock: passphrase, recovery key, and unlocked sessions.
+"""Each person's lock: passphrase, recovery key, passkeys, and unlocked sessions.
 
 While a journal is locked, its data key exists nowhere in memory. Unlocking
 (with the passphrase or the recovery key) unwraps the key into a *session*
@@ -16,7 +16,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 
-from . import crypto, users
+from . import crypto, passkeys, users
 
 log = logging.getLogger(__name__)
 
@@ -214,6 +214,50 @@ def new_recovery_key(uid, password):
     users.set_keys(uid, key_recovery=crypto.wrap_data_key(key, recovery))
     log.info("New recovery key created (%s)", uid)
     return recovery
+
+
+# ---- Passkeys (see passkeys.py) ------------------------------------------
+
+def check_password(uid, password):
+    """Raises VaultError unless this is the person's passphrase."""
+    try:
+        crypto.unwrap_data_key(users.get(uid)["key_password"], password or "")
+    except crypto.WrongKey:
+        time.sleep(1)
+        raise VaultError("That passphrase isn't right.") from None
+
+
+def add_passkey(uid, password, credential_id, prf_salt, prf_secret, label):
+    """Add a passkey that can unlock this journal. Asks for the passphrase
+    again, so someone at an unlocked computer can't quietly add their own."""
+    try:
+        key = crypto.unwrap_data_key(users.get(uid)["key_password"], password or "")
+    except crypto.WrongKey:
+        time.sleep(1)
+        raise VaultError("That passphrase isn't right.") from None
+    try:
+        passkeys.add(uid, key, credential_id, prf_salt, prf_secret, label)
+    except passkeys.PasskeyProblem as e:
+        raise VaultError(str(e)) from None
+    log.info("Passkey added (%s)", uid)
+
+
+def unlock_with_passkey(uid, credential_id, prf_secret):
+    if not is_set_up(uid):
+        raise VaultError("This journal hasn't been set up yet.")
+    _check_not_paused(uid)
+    try:
+        key = passkeys.unwrap(uid, credential_id, prf_secret)
+    except KeyError:
+        raise VaultError("That passkey isn't set up for this journal. Use your passphrase, "
+                         "then add this passkey in Settings → Security & Data.") from None
+    except (crypto.WrongKey, passkeys.PasskeyProblem, ValueError):
+        _failed(uid)
+        log.info("Unlock failed: passkey secret didn't open the journal (%s)", uid)
+        raise VaultError("That passkey didn't open the journal. Use your passphrase instead.") from None
+    _failures.pop(uid, None)
+    log.info("Journal unlocked with a passkey (%s)", uid)
+    return _open(uid, key)
 
 
 # ---- Auto-lock ----------------------------------------------------------

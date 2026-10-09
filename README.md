@@ -27,14 +27,15 @@ Your journal is encrypted. Nothing you write can be read from the disk without y
 - **Forgot your passphrase?** On the lock screen, click **Forgot your passphrase?**, enter your recovery key (capitals and dashes don't matter) and choose a new passphrase.
 - **Changing your passphrase, or getting a new recovery key:** *Settings → Passphrase*. A new recovery key replaces the old one.
 - After 10 wrong tries in a row, unlocking pauses for 15 minutes.
+- **Passkeys (fingerprint, face or device PIN):** *Settings → Security & Data → Passkeys → Add a passkey* (you confirm with your passphrase). From then on the lock screen offers **Unlock with passkey**. Add one per device, or one that syncs (Apple, Google or a password manager). Your passphrase and recovery key keep working; **Remove** stops a passkey unlocking the journal. It needs a browser and device that support the passkey *PRF* feature (recent Chrome, Edge, Safari or Firefox, and most phones); if one doesn't, the app says so and you carry on with the passphrase. Passkeys belong to the site's address, so they only work on that domain (welllived.app, inhissteps.app, or `localhost` for test copies).
 
-How it works, briefly: a random key encrypts every entry (AES-256-GCM); that key is itself stored only encrypted, once with your passphrase (via scrypt) and once with your recovery key. So changing your passphrase is instant. On the web version, each person has their own key, locked by their own passphrase.
+How it works, briefly: a random key encrypts every entry (AES-256-GCM); that key is itself stored only encrypted, once with your passphrase (via scrypt), once with your recovery key, and once for each passkey (with a secret only that passkey can produce, through the WebAuthn PRF extension; the server never stores the secret). So changing your passphrase is instant. On the web version, each person has their own key, locked by their own passphrase.
 
 ## Writing prompts
 
 Stuck? Click **Give me a prompt**. Claude reads your last eight entries (and the reflection questions you were given) and suggests one prompt: it might return to a recurring theme, follow up on a question you haven't answered, or, with little history, offer something fresh from the philosophical tradition. A small note says which entry it builds on. **Another one** gives a different suggestion; **×** dismisses it. A prompt takes a few seconds and costs well under a cent.
 
-If you write with a prompt showing, it's saved with the entry (shown above it, and in the *Writing Prompt* column of exports) and kept with your draft until then. Hidden entries are never used for prompts. To tune the suggestions, edit `editions/philosophy/prompts/writing_prompt.md`; changes apply straight away.
+If you write with a prompt showing, it's saved with the entry (in the *Writing Prompt* column of exports; it isn't shown on the entry page once you finish) and kept with your draft until then. Hidden entries are never used for prompts. To tune the suggestions, edit `editions/philosophy/prompts/writing_prompt.md`; changes apply straight away.
 
 ## Titles
 

@@ -120,6 +120,12 @@
       </div>
 
       <form id="vault-unlock" hidden novalidate>
+        <div id="passkey-unlock" class="passkey-unlock" hidden>
+          <button type="button" id="passkey-unlock-btn" class="primary passkey-btn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2.5 20c.6-3.6 3.2-6 6.5-6 1.5 0 2.9.5 4 1.4"/><circle cx="17.5" cy="15" r="2.5"/><path d="M19.3 16.8l2.7 2.7M21 18.5l-1 1"/></svg>
+            Unlock with passkey</button>
+          <p class="subtle passkey-or">or type your passphrase</p>
+        </div>
         <label><span class="sr-only">Passphrase</span><input id="unlock-pw" type="password" autocomplete="current-password"></label>
         <p id="unlock-error" class="vault-error" hidden></p>
         <div class="vault-buttons">
@@ -234,7 +240,6 @@
       </div>
       <input id="entry-title-input" class="title-input" type="text" maxlength="120"
              placeholder="Title (optional)" title="Leave blank for No Title" hidden>
-      <p id="entry-prompt" class="entry-prompt" hidden></p>
       <div id="entry-text" class="entry-text"></div>
       <textarea id="entry-editor" hidden></textarea>
       <div class="page-footer">
@@ -400,6 +405,19 @@
           <div id="new-recovery-key" class="recovery-key"></div>
           <p class="hint">Save this somewhere safe now; it won't be shown again.</p>
         </div>
+      </form>
+
+      <h2>Passkeys</h2>
+      <p class="hint passkey-intro">Unlock with your fingerprint, face or device PIN instead of typing your passphrase.
+        Your passphrase and recovery key keep working too.</p>
+      <p id="passkey-unsupported" class="hint" hidden>This browser can't use passkeys. Try a recent Chrome, Edge, Safari or Firefox.</p>
+      <ul id="passkey-list" class="passkey-list"></ul>
+      <form id="passkey-form" class="settings-form vault-settings" novalidate>
+        <label>Name for this passkey <span class="hint">So you can tell your devices apart.</span>
+          <input id="passkey-label" type="text" maxlength="60" autocomplete="off"></label>
+        <label>Your passphrase <span class="hint">To confirm it's you.</span>
+          <input id="passkey-pw" type="password" autocomplete="current-password"></label>
+        <div class="key-test"><button type="submit" id="passkey-add-btn">Add a passkey</button><span id="passkey-result" class="subtle"></span></div>
       </form>
 
       <h2>Your data</h2>

@@ -13,20 +13,20 @@
   "description": "A private journal for your daily quiet time, with a reflection from Scripture after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",
-  "lead": "A quiet place to meet with God each day, with a reflection from Scripture waiting after every entry.",
+  "lead": "A quiet place to reflect each day and draw on Christian wisdom.",
   "points": [
     {"icon": "calendar", "title": "Build a daily habit of quiet time",
-     "text": "A few minutes of honest writing before God each day. Your streak keeps count, and a prompt is there when the page feels blank."},
+     "text": "A few minutes of honest writing each day. Your streak keeps count, and a prompt is there when the page feels blank."},
     {"icon": "book", "title": "Rooted in Scripture and the great devotional writers",
-     "text": "Reflections draw on the Bible, especially Paul's letters, the Gospels and the Psalms, and on Augustine, Luther, Calvin, Bunyan, Edwards, Spurgeon and more, with direct links to the original texts."},
-    {"icon": "question", "title": "Grow in the likeness of Christ",
+     "text": "Reflections draw from the Gospels, Paul’s letters, and the Psalms, alongside classic voices like Augustine, Luther, Calvin, Bunyan, Edwards, and Spurgeon, with links to the original texts."},
+    {"icon": "question", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favourites close."},
     {"icon": "lock", "title": "A fully private, encrypted journal",
      "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
   ],
   "welcome_quote": {
-    "text": "“Search me, O God, and know my heart; test me and know my concerns. See if there is any offensive way in me; lead me in the way everlasting.”",
-    "cite_html": "Psalm 139:23–24 <cite>(BSB)</cite>"
+    "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
+    "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"
   },
   "passphrase_quote": {
     "text": "“But when you pray, go into your inner room, shut your door, and pray to your Father, who is unseen. And your Father, who sees what is done in secret, will reward you.”",

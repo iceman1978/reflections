@@ -35,8 +35,16 @@
       <p class="subtle">To be fully transparent: while your journal is unlocked, the server uses your key to show you
         your entries and to ask Claude for reflections, and it forgets the key when the journal locks. Someone who took
         control of the server and secretly changed its code could, in principle, watch for passphrases as they're
-        typed. The passphrase protects against everything short of that. A future version may let you unlock with your
-        fingerprint or face instead of typing a passphrase.</p>
+        typed. The passphrase protects against everything short of that.</p>
+
+      <h2 id="passkeys">Unlocking with a passkey</h2>
+      <p>Instead of typing your passphrase, you can unlock with a <strong>passkey</strong>: your fingerprint, face or
+        device PIN (<em>Settings → Security &amp; Data → Passkeys</em>). It keeps the same promise. When you add one,
+        your device creates a secret that only that passkey can produce, and only after your fingerprint, face or PIN.
+        Your journal's key is locked once more under that secret. The server stores only the locked copy, never the
+        secret, so it can't unlock your journal with it any more than with your passphrase.</p>
+      <p>Your passphrase and recovery key keep working. Removing a passkey in Settings stops it unlocking your journal.
+        Passkeys that sync (through Apple, Google or a password manager) work on your other devices too.</p>
       {% endif %}
 
       <h2>When something leaves the journal</h2>

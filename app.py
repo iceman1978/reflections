@@ -22,7 +22,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, migrate, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, migrate, passkeys, reflection, stats, store, usage, users, vault,
                      wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -79,6 +79,7 @@ else:
 PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/healthz",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
+                "/api/vault/passkey-options", "/api/vault/unlock-passkey",
                 "/api/background", "/api/shutdown"}
 
 
@@ -400,6 +401,7 @@ def vault_state():
         unlocked=bool(s and uid and s.user_id == uid),
         legacy_entries=0 if HOSTED or (uid and vault.is_set_up(uid)) else migrate.legacy_count(),
         min_password=vault.MIN_PASSWORD_LENGTH,
+        passkeys=len(passkeys.unlock_options(uid)) if uid else 0,
     )
 
 
@@ -456,6 +458,33 @@ def vault_unlock():
                           "cleanup_failed": cleanup_failed}, token)
 
 
+def _rp_id():
+    """The passkey's "relying party": this site's own address (passkeys only work there)."""
+    return (request.host or "").rsplit(":", 1)[0].lower()
+
+
+@app.get("/api/vault/passkey-options")
+def vault_passkey_options():
+    if (resp := _need_user()):
+        return resp
+    return jsonify(rp_id=_rp_id(), credentials=passkeys.unlock_options(g.user_id))
+
+
+@app.post("/api/vault/unlock-passkey")
+def vault_unlock_passkey():
+    if (resp := _need_user()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    try:
+        token = vault.unlock_with_passkey(g.user_id, data.get("credential_id") or "", data.get("prf") or "")
+    except vault.VaultError as e:
+        return jsonify(error=str(e)), 400
+    _lock_own_session("replaced by a new unlock")
+    vault.use(vault.session(token))
+    activity.seen(g.user_id)
+    return _with_session({"ok": True}, token)
+
+
 @app.post("/api/vault/recover")
 def vault_recover():
     if (resp := _need_user()):
@@ -493,6 +522,46 @@ def vault_new_recovery_key():
         return jsonify(recovery_key=vault.new_recovery_key(g.user_id, data.get("password") or ""))
     except vault.VaultError as e:
         return jsonify(error=str(e)), 400
+
+
+# ---- Passkeys (Settings → Security & Data) --------------------------------
+
+@app.get("/api/passkeys")
+def passkeys_list():
+    user = users.get(g.user_id)
+    return jsonify(
+        passkeys=passkeys.list_for(g.user_id),
+        rp_id=_rp_id(), rp_name=config.APP_NAME,
+        # The passkey's user handle: our internal ID (not the email), so the device stores nothing personal.
+        user_id=g.user_id, user_name=(user or {}).get("email") or config.APP_NAME,
+        user_display=(user or {}).get("name") or (user or {}).get("email") or config.APP_NAME)
+
+
+@app.post("/api/passkeys")
+def passkeys_add():
+    data = request.get_json(silent=True) or {}
+    if data.get("check_only"):
+        try:
+            vault.check_password(g.user_id, data.get("password") or "")
+        except vault.VaultError as e:
+            return jsonify(error=str(e)), 400
+        return jsonify(ok=True)
+    try:
+        vault.add_passkey(g.user_id, data.get("password") or "", data.get("credential_id") or "",
+                          data.get("prf_salt") or "", data.get("prf") or "", data.get("label") or "")
+    except vault.VaultError as e:
+        return jsonify(error=str(e)), 400
+    return jsonify(passkeys=passkeys.list_for(g.user_id))
+
+
+@app.delete("/api/passkeys/<path:credential_id>")
+def passkeys_remove(credential_id):
+    try:
+        passkeys.remove(g.user_id, credential_id)
+    except KeyError:
+        return jsonify(error="That passkey wasn't found."), 404
+    log.info("Passkey removed (%s)", g.user_id)
+    return jsonify(passkeys=passkeys.list_for(g.user_id))
 
 
 # ---- Entries --------------------------------------------------------------
