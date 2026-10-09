@@ -63,7 +63,7 @@
   --day-fill-hover: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.6) 81%);
   --field: hsl(var(--paper-hue) var(--paper-sat) 99%);
   /* Over the photo. Its strength comes from Settings → Photo visibility. */
-  --veil: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.5) 90% / var(--veil-strength, 0.4));
+  --veil: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.5) 90% / var(--veil-strength, 0.5));
   --shadow: hsl(var(--hue) 30% 10% / 0.20);
   --warn-bg: #fff3d6;
   --warn-ink: #6a4b00;
@@ -95,7 +95,7 @@ html[data-theme="evening"] {
   --day-fill: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.3) 23%);
   --day-fill-hover: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.3) 29%);
   --field: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.2) 12%);
-  --veil: hsl(var(--paper-hue) 20% 6% / min(1, calc(var(--veil-strength, 0.4) * 1.4)));  /* a bit stronger at night */
+  --veil: hsl(var(--paper-hue) 20% 6% / min(1, calc(var(--veil-strength, 0.5) * 1.4)));  /* a bit stronger at night */
   --shadow: rgba(0, 0, 0, 0.5);
   --warn-bg: #4a3b16;
   --warn-ink: #f6e2ae;
@@ -121,7 +121,7 @@ html[data-theme="evening"] {
     --day-fill: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.3) 23%);
     --day-fill-hover: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.3) 29%);
     --field: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.2) 12%);
-    --veil: hsl(var(--paper-hue) 20% 6% / min(1, calc(var(--veil-strength, 0.4) * 1.4)));
+    --veil: hsl(var(--paper-hue) 20% 6% / min(1, calc(var(--veil-strength, 0.5) * 1.4)));
     --shadow: rgba(0, 0, 0, 0.5);
     --warn-bg: #4a3b16;
     --warn-ink: #f6e2ae;
@@ -194,10 +194,10 @@ a { color: var(--accent); }
    Blur comes from Settings → Photo blur (--photo-blur). */
 .backdrop {
   position: fixed;
-  inset: calc(-3 * var(--photo-blur, 10px) - 10px);  /* hides the soft edges the blur creates */
+  inset: calc(-3 * var(--photo-blur, 3px) - 10px);  /* hides the soft edges the blur creates */
   z-index: -1;
   background: var(--desk) center / cover no-repeat;
-  filter: blur(var(--photo-blur, 10px)) saturate(0.85);
+  filter: blur(var(--photo-blur, 3px)) saturate(0.85);
   opacity: 0;
   transition: opacity 1.2s ease;
 }

@@ -183,8 +183,8 @@ Your personal choices (name, journal name, day/evening, colour, photo, draft sav
 | `theme` | Day or evening: `day`, `evening` or `auto` | `day` |
 | `colour_theme` | `lake`, `walnut`, `sage`, `amber`, `claret`, `lavender`, `sea-glass` or `graphite` | `lake` |
 | `background_photo` | Background photo behind the journal (off: a deep shade of the colour theme) | `true` |
-| `photo_blur` | Photo blur in pixels, 0–30 | `10` |
-| `photo_visibility` | How clearly the photo shows through, 0–100 (%) | `60` |
+| `photo_blur` | Photo blur in pixels, 0–30 | `3` |
+| `photo_visibility` | How clearly the photo shows through, 0–100 (%) | `50` |
 
 ## Claude API key
 

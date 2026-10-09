@@ -57,8 +57,8 @@ DEFAULTS = {
     "theme": "day",
     "colour_theme": "lake",
     "background_photo": True,
-    "photo_blur": 10,         # pixels
-    "photo_visibility": 60,   # percent; lower = more veiled
+    "photo_blur": 3,          # pixels
+    "photo_visibility": 50,   # percent; lower = more veiled
 }
 
 # Colour themes offered in Settings (their colours are defined in static/style.css).
