@@ -1,0 +1,40 @@
+{
+  "_about": [
+    "One edition of the app: its name, welcome page, quotes, colours and the voices",
+    "reflections draw on. The library of quotable works is sources.json in this folder,",
+    "and Claude's instructions are in prompts/. Choose the edition with the EDITION",
+    "setting (default: philosophy)."
+  ],
+  "app_name": "Well Lived",
+  "tagline": "A Daily Journal",
+  "tab_letter": "W",
+  "tab_font": "EBGaramond-Variable.ttf",
+  "description": "A private journal, with a thoughtful reflection after every entry.",
+  "theme_colour": "#2a4865",
+  "default_colour_theme": "lake",
+  "lead": "A quiet place to write each day, with a thoughtful reflection waiting after every entry.",
+  "points": [
+    {"icon": "calendar", "title": "Build a habit of daily personal reflection",
+     "text": "A few minutes of writing a day. Your streak keeps count, and a prompt is there when the page feels blank."},
+    {"icon": "columns", "title": "Ground yourself in over two millennia of Western philosophy",
+     "text": "Draw wisdom from classical virtue ethics, Stoicism, medieval scholasticism, Enlightenment thought, and modern existentialism—with direct links to original texts."},
+    {"icon": "question", "title": "Explore past reflections with prompted questions",
+     "text": "Every reflection ends with a question to carry forward. Browse back by date, or keep favourites close."},
+    {"icon": "lock", "title": "A fully private, encrypted journal",
+     "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
+  ],
+  "welcome_quote": {
+    "text": "“The unexamined life is not worth living.”",
+    "cite_html": "Socrates, in Plato’s <cite>Apology</cite>"
+  },
+  "passphrase_quote": {
+    "text": "“Thought and speech are the same thing, except that what we call thought is a silent dialogue of the soul with itself, taking place without the voice.”",
+    "cite_html": "The Eleatic Visitor, in Plato’s <cite>Sophist</cite>"
+  },
+  "invite_line": "Invite a fellow thinker",
+  "voices_label": "thinkers",
+  "voices": ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",
+             "Augustine", "Boethius", "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri",
+             "René Descartes", "Blaise Pascal", "Baruch Spinoza", "John Locke", "David Hume", "Immanuel Kant",
+             "Søren Kierkegaard", "John Stuart Mill"]
+}

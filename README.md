@@ -1,4 +1,4 @@
-# Reflections
+# Well Lived and In His Steps
 
 A private journal that runs on your own computer. You write in your browser, and every entry is saved, encrypted, in a database on your machine that only your passphrase can open.
 
@@ -34,7 +34,7 @@ How it works, briefly: a random key encrypts every entry (AES-256-GCM); that key
 
 Stuck? Click **Give me a prompt**. Claude reads your last eight entries (and the reflection questions you were given) and suggests one prompt: it might return to a recurring theme, follow up on a question you haven't answered, or, with little history, offer something fresh from the philosophical tradition. A small note says which entry it builds on. **Another one** gives a different suggestion; **×** dismisses it. A prompt takes a few seconds and costs well under a cent.
 
-If you write with a prompt showing, it's saved with the entry (shown above it, and in the *Writing Prompt* column of exports) and kept with your draft until then. Hidden entries are never used for prompts. To tune the suggestions, edit `prompts/writing_prompt.md`; changes apply straight away.
+If you write with a prompt showing, it's saved with the entry (shown above it, and in the *Writing Prompt* column of exports) and kept with your draft until then. Hidden entries are never used for prompts. To tune the suggestions, edit `editions/philosophy/prompts/writing_prompt.md`; changes apply straight away.
 
 ## Titles
 
@@ -85,15 +85,15 @@ If it fails (no internet, an API problem, Claude busy), your entry is still save
 
 After editing an entry, the old reflection stays. Click **Reflect again** if you want a new one. If that fails, the earlier reflection is kept.
 
-**Tuning the reflections:** edit `prompts/reflection.md` in Notepad. Changes apply to the next reflection; no restart is needed. The note shown when an entry suggests real distress is in `prompts/support_note.md`.
+**Tuning the reflections:** edit `editions/philosophy/prompts/reflection.md` in Notepad. Changes apply to the next reflection; no restart is needed. The note shown when an entry suggests real distress is in `prompts/support_note.md`.
 
 **Cost:** each reflection costs roughly 2–5 cents of API credit at the default *Deep* setting. *Settings → Reflection depth* trades depth for speed and cost.
 
 ### Quotes and links
 
-Reflections draw on the whole Western tradition: Socrates and Plato, Aristotle, Epicurus, Cicero, the Stoics, Augustine, Boethius, Anselm, Aquinas and Dante, Descartes, Pascal, Spinoza, Locke and Hume, Kant, Kierkegaard, and Mill. Claude picks whichever thinker best fits each entry; to change that emphasis, edit `prompts/reflection.md`.
+Reflections draw on the whole Western tradition: Socrates and Plato, Aristotle, Epicurus, Cicero, the Stoics, Augustine, Boethius, Anselm, Aquinas and Dante, Descartes, Pascal, Spinoza, Locke and Hume, Kant, Kierkegaard, and Mill. Claude picks whichever thinker best fits each entry; to change that emphasis, edit `editions/philosophy/prompts/reflection.md`.
 
-Claude may quote only the 34 works listed in `config/sources.json`, each in a specific public-domain translation (or original English edition) on Wikisource. Claude never writes links. For each quote, the app:
+Claude may quote only the 34 works listed in `editions/philosophy/sources.json`, each in a specific public-domain translation (or original English edition) on Wikisource. Claude never writes links. For each quote, the app:
 
 1. searches its local copy of that translation (`sources/texts/`) for the words,
 2. if found, shows the **source's exact wording**, cites where it actually appears (correcting the book or chapter if Claude got it wrong), and links to that page (**Read the passage**),
@@ -101,7 +101,7 @@ Claude may quote only the 34 works listed in `config/sources.json`, each in a sp
 
 Ideas Claude attributes to one of these works *without* quoting (e.g. "Seneca, in *On the Shortness of Life*, argued that…") are listed under the reflection too, marked *(idea)*, with a **Read the source** link to the book, chapter or letter Claude named. The app checks that the location exists in that work; if it doesn't, the link goes to the work's main page instead. (It can't check that the idea is in that chapter, since there are no exact words to look for, hence "source" rather than "passage".) Reflections written before this feature have no idea links; **Reflect again** adds them.
 
-To add a work, or after editing `config/sources.json`, run this in the journal folder. It checks every link and downloads the texts (a few minutes):
+To add a work, or after editing `editions/philosophy/sources.json`, run this in the journal folder. It checks every link and downloads the texts (a few minutes):
 
 ```
 uv run python tools/build_sources.py
@@ -185,7 +185,7 @@ Your personal choices (name, journal name, day/evening, colour, photo, draft sav
 | Setting | What it does | Default |
 |---|---|---|
 | `user_name` | Your name in the greeting ("Hi …, what's on your mind?") | *(empty)* |
-| `journal_name` | The title at the top of your journal, in the theme colour (blank = *Reflections*) | *(empty)* |
+| `journal_name` | The title at the top of your journal, in the theme colour (blank = the app name, e.g. *Well Lived*) | *(empty)* |
 | `port` | The number in the browser address | `5050` |
 | `open_browser_on_start` | Open the browser automatically | `true` |
 | `timezone` | Time zone for dates and streaks | `America/Toronto` |
@@ -258,8 +258,8 @@ This puts the journal at **https://reflections-j7o5.onrender.com** (Render added
 
 ### 2. Create the Google sign-in
 
-1. Go to <https://console.cloud.google.com>, create a project (e.g. *Reflections*).
-2. **APIs & Services → OAuth consent screen** (or *Google Auth Platform*): choose **External**, app name *Reflections*, your email as support and developer contact. Scopes: just the defaults (`openid`, `email`, `profile`).
+1. Go to <https://console.cloud.google.com>, create a project (e.g. *Well Lived*).
+2. **APIs & Services → OAuth consent screen** (or *Google Auth Platform*): choose **External**, app name *Well Lived*, your email as support and developer contact. Scopes: just the defaults (`openid`, `email`, `profile`).
 3. Leave it in **Testing** mode and add each family member's Gmail address under **Test users** (up to 100). Nobody else can sign in, and Google doesn't need to review the app.
 4. **Credentials → Create credentials → OAuth client ID** → *Web application*.
    - Authorised JavaScript origin: `https://reflections.onrender.com`
@@ -286,14 +286,14 @@ If the name `reflections` is taken on Render, it will give the service a slightl
 
 ### The welcome page, logo and name
 
-Signed-out visitors see a welcome page: what Reflections is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
+Signed-out visitors see a welcome page: what the app is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
 
-- **Logo and app icons:** the master is `brand-source/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon and the "Install app" icons in `static/brand/`.
-- **Installing:** Reflections offers to install itself where it can. **Settings → Basic → Install as an app** always has it; and from the 3rd entry on, a small invitation appears below the header (**Not now** hides it for a month; it never shows once installed). On Chrome or Edge (Windows, Mac, Android) the **Install** button opens the browser's install dialog; on iPhone/iPad, where websites can't install themselves, it shows the two steps (*Share → Add to Home Screen*). Nothing is offered in browsers that can't install (e.g. Firefox on a computer). A tiny service worker (`static/sw.js`) makes the site installable; it stores nothing on the device.
-- **Picture behind the left side (optional):** `static/brand/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
-- **Name:** *Reflections* by default (browser tab, welcome page, privacy page). To change it, set `APP_NAME` in `render.yaml` (or in `.env` on your own computer).
+- **Logo and app icons:** the master is `brand-source/<edition>/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py <edition>` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon and the "Install app" icons in `static/brands/<edition>/`.
+- **Installing:** the app offers to install itself where it can. **Settings → Basic → Install as an app** always has it; and from the 3rd entry on, a small invitation appears below the header (**Not now** hides it for a month; it never shows once installed). On Chrome or Edge (Windows, Mac, Android) the **Install** button opens the browser's install dialog; on iPhone/iPad, where websites can't install themselves, it shows the two steps (*Share → Add to Home Screen*). Nothing is offered in browsers that can't install (e.g. Firefox on a computer). A tiny service worker (`static/sw.js`) makes the site installable; it stores nothing on the device.
+- **Picture behind the left side (optional):** `static/brands/<edition>/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
+- **Name:** comes from the edition (`app_name` in `editions/<edition>/edition.json`): *Well Lived* for philosophy, *In His Steps* for the Christian edition. It shows in the browser tab, welcome page, privacy page and installed app. `APP_NAME` in `.env` or on Render overrides it, but is best left unset.
 
-Files in `static/brand/` are public (the welcome page is visible to anyone), unlike `static/backgrounds/`, which only signed-in people can see.
+Files in `static/brands/<edition>/` are public (the welcome page is visible to anyone), unlike `static/backgrounds/`, which only signed-in people can see.
 
 ### Inviting someone, or removing them
 

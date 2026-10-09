@@ -1,0 +1,47 @@
+{
+  "_about": [
+    "In His Steps: the Christian edition, for daily quiet times. Same app as Well Lived,",
+    "with its own name, welcome page, quotes, colours and voices. The library of quotable",
+    "works is sources.json in this folder (made by tools/make_christian_sources.py), and",
+    "Claude's instructions are in prompts/. Run it with EDITION=christian."
+  ],
+  "app_name": "In His Steps",
+  "tagline": "A Daily Journal",
+  "tab_letter": "S",
+  "tab_font": "EBGaramond-Variable.ttf",
+  "tab_colour": "#2A4B71",
+  "description": "A private journal for your daily quiet time, with a reflection from Scripture after every entry.",
+  "theme_colour": "#2a4865",
+  "default_colour_theme": "lake",
+  "lead": "A quiet place to meet with God each day, with a reflection from Scripture waiting after every entry.",
+  "points": [
+    {"icon": "calendar", "title": "Build a daily habit of quiet time",
+     "text": "A few minutes of honest writing before God each day. Your streak keeps count, and a prompt is there when the page feels blank."},
+    {"icon": "book", "title": "Rooted in Scripture and the great devotional writers",
+     "text": "Reflections draw on the Bible, especially Paul's letters, the Gospels and the Psalms, and on Augustine, Luther, Calvin, Bunyan, Edwards, Spurgeon and more, with direct links to the original texts."},
+    {"icon": "question", "title": "Grow in the likeness of Christ",
+     "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favourites close."},
+    {"icon": "lock", "title": "A fully private, encrypted journal",
+     "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
+  ],
+  "welcome_quote": {
+    "text": "“Search me, O God, and know my heart; test me and know my concerns. See if there is any offensive way in me; lead me in the way everlasting.”",
+    "cite_html": "Psalm 139:23–24 <cite>(BSB)</cite>"
+  },
+  "passphrase_quote": {
+    "text": "“But when you pray, go into your inner room, shut your door, and pray to your Father, who is unseen. And your Father, who sees what is done in secret, will reward you.”",
+    "cite_html": "Jesus, in Matthew 6:6 <cite>(BSB)</cite>"
+  },
+  "invite_line": "Invite a friend",
+  "voices_label": "writers",
+  "voice_singular": "writer",
+  "examples": {
+    "paraphrase": "Paul told the Philippians not to be anxious about anything, but to bring every request to God with thanksgiving.",
+    "reference": "Brother Lawrence, in his Fourth Conversation, described…",
+    "quote_intro": "As Paul wrote to the Romans, [[q1]]"
+  },
+  "voices": ["Augustine", "Thomas Aquinas", "Thomas à Kempis", "Martin Luther", "John Calvin",
+             "Richard Baxter", "John Owen", "John Bunyan", "Brother Lawrence", "Jonathan Edwards",
+             "Charles Spurgeon", "J. C. Ryle", "Andrew Murray", "Oswald Chambers", "A. W. Tozer",
+             "C. S. Lewis", "Dietrich Bonhoeffer", "Dallas Willard", "Tim Keller"]
+}

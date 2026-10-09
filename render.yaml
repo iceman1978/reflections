@@ -13,8 +13,8 @@ services:
       mountPath: /var/data       # entries (encrypted), backups, logs
       sizeGB: 1
     envVars:
-      - key: APP_NAME
-        value: Reflections
+      - key: EDITION
+        value: philosophy     # the app name and content come from editions/philosophy/
       - key: PUBLIC_HOST
         value: reflections-j7o5.onrender.com
       - key: TIMEZONE
@@ -34,4 +34,41 @@ services:
       - key: ALLOWED_EMAILS      # comma-separated Google addresses allowed to sign in
         sync: false
       - key: ADMIN_EMAILS        # who can read feedback (Settings → Feedback received): your address
+        sync: false
+
+  # In His Steps (the Christian edition): the same code, its own address, disk, accounts and Google sign-in.
+  # Keep the name above ("reflections") as it is: renaming a service here would make Render create a new one.
+  - type: web
+    name: inhissteps             # → https://inhissteps.onrender.com (or with a suffix if the name is taken)
+    runtime: docker
+    plan: starter
+    region: ohio
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: christian-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: EDITION
+        value: christian      # the app name and content come from editions/christian/
+      - key: PUBLIC_HOST         # set to the real address once Render shows it (and later the custom domain)
+        sync: false
+      - key: TIMEZONE
+        value: America/Toronto
+      - key: REFLECTIONS_PER_DAY
+        value: "3"
+      - key: PROMPTS_PER_DAY
+        value: "10"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID    # from the In His Steps Google Cloud project (not Well Lived's)
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_EMAILS
+        sync: false
+      - key: ADMIN_EMAILS
         sync: false

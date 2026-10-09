@@ -4,12 +4,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% if test_login %}[TEST] {% endif %}{{ app_name }}</title>
+  <title>{% if test_login %}[TEST] {% endif %}{{ app_name }}{% if edition.tagline %}: {{ edition.tagline }}{% endif %}</title>
   {% include "_icons.html" %}
   <link rel="preload" href="/static/fonts/EBGaramond-Variable.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="{{ static_url('style.css') }}">
 </head>
 <body>
+  {% macro point_icon(name) -%}
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    {%- if name == "calendar" %}<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8.5 14.5l2.2 2.2 4.8-4.8"/>
+    {%- elif name == "columns" %}<path d="M4 20.5h16M5 4h14M6 4v-.5h12V4M7 7v11M10.3 7v11M13.7 7v11M17 7v11M5.5 18h13M5.5 7h13"/>
+    {%- elif name == "question" %}<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.4v.4M12 16.6v.1"/>
+    {%- elif name == "lock" %}<path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/>
+    {%- elif name == "book" %}<path d="M12 6.5C10 5 7 4.5 3.5 5v13.5C7 18 10 18.5 12 20c2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5zM12 6.5V20"/>
+    {%- elif name == "sun" %}<circle cx="12" cy="13" r="4"/><path d="M12 4v2M5.6 6.6l1.4 1.4M18.4 6.6L17 8M3 13h2M19 13h2M4 19.5h16"/>
+    {%- endif -%}
+  </svg>
+  {%- endmacro %}
   {% if test_login %}<div class="test-ribbon" title="Started with test-web.bat: throwaway data, not the live site">Test copy</div>{% endif %}
   <!-- Today's nature photo, softly blurred behind the book -->
   <div id="backdrop" class="backdrop" aria-hidden="true"></div>
@@ -25,45 +36,39 @@
         {% if logo_url %}
         <img class="brand-logo" src="{{ logo_url }}" alt="">
         {% else %}
-        <div class="brand-logo brand-logo-placeholder" title="Add your logo as static/brand/logo.png (or .svg)">Logo</div>
+        <div class="brand-logo brand-logo-placeholder" title="Add a logo: see static/brands/README.txt">Logo</div>
         {% endif %}
-        <h1 class="brand-name">{{ app_name }}</h1>
+        <div class="brand-title">
+          <h1 class="brand-name">{{ app_name }}</h1>
+          {% if edition.tagline %}<p class="brand-tagline">{{ edition.tagline }}</p>{% endif %}
+        </div>
       </div>
-      <p class="landing-lead">A quiet place to write each day, with a thoughtful reflection waiting after every entry.</p>
+      <p class="landing-lead">{{ edition.lead }}</p>
       <ul class="landing-points">
+        {% for point in edition.points %}
         <li>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M8.5 14.5l2.2 2.2 4.8-4.8"/></svg>
-          <div><strong>Build a habit of daily personal reflection</strong>
-            <span>A few minutes of writing a day. Your streak keeps count, and a prompt is there when the page feels blank.</span></div>
+          {{ point_icon(point.icon) }}
+          <div><strong>{{ point.title }}</strong>
+            <span>{{ point.text }}</span></div>
         </li>
-        <li>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16M5 4h14M6 4v-.5h12V4M7 7v11M10.3 7v11M13.7 7v11M17 7v11M5.5 18h13M5.5 7h13"/></svg>
-          <div><strong>Ground yourself in over two millennia of Western philosophy</strong>
-            <span>Draw wisdom from classical virtue ethics, Stoicism, medieval scholasticism, Enlightenment thought, and modern existentialism—with direct links to original texts.</span></div>
-        </li>
-        <li>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.2A8 8 0 1 1 20 12z"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.4v.4M12 16.6v.1"/></svg>
-          <div><strong>Explore past reflections with prompted questions</strong>
-            <span>Every reflection ends with a question to carry forward. Browse back by date, or keep favourites close.</span></div>
-        </li>
-        <li>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/></svg>
-          <div><strong>A fully private, encrypted journal</strong>
-            <span>Entries are locked with a passphrase only you know. Download your whole journal at any time.</span></div>
-        </li>
+        {% endfor %}
       </ul>
+      {% if edition.welcome_quote %}
       <figure class="landing-quote">
-        <blockquote>“The unexamined life is not worth living.”</blockquote>
-        <figcaption>Socrates, in Plato’s <cite>Apology</cite></figcaption>
+        <blockquote>{{ edition.welcome_quote.text }}</blockquote>
+        <figcaption>{{ edition.welcome_quote.cite_html | safe }}</figcaption>
       </figure>
+      {% endif %}
     </section>
     {% endif %}
 
     <!-- Above the passphrase card -->
+    {% if edition.passphrase_quote %}
     <figure id="vault-quote" class="vault-quote" hidden>
-      <blockquote>“Thought and speech are the same thing, except that what we call thought is a silent dialogue of the soul with itself, taking place without the voice.”</blockquote>
-      <figcaption>The Eleatic Visitor, in Plato’s <cite>Sophist</cite></figcaption>
+      <blockquote>{{ edition.passphrase_quote.text }}</blockquote>
+      <figcaption>{{ edition.passphrase_quote.cite_html | safe }}</figcaption>
     </figure>
+    {% endif %}
 
     <div class="vault-card page">
       <h1 id="vault-title" class="vault-title">{{ app_name }}</h1>
@@ -576,6 +581,7 @@
   <script>window.JOURNAL = {
     hosted: {{ hosted | tojson }},
     appName: {{ app_name | tojson }},
+    inviteLine: {{ edition.invite_line | tojson }},
     userName: {{ user_name | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},

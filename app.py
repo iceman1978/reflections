@@ -154,19 +154,21 @@ def _static_versions():
     return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "app_version": config.APP_VERSION, "test_login": bool(HOSTED and TEST_LOGIN),
             "test_emails": sorted(config.ALLOWED_EMAILS),
             "logo_url": _brand_file("logo"), "hero_url": _brand_file("hero"),
-            "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR}
+            "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR,
+            "edition": config.EDITION, "brand_url": BRAND_URL, "brand_path": f"brands/{config.EDITION_NAME}"}
 
 
-BRAND_DIR = ROOT / "static" / "brand"
+BRAND_DIR = config.BRAND_DIR                     # static/brands/<edition>/
+BRAND_URL = f"/static/brands/{config.EDITION_NAME}"
 BRAND_TYPES = (".svg", ".png", ".webp", ".jpg", ".jpeg")
 
 
 def _brand_file(stem):
-    """static/brand/logo.* or hero.*, if one has been added (else None)."""
+    """The edition's logo.* or hero.*, if one has been added (else None)."""
     for ext in BRAND_TYPES:
         path = BRAND_DIR / f"{stem}{ext}"
         if path.exists():
-            return f"/static/brand/{path.name}?v={int(path.stat().st_mtime)}"
+            return f"{BRAND_URL}/{path.name}?v={int(path.stat().st_mtime)}"
     return None
 
 
@@ -231,9 +233,9 @@ def healthz():
 
 
 # ---- Icons and "Install app" ----------------------------------------------
-# Made from brand-source/logo-original.png by tools/make_icons.py.
+# Made from brand-source/<edition>/logo-original.png by tools/make_icons.py.
 
-THEME_COLOUR = "#2a4865"   # the deep blue of the logo (title bar, splash screen)
+THEME_COLOUR = config.EDITION.get("theme_colour", "#2a4865")   # title bar and splash screen when installed
 
 
 @app.get("/favicon.ico")
@@ -256,15 +258,15 @@ def service_worker():
 @app.get("/manifest.webmanifest")
 def manifest():
     """What a phone or computer needs to offer "Install app" / "Add to Home Screen"."""
-    icons = [{"src": f"/static/brand/{name}", "sizes": size, "type": "image/png", "purpose": purpose}
+    icons = [{"src": f"{BRAND_URL}/{name}", "sizes": size, "type": "image/png", "purpose": purpose}
              for name, size, purpose in (("icon-192.png", "192x192", "any"), ("icon-512.png", "512x512", "any"),
                                          ("icon-maskable-512.png", "512x512", "maskable"))
              if (BRAND_DIR / name).exists()]
     resp = jsonify({
         "id": "/",
-        "name": config.APP_NAME,
+        "name": f"{config.APP_NAME}: {config.EDITION['tagline']}" if config.EDITION.get("tagline") else config.APP_NAME,
         "short_name": config.APP_NAME,
-        "description": "A private journal, with a thoughtful reflection after every entry.",
+        "description": config.EDITION.get("description", ""),
         "start_url": "/",
         "scope": "/",
         "display": "standalone",

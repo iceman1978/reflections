@@ -1,7 +1,7 @@
 {% if has_icons %}
-  <link rel="icon" href="{{ static_url('brand/favicon.ico') }}" sizes="48x48">
-  <link rel="icon" href="{{ static_url('brand/favicon-32.png') }}" type="image/png" sizes="32x32">
-  <link rel="apple-touch-icon" href="/static/brand/apple-touch-icon.png">
+  <link rel="icon" href="{{ static_url(brand_path ~ '/favicon.ico') }}" sizes="48x48">
+  <link rel="icon" href="{{ static_url(brand_path ~ '/favicon-32.png') }}" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="{{ brand_url }}/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="{{ theme_colour }}">
   <meta name="apple-mobile-web-app-title" content="{{ app_name }}">

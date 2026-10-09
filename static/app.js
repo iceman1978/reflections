@@ -688,7 +688,8 @@
       ];
       for (const q of sourcesList) {
         const li = document.createElement("li");
-        li.append(document.createTextNode(`— ${q.author}, ${q.title}${q.location ? ` ${q.location}` : ""} `));
+        // Books of the Bible have no author: "— Romans 8:28".
+        li.append(document.createTextNode(`— ${q.author ? `${q.author}, ` : ""}${q.title}${q.location ? ` ${q.location}` : ""} `));
         if (q.kind === "idea") {
           const tag = document.createElement("span");
           tag.className = "cite-kind";
@@ -702,7 +703,7 @@
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = q.kind === "quote" ? "Read the passage ↗" : "Read the source ↗";
-          a.title = `${q.translation}, on Wikisource`;
+          a.title = `${q.translation}, on ${siteName(q.url)}`;
           li.append(a);
         }
         ul.append(li);
@@ -719,6 +720,12 @@
   // Chrome, Edge, Safari and Firefox understand. Quotes are stored in the
   // source's exact wording, so the words match the page. If a browser can't
   // find them, it simply opens the page at the top.
+  function siteName(url) {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    return { "en.wikisource.org": "Wikisource", "ccel.org": "the Christian Classics Ethereal Library",
+             "gutenberg.org": "Project Gutenberg", "biblehub.com": "Bible Hub" }[host] || host;
+  }
+
   function passageUrl(url, quote) {
     const words = String(quote || "").trim().split(/\s+/).filter(Boolean);
     if (!words.length) return url;
@@ -1647,7 +1654,7 @@
       id: "invite",
       ready: (s) => CFG.hosted && !s.invites_sent && INVITE_AT.some((n) => s.total_entries >= n && n > (Number(recall("journal.nudge.invite")) || 0)),
       text: () => `<strong>Know someone who'd enjoy this?</strong> ${esc(CFG.appName)} is invitation-only while it's in beta, `
-        + "and grows through people like you. Invite a fellow thinker, any time, with the gift at the top.",
+        + `and grows through people like you. ${esc(CFG.inviteLine)}, any time, with the gift at the top.`,
       go: () => "Invite someone",
       // Opening the form answers this milestone; if no invitation is actually sent,
       // the card comes back at the next one (sent invitations come from the server).
@@ -1680,7 +1687,7 @@
     installPrompt = null;
     $("install-invite").hidden = true;
     renderInstall();
-    showNotice("Installed. You'll find Reflections with your other apps.", 5000);
+    showNotice(`Installed. You'll find ${CFG.appName} with your other apps.`, 5000);
   });
   $("install-btn").addEventListener("click", installApp);
   $("invite-install-btn").addEventListener("click", () => {

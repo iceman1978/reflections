@@ -15,11 +15,12 @@ import anthropic
 from dotenv import load_dotenv
 
 from . import sources, store
-from .config import ROOT, TZ, settings
+from .config import EDITION, EDITION_DIR, ROOT, TZ, settings
 
 log = logging.getLogger(__name__)
 
-PROMPTS_DIR = ROOT / "prompts"
+PROMPTS_DIR = EDITION_DIR / "prompts"        # this edition's instructions for Claude
+SHARED_PROMPTS_DIR = ROOT / "prompts"        # used by every edition (e.g. the support note)
 
 
 class ReflectionError(Exception):
@@ -100,16 +101,22 @@ def _request_options(schema=None, effort=None):
 # ---- Prompt -------------------------------------------------------------
 
 def _read_prompt(name):
-    text = (PROMPTS_DIR / name).read_text(encoding="utf-8")
+    path = PROMPTS_DIR / name if (PROMPTS_DIR / name).exists() else SHARED_PROMPTS_DIR / name
+    text = path.read_text(encoding="utf-8")
     return re.sub(r"<!--.*?-->", "", text, flags=re.S).strip()
 
 
-# Thinkers a reflection can draw on (also used to spread reflections across them).
-THINKERS = ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",
-            "Augustine", "Boethius", "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri",
-            "René Descartes", "Blaise Pascal", "Baruch Spinoza", "John Locke", "David Hume", "Immanuel Kant",
-            "Søren Kierkegaard", "John Stuart Mill"]
+# The voices a reflection can draw on (from the edition; also used to spread reflections across them).
+THINKERS = list(EDITION["voices"])
 RECENT_REFLECTIONS = 8   # how far back to look when nudging towards variety
+VOICE = EDITION.get("voice_singular", "thinker")   # what the edition calls one of its voices
+# Example sentences in Claude's instructions, so they come from the edition's own voices.
+EXAMPLES = {
+    "paraphrase": "Seneca observed that we suffer more in imagination than in reality.",
+    "reference": "Seneca, in On the Shortness of Life, argued that…",
+    "quote_intro": "As Seneca wrote, [[q1]]",
+    **EDITION.get("examples", {}),
+}
 
 
 def _schema():
@@ -143,8 +150,10 @@ def _schema():
                             "type": "string",
                             "description": "One complete, attributed sentence that can replace the "
                                            "WHOLE sentence containing the marker if the quote can't "
-                                           "be verified, e.g. 'Seneca observed that we suffer more "
-                                           "in imagination than in reality.'",
+                                           f"be verified, e.g. '{EXAMPLES['paraphrase']}' It follows "
+                                           "the sentence before it, so if that sentence already names "
+                                           "the author, use a pronoun or short form ('He observed that…') "
+                                           "instead of repeating the full name.",
                         },
                     },
                     "required": ["marker", "work", "location", "quote", "paraphrase"],
@@ -154,8 +163,8 @@ def _schema():
             "references": {
                 "type": "array",
                 "description": "Every work from the list whose ideas the insight draws on or "
-                               "attributes WITHOUT quoting it, e.g. 'Seneca, in On the Shortness "
-                               "of Life, argued that…'. (Works you quote are cited from the quote.)",
+                               f"attributes WITHOUT quoting it, e.g. '{EXAMPLES['reference']}'. "
+                               "(Works you quote are cited from the quote.)",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -173,7 +182,7 @@ def _schema():
             },
             "thinkers": {
                 "type": "array",
-                "description": "The one to three thinkers whose ideas the insight mainly draws on.",
+                "description": f"The one to three {VOICE}s whose ideas the insight mainly draws on.",
                 "items": {"type": "string", "enum": THINKERS},
             },
             "wellbeing_concern": {
@@ -194,7 +203,7 @@ def _system_prompt():
         + "\n\n## Response format\n\n"
         "Respond with JSON matching the schema. In the insight, put each quote's marker "
         "(e.g. [[q1]]) exactly where the quoted words belong, with the words that introduce it "
-        "around the marker, e.g. 'As Seneca wrote, [[q1]]'. Give the quote a sentence of its own: "
+        f"around the marker, e.g. '{EXAMPLES['quote_intro']}'. Give the quote a sentence of its own: "
         "if the quote can't be verified, that whole sentence is replaced by the paraphrase, which "
         "must therefore be a complete, attributed sentence. Leave quotes empty if you don't "
         "quote anything. Whenever you attribute an idea to one of the works listed above without "
@@ -215,17 +224,37 @@ def recent_thinkers(entry):
     return counts, min(len(reflected), RECENT_REFLECTIONS)
 
 
+def recent_scripture(entry):
+    """How often each book of the Bible was cited in the last few reflections (editions with Scripture)."""
+    bible = {w: work["cite_title"] for w, work in sources.works().items() if "bible" in work["pages"]}
+    if not bible:
+        return Counter()
+    reflected = [e for e in store.all_entries()
+                 if e["id"] != entry["id"] and e.get("reflection_status") == store.DONE and e.get("insight")]
+    counts = Counter()
+    for e in reflected[-RECENT_REFLECTIONS:]:
+        books = {bible[c.get("work")] for c in (e.get("quotes") or []) + (e.get("references") or [])
+                 if c.get("work") in bible}
+        counts.update(books)
+    return counts
+
+
 def _variety_note(entry):
     counts, seen = recent_thinkers(entry)
     if not seen:
         return None
-    used = ", ".join(f"{name} ({n})" for name, n in counts.most_common()) or "no named thinker"
-    note = (f"For variety: this writer's last {seen} reflection{'s' if seen != 1 else ''} drew mainly on "
+    used = ", ".join(f"{name} ({n})" for name, n in counts.most_common()) or f"no named {VOICE}"
+    note = (f"For variety: this person's last {seen} reflection{'s' if seen != 1 else ''} drew mainly on "
             f"{used}.")
     fresh = [name for name in THINKERS if name not in counts]
     if fresh:
         note += (f" Not used recently: {', '.join(fresh)}. Prefer one of those this time, unless a recent "
-                 "thinker is clearly the best lens for this particular entry.")
+                 f"{VOICE} is clearly the best lens for this particular entry.")
+    books = recent_scripture(entry)
+    if books:
+        note += (" Scripture they've recently been given: "
+                 + ", ".join(f"{book} ({n})" for book, n in books.most_common())
+                 + ". Unless one of those clearly fits best, open a different part of the Bible this time.")
     return note
 
 

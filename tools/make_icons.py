@@ -1,10 +1,11 @@
 """Make every logo and icon size from one master image.
 
-    uv run --with pillow python tools/make_icons.py [path/to/master.png]
+    uv run --with pillow python tools/make_icons.py [edition] [path/to/master.png]
 
-The master (default: brand-source/logo-original.png) should be square, at
+The edition defaults to the EDITION setting (or philosophy). The master
+(default: brand-source/<edition>/logo-original.png) should be square, at
 least 1024 x 1024. It's kept out of static/ because it's large; this writes
-small, web-ready copies into static/brand/:
+small, web-ready copies into static/brands/<edition>/:
 
     logo.png                welcome page (shown at up to 96 px, so 384 px for sharp screens)
     favicon.ico             browser tab (16, 32 and 48 px inside one file)
@@ -17,19 +18,24 @@ small, web-ready copies into static/brand/:
 
 Run it again whenever the logo changes, then push.
 """
+import json
+import os
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "static" / "brand"
+EDITION = (sys.argv[1] if len(sys.argv) > 1 else os.environ.get("EDITION", "philosophy")).strip().lower()
+OUT = ROOT / "static" / "brands" / EDITION
 
 # The browser-tab icon is simpler than the logo, so it's readable at 16 px:
-# the "R" from the handwriting font, white on the app's blue.
-TAB_LETTER = "R"
-TAB_FONT = ROOT / "static" / "fonts" / "HomemadeApple-Regular.ttf"
-TAB_BLUE = (0x2A, 0x4B, 0x71)
+# the first letter of the edition's name (or its "tab_letter") in the
+# handwriting font, white on the app's blue.
+_edition = json.loads((ROOT / "editions" / EDITION / "edition.json").read_text(encoding="utf-8"))
+TAB_LETTER = _edition.get("tab_letter") or _edition["app_name"].removeprefix("The ")[0]
+TAB_FONT = ROOT / "static" / "fonts" / _edition.get("tab_font", "HomemadeApple-Regular.ttf")   # or EBGaramond-Variable.ttf
+TAB_BLUE = tuple(bytes.fromhex(_edition.get("tab_colour", "#2A4B71").lstrip("#")))   # the background colour
 
 
 def letter_icon(size=512, fill=0.74, radius=0.2, weight=0.03):
@@ -74,8 +80,13 @@ def maskable(img, size=512, safe=0.80):
 
 
 def main():
-    src = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "brand-source" / "logo-original.png"
-    img = Image.open(src).convert("RGB")
+    src = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "brand-source" / EDITION / "logo-original.png"
+    if not src.exists():
+        # No logo yet: a stand-in made from the letter, until a real one is added.
+        print(f"No logo at {src.relative_to(ROOT)}; using the letter {TAB_LETTER} as a stand-in.")
+        img = letter_icon(1024, radius=0).convert("RGB")
+    else:
+        img = Image.open(src).convert("RGB")
     if img.width != img.height:
         raise SystemExit(f"The master image should be square; this one is {img.width} x {img.height}.")
     OUT.mkdir(parents=True, exist_ok=True)

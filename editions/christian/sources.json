@@ -1,0 +1,539 @@
+{
+  "_about": [
+    "In His Steps' library: the only works Claude may quote, and the app (never Claude) builds",
+    "every link from this file. MADE BY tools/make_christian_sources.py: edit that, not this.",
+    "Then download the texts:  $env:EDITION = \"christian\"; uv run python tools/build_sources.py",
+    "",
+    "Scripture is the Berean Standard Bible (public domain since 2023), linked to Bible Hub.",
+    "Writers come from the Christian Classics Ethereal Library (CCEL), Project Gutenberg, or",
+    "Wikisource (Augustine and Aquinas, shared with Reflections). Writers still in copyright",
+    "(C. S. Lewis, Bonhoeffer, Dallas Willard, Tim Keller, Oswald Chambers) are not listed:",
+    "Claude may paraphrase and name them, but never quote them.",
+    "See editions/philosophy/sources.json for what each field means."
+  ],
+  "site": "https://en.wikisource.org/wiki/",
+  "works": {
+    "psalms": {
+      "author": "",
+      "title": "Psalms",
+      "cite_title": "Psalm",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Prayer in every mood: lament, confession (32, 51), trust (23, 27, 46, 62, 91), longing (42, 63, 84), searching the heart (139), praise. Give the speaker's honest feelings their due before turning to hope.",
+      "work_page": "https://biblehub.com/bsb/psalms/1.htm",
+      "pages": {
+        "bible": "Psalm",
+        "slug": "psalms"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "proverbs": {
+      "author": "",
+      "title": "Proverbs",
+      "cite_title": "Proverbs",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Wisdom for daily conduct: speech, work, friendship, money, pride and humility, the fear of the LORD (1, 3, 4, 16).",
+      "work_page": "https://biblehub.com/bsb/proverbs/1.htm",
+      "pages": {
+        "bible": "Proverbs",
+        "slug": "proverbs"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "ecclesiastes": {
+      "author": "",
+      "title": "Ecclesiastes",
+      "cite_title": "Ecclesiastes",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The Teacher on vanity, toil, time and seasons (3), enjoying God's gifts, and what endures (12). Call the author 'the Teacher' (the book's own name for him, traditionally Solomon): 'the Teacher of Ecclesiastes' on first mention, then just 'the Teacher' or 'he'.",
+      "work_page": "https://biblehub.com/bsb/ecclesiastes/1.htm",
+      "pages": {
+        "bible": "Ecclesiastes",
+        "slug": "ecclesiastes"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "isaiah": {
+      "author": "",
+      "title": "Isaiah",
+      "cite_title": "Isaiah",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Comfort and calling: the vision of holiness (6), comfort for the weary (40), the Servant (42, 53), invitation (55).",
+      "work_page": "https://biblehub.com/bsb/isaiah/1.htm",
+      "pages": {
+        "bible": "Isaiah",
+        "slug": "isaiah"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "matthew": {
+      "author": "",
+      "title": "Matthew",
+      "cite_title": "Matthew",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The Sermon on the Mount (5-7): the Beatitudes, anger, lust, enemies, giving and prayer in secret, treasure, worry, judging, the narrow gate. Parables (13, 18, 20, 25). The weary invited to rest (11:28-30).",
+      "work_page": "https://biblehub.com/bsb/matthew/1.htm",
+      "pages": {
+        "bible": "Matthew",
+        "slug": "matthew"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "mark": {
+      "author": "",
+      "title": "Mark",
+      "cite_title": "Mark",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Jesus in action: the cost of following (8:34-38), service (10:42-45), faith and doubt (9:24), Gethsemane (14).",
+      "work_page": "https://biblehub.com/bsb/mark/1.htm",
+      "pages": {
+        "bible": "Mark",
+        "slug": "mark"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "luke": {
+      "author": "",
+      "title": "Luke",
+      "cite_title": "Luke",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Parables of grace: the Good Samaritan (10), Mary and Martha (10), the rich fool (12), the lost sheep, coin and son (15), the Pharisee and the tax collector (18). Zacchaeus (19).",
+      "work_page": "https://biblehub.com/bsb/luke/1.htm",
+      "pages": {
+        "bible": "Luke",
+        "slug": "luke"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "john": {
+      "author": "",
+      "title": "John",
+      "cite_title": "John",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The Word made flesh (1), new birth (3), living water (4), the 'I am' sayings, washing feet (13), abiding in the vine (15), the high-priestly prayer (17), Peter restored (21).",
+      "work_page": "https://biblehub.com/bsb/john/1.htm",
+      "pages": {
+        "bible": "John",
+        "slug": "john"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "romans": {
+      "author": "",
+      "title": "Romans",
+      "cite_title": "Romans",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Paul's fullest gospel: all have sinned (3), justified by faith (5), dead to sin (6), the divided self (7), no condemnation and life in the Spirit (8), living sacrifices and transformed minds (12).",
+      "work_page": "https://biblehub.com/bsb/romans/1.htm",
+      "pages": {
+        "bible": "Romans",
+        "slug": "romans"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_corinthians": {
+      "author": "",
+      "title": "1 Corinthians",
+      "cite_title": "1 Corinthians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The foolishness of the cross (1), the body (12), love (13), resurrection hope (15).",
+      "work_page": "https://biblehub.com/bsb/1_corinthians/1.htm",
+      "pages": {
+        "bible": "1 Corinthians",
+        "slug": "1_corinthians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "2_corinthians": {
+      "author": "",
+      "title": "2 Corinthians",
+      "cite_title": "2 Corinthians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Comfort in affliction (1), treasure in jars of clay (4), new creation (5), strength in weakness (12).",
+      "work_page": "https://biblehub.com/bsb/2_corinthians/1.htm",
+      "pages": {
+        "bible": "2 Corinthians",
+        "slug": "2_corinthians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "galatians": {
+      "author": "",
+      "title": "Galatians",
+      "cite_title": "Galatians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Freedom in Christ, not by works of the law (2:20, 5:1), the fruit of the Spirit against the works of the flesh (5), bearing one another's burdens (6).",
+      "work_page": "https://biblehub.com/bsb/galatians/1.htm",
+      "pages": {
+        "bible": "Galatians",
+        "slug": "galatians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "ephesians": {
+      "author": "",
+      "title": "Ephesians",
+      "cite_title": "Ephesians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Saved by grace through faith (2), rooted in love (3), the old self and the new (4), speech and anger (4), walking as children of light (5), the armour of God (6).",
+      "work_page": "https://biblehub.com/bsb/ephesians/1.htm",
+      "pages": {
+        "bible": "Ephesians",
+        "slug": "ephesians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "philippians": {
+      "author": "",
+      "title": "Philippians",
+      "cite_title": "Philippians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The mind of Christ and his humility (2), counting all as loss (3), pressing on (3), anxiety and peace, whatever is true, contentment in all circumstances (4).",
+      "work_page": "https://biblehub.com/bsb/philippians/1.htm",
+      "pages": {
+        "bible": "Philippians",
+        "slug": "philippians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "colossians": {
+      "author": "",
+      "title": "Colossians",
+      "cite_title": "Colossians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Setting your mind on things above, putting off and putting on (3), work done as for the Lord (3).",
+      "work_page": "https://biblehub.com/bsb/colossians/1.htm",
+      "pages": {
+        "bible": "Colossians",
+        "slug": "colossians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_thessalonians": {
+      "author": "",
+      "title": "1 Thessalonians",
+      "cite_title": "1 Thessalonians",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "A quiet life (4), grief with hope (4), rejoice always, pray without ceasing, give thanks (5).",
+      "work_page": "https://biblehub.com/bsb/1_thessalonians/1.htm",
+      "pages": {
+        "bible": "1 Thessalonians",
+        "slug": "1_thessalonians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "2_timothy": {
+      "author": "",
+      "title": "2 Timothy",
+      "cite_title": "2 Timothy",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Not a spirit of fear (1), endurance (2), Scripture (3), finishing the race (4).",
+      "work_page": "https://biblehub.com/bsb/2_timothy/1.htm",
+      "pages": {
+        "bible": "2 Timothy",
+        "slug": "2_timothy"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "hebrews": {
+      "author": "",
+      "title": "Hebrews",
+      "cite_title": "Hebrews",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "A high priest who sympathises with weakness (4), faith (11), running the race and discipline (12), contentment (13).",
+      "work_page": "https://biblehub.com/bsb/hebrews/1.htm",
+      "pages": {
+        "bible": "Hebrews",
+        "slug": "hebrews"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "james": {
+      "author": "",
+      "title": "James",
+      "cite_title": "James",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Trials and wisdom (1), doers of the word (1), favouritism (2), faith and works (2), the tongue (3), humility and planning (4), patience (5).",
+      "work_page": "https://biblehub.com/bsb/james/1.htm",
+      "pages": {
+        "bible": "James",
+        "slug": "james"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_peter": {
+      "author": "",
+      "title": "1 Peter",
+      "cite_title": "1 Peter",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Living hope (1), suffering for doing good (2-4), casting your anxieties on him (5:7), humility (5).",
+      "work_page": "https://biblehub.com/bsb/1_peter/1.htm",
+      "pages": {
+        "bible": "1 Peter",
+        "slug": "1_peter"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_john": {
+      "author": "",
+      "title": "1 John",
+      "cite_title": "1 John",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Walking in the light, confession and forgiveness (1), love for one another, God is love (4), assurance (5).",
+      "work_page": "https://biblehub.com/bsb/1_john/1.htm",
+      "pages": {
+        "bible": "1 John",
+        "slug": "1_john"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "confessions": {
+      "author": "Augustine",
+      "title": "Confessions",
+      "translation": "J. G. Pilkington (1886)",
+      "location_format": "book.chapter, e.g. 1.1",
+      "work_page": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions",
+      "pages": {
+        "prefix": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions/",
+        "pattern": "^Book ([IVXL]+)/Chapter (\\d+)$"
+      },
+      "sections": null,
+      "note": "The restless heart (1.1), disordered loves, the divided will (8), conversion in the garden (8.12), memory and longing for God (10). Augustine speaks to God throughout: quote it as prayer."
+    },
+    "summa": {
+      "author": "Thomas Aquinas",
+      "title": "Summa Theologiae",
+      "translation": "Fathers of the English Dominican Province (1917)",
+      "location_format": "part.question.article, e.g. I-II.2.8 (only the moral parts I-II and II-II are available)",
+      "note": "Use it for grace (I-II.109-114), the theological virtues of faith, hope and charity (II-II.1-46), humility and pride (II-II.161-162), sloth (II-II.35). Quote the body of an article or a reply, not the objections, which state views Aquinas rejects.",
+      "work_page": "Summa Theologiae",
+      "pages": {
+        "prefix": "Summa Theologiae/",
+        "pattern": "^(First Part of the Second Part|Second Part of the Second Part)/Question (\\d+)$",
+        "aliases": {
+          "First Part of the Second Part": "I-II",
+          "Second Part of the Second Part": "II-II"
+        }
+      },
+      "sections": null
+    },
+    "luther_liberty": {
+      "author": "Martin Luther",
+      "title": "Concerning Christian Liberty",
+      "translation": "R. S. Grignon (Harvard Classics, 1910)",
+      "location_format": "leave empty",
+      "note": "Also known as The Freedom of a Christian (1520): the Christian is a free lord of all, subject to none, and a dutiful servant of all, subject to all; faith alone justifies, and good works flow from a heart already set free.",
+      "work_page": "https://ccel.org/ccel/luther/christianliberty",
+      "pages": {
+        "ccel": "luther/christianliberty",
+        "levels": 0
+      },
+      "sections": null
+    },
+    "calvin_christian_life": {
+      "author": "John Calvin",
+      "title": "On the Christian Life",
+      "translation": "Henry Beveridge (1845)",
+      "location_format": "chapter, e.g. Chapter 2",
+      "note": "Institutes III.6-10, often printed as the Golden Booklet: self-denial ('we are not our own'), bearing the cross, meditating on the life to come, using this life's gifts rightly.",
+      "work_page": "https://ccel.org/ccel/calvin/chr_life",
+      "pages": {
+        "ccel": "calvin/chr_life"
+      },
+      "sections": null
+    },
+    "bunyan_pilgrim": {
+      "author": "John Bunyan",
+      "title": "The Pilgrim's Progress",
+      "translation": "original English (1678)",
+      "location_format": "part and stage, e.g. Part I, The Third Stage",
+      "note": "Christian's journey: the burden at the cross, the Slough of Despond, the Interpreter's house, Vanity Fair, Doubting Castle and Giant Despair, the River. Characters speak the lines; name them.",
+      "work_page": "https://ccel.org/ccel/bunyan/pilgrim",
+      "pages": {
+        "ccel": "bunyan/pilgrim",
+        "levels": 2
+      },
+      "sections": null
+    },
+    "bunyan_grace": {
+      "author": "John Bunyan",
+      "title": "Grace Abounding to the Chief of Sinners",
+      "translation": "original English (1666)",
+      "location_format": "paragraph number, e.g. 37",
+      "note": "Bunyan's own story of doubt, temptation, despair and assurance: honest about a troubled conscience.",
+      "work_page": "https://ccel.org/ccel/bunyan/grace",
+      "pages": {
+        "ccel": "bunyan/grace"
+      },
+      "sections": "numbered_paragraphs",
+      "location_from_section": true,
+      "section_prefix": "§"
+    },
+    "edwards_affections": {
+      "author": "Jonathan Edwards",
+      "title": "Religious Affections",
+      "translation": "original English (1746)",
+      "location_format": "part and numbered sign, e.g. Part III, XII (or just Part I)",
+      "note": "Telling true religion from its imitations: 'true religion, in great part, consists in holy affections'; feelings are no proof either way; the sign of real grace is a changed life and practice.",
+      "work_page": "https://ccel.org/ccel/edwards/affections",
+      "pages": {
+        "ccel": "edwards/affections",
+        "levels": 2
+      },
+      "sections": null
+    },
+    "lawrence_practice": {
+      "author": "Brother Lawrence",
+      "title": "The Practice of the Presence of God",
+      "translation": "the classic anonymous English translation",
+      "location_format": "conversation or letter, e.g. Fourth Conversation or Second Letter",
+      "note": "A kitchen worker's habit of constant, simple conversation with God among the pots and pans; returning without fuss after distraction.",
+      "work_page": "https://ccel.org/ccel/lawrence/practice",
+      "pages": {
+        "ccel": "lawrence/practice"
+      },
+      "sections": null
+    },
+    "murray_prayer": {
+      "author": "Andrew Murray",
+      "title": "With Christ in the School of Prayer",
+      "translation": "original English (1885)",
+      "location_format": "lesson, e.g. Third Lesson",
+      "note": "Thirty-one lessons on prayer from Jesus' own words: praying in secret, asking with confidence, persevering, the Father's love.",
+      "work_page": "https://ccel.org/ccel/murray/prayer",
+      "pages": {
+        "ccel": "murray/prayer"
+      },
+      "sections": null
+    },
+    "murray_humility": {
+      "author": "Andrew Murray",
+      "title": "Humility: The Beauty of Holiness",
+      "translation": "original English (1895)",
+      "location_format": "chapter, e.g. Chapter VI",
+      "note": "Humility as the creature's proper place before God and the root of every virtue; pride as the root of sin; humility tested in daily life, among other people, more than in prayer.",
+      "work_page": "https://www.gutenberg.org/ebooks/57121",
+      "pages": {
+        "gutenberg": 57121,
+        "split_text": "^(Notes|Humility: The [A-Za-z ]{1,30}|The Humility of Jesus|Humility (in|and) [A-Za-z ]{1,25})\\.?$"
+      },
+      "sections": null
+    },
+    "spurgeon_morning_evening": {
+      "author": "Charles Spurgeon",
+      "title": "Morning and Evening",
+      "translation": "original English (1865-1868)",
+      "location_format": "reading, e.g. Morning, January 14 or Evening, March 3",
+      "note": "Daily devotional readings, each on one verse: warm, vivid, Christ-centred.",
+      "work_page": "https://ccel.org/ccel/spurgeon/morneve",
+      "pages": {
+        "ccel": "spurgeon/morneve"
+      },
+      "sections": null
+    },
+    "ryle_holiness": {
+      "author": "J. C. Ryle",
+      "title": "Holiness",
+      "translation": "original English (1879)",
+      "location_format": "chapter, e.g. IV (The Fight)",
+      "note": "Plain, searching chapters: sin, sanctification, the fight, the cost, growth, assurance, 'Lot: a Beacon', 'Remember Lot's Wife', 'Christ is All'.",
+      "work_page": "https://ccel.org/ccel/ryle/holiness",
+      "pages": {
+        "ccel": "ryle/holiness"
+      },
+      "sections": null
+    },
+    "owen_mortification": {
+      "author": "John Owen",
+      "title": "Of the Mortification of Sin in Believers",
+      "translation": "original English (1656)",
+      "location_format": "chapter, e.g. Chapter II",
+      "note": "Putting sin to death by the Spirit (Romans 8:13): 'be killing sin or it will be killing you'; dealing with the root, not just the symptom; looking to Christ.",
+      "work_page": "https://ccel.org/ccel/owen/mort",
+      "pages": {
+        "ccel": "owen/mort"
+      },
+      "sections": null
+    },
+    "tozer_pursuit": {
+      "author": "A. W. Tozer",
+      "title": "The Pursuit of God",
+      "translation": "original English (1948)",
+      "location_format": "chapter, e.g. Chapter II",
+      "note": "Hungering for God himself rather than for religion: possessing nothing, removing the veil, the gaze of the soul, the sacrament of ordinary living.",
+      "work_page": "https://www.gutenberg.org/ebooks/25141",
+      "pages": {
+        "gutenberg": 25141,
+        "split": "h2",
+        "skip": "^(contents|introduction)"
+      },
+      "sections": null
+    },
+    "baxter_rest": {
+      "author": "Richard Baxter",
+      "title": "The Saints' Everlasting Rest",
+      "translation": "original English (1650), abridged by Benjamin Fawcett",
+      "location_format": "chapter, e.g. Chapter 9",
+      "note": "Heaven as the believer's rest, and the habit of heavenly meditation as medicine for a troubled, earth-bound heart.",
+      "work_page": "https://ccel.org/ccel/baxter/saints_rest",
+      "pages": {
+        "ccel": "baxter/saints_rest"
+      },
+      "sections": null
+    },
+    "kempis_imitation": {
+      "author": "Thomas à Kempis",
+      "title": "The Imitation of Christ",
+      "translation": "Aloysius Croft and Harold Bolton (1940)",
+      "location_format": "book and chapter, e.g. Book 1, Chapter 3",
+      "note": "Short chapters on humility, inner peace, self-knowledge, bearing others' faults, and following Christ. Book 4 is on the Sacrament: rarely the right lens here.",
+      "work_page": "https://ccel.org/ccel/kempis/imitation",
+      "pages": {
+        "ccel": "kempis/imitation",
+        "levels": 2
+      },
+      "sections": null
+    }
+  }
+}

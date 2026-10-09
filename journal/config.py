@@ -24,7 +24,17 @@ TEST_DIR = os.environ.get("JOURNAL_DATA_DIR")
 if TEST_DIR:
     SETTINGS_PATH = Path(TEST_DIR) / "settings.json"
 
-APP_NAME = os.environ.get("APP_NAME", "Reflections")   # shown in the browser tab and on the welcome page
+# The edition: which tradition this copy of the app draws on, with its own name,
+# welcome page, library of texts and instructions for Claude. Each lives in
+# editions/<name>/ (edition.json, sources.json, prompts/); the code is shared.
+EDITION_NAME = os.environ.get("EDITION", "philosophy").strip().lower()
+EDITION_DIR = ROOT / "editions" / EDITION_NAME
+if not (EDITION_DIR / "edition.json").exists():
+    raise SystemExit(f"Unknown edition '{EDITION_NAME}': there's no editions/{EDITION_NAME}/edition.json")
+EDITION = json.loads((EDITION_DIR / "edition.json").read_text(encoding="utf-8"))
+BRAND_DIR = ROOT / "static" / "brands" / EDITION_NAME           # logo and app icons (tools/make_icons.py)
+
+APP_NAME = os.environ.get("APP_NAME") or EDITION["app_name"]   # shown in the browser tab and on the welcome page
 COPYRIGHT = "Copyright © 2026, Aaron de Vries"           # shown at the foot of every page
 # The version shown in the footer, e.g. "Beta v0.1". It lives in the VERSION
 # file at the top of the project, so releasing means editing one line there.
@@ -59,7 +69,7 @@ DEFAULTS = {
     "api_timeout_seconds": 60,
     "api_retries": 2,
     "theme": "day",
-    "colour_theme": "lake",
+    "colour_theme": EDITION.get("default_colour_theme", "lake"),
     "background_photo": True,
     "photo_blur": 3,          # pixels
     "photo_visibility": 50,   # percent; lower = more veiled
