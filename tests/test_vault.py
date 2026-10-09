@@ -337,6 +337,57 @@ class ActivityTests(unittest.TestCase):
         self.assertEqual(activity.summary()["entries_recent"], 2)
 
 
+class VarietyTests(unittest.TestCase):
+    """Reflections are nudged away from the thinkers used most recently."""
+
+    def setUp(self):
+        fresh_journal()
+        set_up_as(users.ensure_local())
+
+    def test_recent_thinkers_note(self):
+        from journal import reflection
+        def reflected(text, **fields):
+            e = store.create_entry(text)
+            return store.update_entry(e["id"], reflection_status=store.DONE, insight="An insight.", **fields)
+        # An older reflection, from before thinkers were recorded: read from its quotes and links.
+        reflected("one", quotes=[{"author": "Plato"}], references=[{"author": "Aristotle"}])
+        reflected("two", thinkers=["Plato"])
+        reflected("three", thinkers=["Plato", "Aristotle"])
+        store.create_entry("not reflected yet")                                  # ignored
+        current = store.create_entry("the entry being reflected on")
+        counts, seen = reflection.recent_thinkers(current)
+        self.assertEqual(seen, 3)
+        self.assertEqual(counts, {"Plato": 3, "Aristotle": 2})
+        note = reflection._variety_note(current)
+        self.assertIn("Plato (3), Aristotle (2)", note)
+        self.assertIn("Not used recently: Socrates, Epicurus, Cicero, Marcus Aurelius", note)
+        self.assertIn(note, reflection._user_message(current))
+
+    def test_no_note_for_a_first_reflection(self):
+        from journal import reflection
+        self.assertIsNone(reflection._variety_note(store.create_entry("first ever entry")))
+
+
+class LongestEntryTests(unittest.TestCase):
+    def setUp(self):
+        fresh_journal()
+        set_up_as(users.ensure_local())
+
+    def test_longest_entry_record(self):
+        from journal import stats
+        self.assertEqual(stats.journal_stats()["longest_words"], 0)
+        store.create_entry("one two three")
+        long_one = store.create_entry("a b c d e f g h")
+        hidden = store.create_entry(" ".join(["word"] * 50))
+        store.set_hidden(hidden["id"], True)                     # hidden entries don't hold the record
+        s = stats.journal_stats()
+        self.assertEqual((s["longest_words"], s["longest_id"], s["shown_entries"]), (8, long_one["id"], 2))
+        store.create_entry("1 2 3 4 5 6 7 8")                   # a tie doesn't take the record
+        self.assertEqual(stats.journal_stats()["longest_id"], long_one["id"])
+        longer = store.create_entry("1 2 3 4 5 6 7 8 9")         # beating it does
+        self.assertEqual(stats.journal_stats()["longest_id"], longer["id"])
+
+
 class UpgradeTests(unittest.TestCase):
     """A single-person encrypted journal (before accounts) becomes the 'local' user."""
 

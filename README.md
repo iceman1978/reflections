@@ -64,6 +64,10 @@ The header shows your total entries, your current streak (consecutive days with 
 - Days follow your time zone setting (Toronto by default), so an entry at 11:30 pm counts for that day.
 - From 3 days on, the streak shows as a small badge (**✦ 9-day streak**). When **Finish & reflect** brings you to a milestone (3 days, 1 week, then every further week: 2 weeks, 3 weeks, …), the badge gently pops and reads the milestone for a few seconds (*Three days in a row*, *A full week of writing*, *Two weeks of writing*…) before settling back. It only celebrates the entry that reaches the milestone, not later entries the same day.
 
+### Longest entry yet
+
+From your fourth entry on, finishing an entry with more words than any you've written before brings up a gold **"✦ Your longest entry yet · 612 words"** badge beside your streak. That entry then shows **"✦ longest"** next to its word count, until another entry beats it (a tie keeps the record where it is; hidden entries don't count).
+
 ## Favourites
 
 While reading a past entry, click the **☆** next to its title to make it a favourite (★); click again to remove it. The star is hidden while you're editing. Above the list of past entries, choose **★ Favourites** to see only your favourites, or **All** to see everything; the app remembers your choice. Favourites are marked in the *Favourite* column of exports. Starring doesn't change an entry's *Last Updated* time.
@@ -82,9 +86,9 @@ After editing an entry, the old reflection stays. Click **Reflect again** if you
 
 ### Quotes and links
 
-Reflections draw on the whole Western tradition: Socrates and Plato, Aristotle, the Stoics, Augustine and Aquinas, Descartes, Spinoza, Locke and Hume, Kant and Nietzsche. Claude picks whichever thinker best fits each entry; to change that emphasis, edit `prompts/reflection.md`.
+Reflections draw on the whole Western tradition: Socrates and Plato, Aristotle, Epicurus, Cicero, the Stoics, Augustine, Boethius, Anselm, Aquinas and Dante, Descartes, Pascal, Spinoza, Locke and Hume, Kant, Kierkegaard, and Mill. Claude picks whichever thinker best fits each entry; to change that emphasis, edit `prompts/reflection.md`.
 
-Claude may quote only the 25 works listed in `config/sources.json`, each in a specific public-domain translation (or original English edition) on Wikisource. Claude never writes links. For each quote, the app:
+Claude may quote only the 34 works listed in `config/sources.json`, each in a specific public-domain translation (or original English edition) on Wikisource. Claude never writes links. For each quote, the app:
 
 1. searches its local copy of that translation (`sources/texts/`) for the words,
 2. if found, shows the **source's exact wording**, cites where it actually appears (correcting the book or chapter if Claude got it wrong), and links to that page (**Read the passage**),
@@ -115,17 +119,24 @@ All texts are public domain and come from [Wikisource](https://en.wikisource.org
 |---|---|
 | Socrates & Plato | *Apology*, *Crito*, *Phaedo*, *Symposium* (Jowett, 1892); *Republic* (Jowett, 1901) |
 | Aristotle | *Nicomachean Ethics* (Chase, 1847) |
+| Epicurus | *Letters* and *Principal Doctrines*, in Diogenes Laërtius' *Lives*, Book X (Hicks, 1925) |
+| Cicero | *On Old Age* (Peabody, 1884); *Tusculan Disputations* (Yonge, 1888) |
 | Marcus Aurelius | *Meditations* (Long, 1862) |
 | Epictetus | *Enchiridion*, *Discourses* (Long, 1877) |
 | Seneca | *Letters to Lucilius* (Gummere, 1917–25); *On the Shortness of Life* (Basore, 1932); *On Anger* (Stewart, 1900) |
 | Augustine | *Confessions* (Pilkington, 1886) |
+| Boethius | *The Consolation of Philosophy* (James, 1897) |
+| Anselm of Canterbury | *Proslogium* (Deane, 1903) |
 | Thomas Aquinas | *Summa Theologiae*, moral parts I-II and II-II (English Dominican Fathers, 1917) |
+| Dante | *Inferno*, *Purgatorio*, *Paradiso* (Longfellow, 1867) |
 | Descartes | *Meditations on First Philosophy*, *Discourse on the Method* (Veitch, 1853) |
+| Pascal | *Pensées*, Sections I–III, thoughts 1–241 (Trotter, 1910); the rest isn't transcribed on Wikisource yet |
 | Spinoza | *Ethics* (Elwes, 1883) |
 | Locke | *An Essay Concerning Human Understanding* (1853 printing) |
 | Hume | *A Treatise of Human Nature* (1888 ed.); *An Enquiry Concerning Human Understanding* (1748 first ed.) |
 | Kant | *Groundwork of the Metaphysics of Morals*, *Critique of Practical Reason* (Abbott, 1873) |
-| Nietzsche | *Beyond Good and Evil* (Zimmern, 1907); *Thus Spake Zarathustra* (Common, 1909); *The Genealogy of Morals* (Samuel, 1913) |
+| Kierkegaard | *Selections from the Writings of Kierkegaard* (Hollander, 1923) |
+| John Stuart Mill | *On Liberty* (1859); *Utilitarianism* (1863), original English editions |
 
 ## Where your data lives
 

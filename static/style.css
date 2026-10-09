@@ -256,19 +256,32 @@ a { color: var(--accent); }
   line-height: 1.6;
   transition: background-color 1.2s ease, border-color 1.2s ease;
 }
-.streak-badge.celebrate {
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  border-color: var(--accent);
+.longest-tag { color: #a87a12; font-style: italic; white-space: nowrap; }
+#entry-words { white-space: nowrap; flex: none; padding-left: 12px; }
+html[data-theme="evening"] .longest-tag { color: #e3b65c; }
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] .longest-tag { color: #e3b65c; } }
+/* A milestone (3 days, a week, every week after) turns the badge gold: bright
+   while it's celebrated, then a softer gold for the rest of that day. */
+.streak-badge.milestone {
+  background: #fbe8a6;
+  border-color: #d9a520;
+  color: #5c4300;
 }
-.streak-badge.pop { animation: badge-pop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), badge-glow 2.6s ease-out; }
+.streak-badge.celebrate {
+  background: #f7cf45;
+  border-color: #c8930f;
+  color: #3d2c00;
+  font-weight: 600;
+}
+.streak-badge.pop { animation: badge-pop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), badge-glow 1.6s ease-out 3; }
 @keyframes badge-pop {
   0% { opacity: 0; transform: scale(0.7); }
   55% { opacity: 1; transform: scale(1.08); }
   100% { transform: scale(1); }
 }
 @keyframes badge-glow {
-  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
-  100% { box-shadow: 0 0 0 10px transparent; }
+  0% { box-shadow: 0 0 0 0 rgba(240, 180, 30, 0.75); }
+  100% { box-shadow: 0 0 0 14px rgba(240, 180, 30, 0); }
 }
 
 /* ---- Buttons ---- */
@@ -857,7 +870,7 @@ textarea.feedback-text:focus { border-color: var(--accent); }
 /* --name-size drives both the name and the logo's nudge: the handwriting's tall
    letters (R, f, l) put the word's visual middle above the centre of its line,
    so the logo is raised to line up with the letters, not the line box. */
-.brand { --name-size: clamp(3.2rem, 6vw, 4.4rem); display: flex; align-items: center; gap: 16px; }
+.brand { --name-size: clamp(3.2rem, 6vw, 4.4rem); display: flex; align-items: center; gap: calc(var(--name-size) * 0.45); }
 .brand-logo { transform: translateY(calc(var(--name-size) * -0.18)); width: 88px; height: 88px; border-radius: 18px; object-fit: cover; flex: none; box-shadow: 0 0 0 1px hsl(0 0% 100% / 0.22); }
 .brand-logo-placeholder {
   display: grid;
@@ -949,6 +962,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 
 /* Small links under the journal: name, privacy, sign out */
 .copyright { font-size: 0.75rem; color: var(--muted); }
+.footer-name { font-family: var(--hand); font-size: 1.35em; line-height: 1; vertical-align: -0.05em; padding-right: 0.15em; }
 .book-footer {
   width: fit-content;
   margin: 18px auto 0;

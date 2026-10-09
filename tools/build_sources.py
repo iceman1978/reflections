@@ -122,7 +122,7 @@ class Paragraphs(HTMLParser):
 
 ROMAN_HEADING = re.compile(r"^([IVXLC]+)\.$")
 NUMBERED = re.compile(r"^(\d+)\.\s")
-NUMBER_ALONE = re.compile(r"^(\d+[a-z]?)\.$")
+NUMBER_ALONE = re.compile(r"^(\d+[a-z]?)\.?$")   # "146." or just "146" on its own line (Pascal)
 
 
 def assign_sections(paras, style):

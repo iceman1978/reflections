@@ -224,6 +224,20 @@
     schedulePromptNudge();
   }
 
+  // "612 words", plus "✦ longest" on the entry that holds the record.
+  function showEntryWords(entry) {
+    const s = state.lastStats;
+    const record = s && s.longest_id === entry.id && s.shown_entries > RECORD_FROM;
+    $("entry-words").replaceChildren(document.createTextNode(plural(entry.word_count, "word")));
+    if (record) {
+      const tag = document.createElement("span");
+      tag.className = "longest-tag";
+      tag.textContent = " ✦ longest";
+      tag.title = "Your longest entry so far";
+      $("entry-words").append(tag);
+    }
+  }
+
   function showEntry(entry) {
     const switching = !state.current || state.current.id !== entry.id;
     state.current = entry;
@@ -235,7 +249,7 @@
       animatePage($("entry-view"), "view-in");
     }
     $("entry-date").textContent = `${longDate(entry.created_at)} · ${timeOf(entry.created_at)}`;
-    $("entry-words").textContent = plural(entry.word_count, "word");
+    showEntryWords(entry);
     $("entry-prompt").hidden = !entry.prompt;
     $("entry-prompt").textContent = entry.prompt ? `Prompt: ${entry.prompt}` : "";
     $("entry-text").textContent = entry.text;
@@ -462,13 +476,23 @@
       const c = state.celebrating;
       const fresh = c && c.n === n && Date.now() < c.until;
       const badge = document.createElement("span");
-      badge.className = fresh ? "streak-badge celebrate" : "streak-badge";
+      // Gold on the day a milestone is reached; brighter while it's being celebrated.
+      const milestoneToday = isMilestone(n) && s.wrote_today;
+      badge.className = "streak-badge" + (milestoneToday || fresh ? " milestone" : "") + (fresh ? " celebrate" : "");
       if (fresh && !c.popped) { badge.classList.add("pop"); c.popped = true; }  // animate once
       badge.textContent = fresh ? `✦ ${milestoneWords(n)}` : `✦ ${n}-day streak`;
       badge.title = fresh ? `${n}-day streak` : "Days in a row with at least one entry";
       box.append(document.createTextNode(" · "), badge);
     } else if (n > 0) {
       box.append(document.createTextNode(` · ${n}-day streak`));
+    }
+    const r = state.record;
+    if (r && Date.now() < r.until) {
+      const rec = document.createElement("span");
+      rec.className = "streak-badge milestone celebrate record-badge";
+      if (!r.popped) { rec.classList.add("pop"); r.popped = true; }   // animate once
+      rec.textContent = `✦ Your longest entry yet · ${plural(r.words, "word")}`;
+      box.append(document.createTextNode(" "), rec);
     }
     if (s.longest_streak > n && s.longest_streak > 1) box.append(document.createTextNode(` · best ${s.longest_streak}`));
     if (n > 0 && !s.wrote_today) {
@@ -495,9 +519,17 @@
   }
 
   // Called after Finish & reflect: celebrate if this entry reached a milestone.
-  async function checkMilestone(before) {
+  const RECORD_FROM = 3;  // earlier entries needed before "longest yet" counts
+
+  async function checkMilestone(before, entry) {
     const after = await refreshStats();
     if (!before || !after) return;
+    if (entry && before.shown_entries >= RECORD_FROM && entry.word_count > before.longest_words) {
+      state.record = { words: entry.word_count, until: Date.now() + 8000 };
+      renderStats(after);
+      setTimeout(() => { if (state.lastStats) renderStats(state.lastStats); }, 8100);
+      if (state.current && state.current.id === entry.id) showEntryWords(state.current);
+    }
     const n = after.current_streak;
     if (n > before.current_streak && isMilestone(n)) {
       state.celebrating = { n, until: Date.now() + 8000 };
@@ -937,7 +969,7 @@
       renderBanner();
       showEntry(res.entry);
       refreshList();
-      checkMilestone(before);
+      checkMilestone(before, res.entry);
       requestReflection(res.entry.id);  // the entry is already safely saved
       loadBackground();                 // a new entry brings the next photo
     } catch (err) {

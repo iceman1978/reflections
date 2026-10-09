@@ -8,12 +8,13 @@ import json
 import logging
 import os
 import re
+from collections import Counter
 from datetime import datetime
 
 import anthropic
 from dotenv import load_dotenv
 
-from . import sources
+from . import sources, store
 from .config import ROOT, TZ, settings
 
 log = logging.getLogger(__name__)
@@ -103,6 +104,14 @@ def _read_prompt(name):
     return re.sub(r"<!--.*?-->", "", text, flags=re.S).strip()
 
 
+# Thinkers a reflection can draw on (also used to spread reflections across them).
+THINKERS = ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",
+            "Augustine", "Boethius", "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri",
+            "René Descartes", "Blaise Pascal", "Baruch Spinoza", "John Locke", "David Hume", "Immanuel Kant",
+            "Søren Kierkegaard", "John Stuart Mill"]
+RECENT_REFLECTIONS = 8   # how far back to look when nudging towards variety
+
+
 def _schema():
     work_ids = list(sources.works().keys())
     return {
@@ -162,12 +171,17 @@ def _schema():
                     "additionalProperties": False,
                 },
             },
+            "thinkers": {
+                "type": "array",
+                "description": "The one to three thinkers whose ideas the insight mainly draws on.",
+                "items": {"type": "string", "enum": THINKERS},
+            },
             "wellbeing_concern": {
                 "type": "boolean",
                 "description": "True only if the entry suggests real distress or risk.",
             },
         },
-        "required": ["title", "insight", "question", "quotes", "references", "wellbeing_concern"],
+        "required": ["title", "insight", "question", "quotes", "references", "thinkers", "wellbeing_concern"],
         "additionalProperties": False,
     }
 
@@ -188,6 +202,33 @@ def _system_prompt():
     )
 
 
+def recent_thinkers(entry):
+    """How often each thinker featured in the writer's last few reflections (not
+    counting this entry). Older reflections, from before thinkers were recorded,
+    are read from their quotes and source links."""
+    reflected = [e for e in store.all_entries()
+                 if e["id"] != entry["id"] and e.get("reflection_status") == store.DONE and e.get("insight")]
+    counts = Counter()
+    for e in reflected[-RECENT_REFLECTIONS:]:
+        names = e.get("thinkers") or {c.get("author") for c in (e.get("quotes") or []) + (e.get("references") or [])}
+        counts.update(n for n in set(names) if n in THINKERS)   # only thinkers still on offer
+    return counts, min(len(reflected), RECENT_REFLECTIONS)
+
+
+def _variety_note(entry):
+    counts, seen = recent_thinkers(entry)
+    if not seen:
+        return None
+    used = ", ".join(f"{name} ({n})" for name, n in counts.most_common()) or "no named thinker"
+    note = (f"For variety: this writer's last {seen} reflection{'s' if seen != 1 else ''} drew mainly on "
+            f"{used}.")
+    fresh = [name for name in THINKERS if name not in counts]
+    if fresh:
+        note += (f" Not used recently: {', '.join(fresh)}. Prefer one of those this time, unless a recent "
+                 "thinker is clearly the best lens for this particular entry.")
+    return note
+
+
 def _user_message(entry):
     when = datetime.fromisoformat(entry["created_at"]).astimezone(TZ)
     clock = when.strftime("%I:%M %p").lstrip("0")
@@ -197,6 +238,8 @@ def _user_message(entry):
     if entry.get("prompt"):
         parts.append(f"They were writing in response to this prompt: {entry['prompt']}")
     parts.append("<entry>\n" + entry["text"] + "\n</entry>")
+    if (variety := _variety_note(entry)):
+        parts.append(variety)
     return "\n\n".join(parts)
 
 
@@ -241,6 +284,7 @@ def reflect(entry):
         "quotes": citations,
         "references": references,
         "wellbeing_concern": bool(data.get("wellbeing_concern")),
+        "thinkers": [n for n in (data.get("thinkers") or []) if n in THINKERS][:3],
         "reflection_model": response.model,
         "reflected_at": datetime.now(TZ).isoformat(),
     }

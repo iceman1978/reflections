@@ -20,7 +20,7 @@
     "  sections:  how passages inside a page are numbered, if the app can tell:",
     "             'numbered_paragraphs' (paragraphs start '3.'), 'roman_headings', or null",
     "  location_from_section:  show only the section number as the location",
-    "             (for works numbered straight through, like Beyond Good and Evil)",
+    "             (for works numbered straight through, aphorism by aphorism)",
     "  note:   extra guidance for Claude about this work"
   ],
   "site": "https://en.wikisource.org/wiki/",
@@ -84,6 +84,37 @@
       "pages": {"prefix": "Nicomachean Ethics (Chase)/", "pattern": "^Book (\\w+)$"},
       "sections": null
     },
+    "epicurus": {
+      "author": "Epicurus",
+      "title": "Letters and Principal Doctrines",
+      "translation": "Robert Drew Hicks (1925), preserved in Diogenes Laërtius, Lives, Book X",
+      "location_format": "section number, e.g. 125",
+      "work_page": "Lives of the Eminent Philosophers/Book X",
+      "pages": {"single": "Lives of the Eminent Philosophers/Book X"},
+      "sections": "numbered_paragraphs",
+      "location_from_section": true,
+      "note": "Book X of Diogenes Laërtius' Lives: a short life of Epicurus, then his own Letters to Herodotus, Pythocles and Menoeceus (pleasure, desire, death) and his Principal Doctrines. Quote Epicurus' own words, from the letters or doctrines."
+    },
+    "on_old_age": {
+      "author": "Cicero",
+      "title": "On Old Age",
+      "translation": "Andrew Preston Peabody (1884)",
+      "location_format": "chapter, e.g. 7",
+      "work_page": "Cicero de Senectute",
+      "pages": {"single": "Cicero de Senectute/Text"},
+      "sections": null,
+      "note": "A dialogue in which the elder Cato defends old age: on work, pleasure, memory and facing death calmly."
+    },
+    "tusculan_disputations": {
+      "author": "Cicero",
+      "title": "Tusculan Disputations",
+      "translation": "Charles Duke Yonge (1888)",
+      "location_format": "book number, e.g. 3",
+      "work_page": "Cicero's Tusculan Disputations/Tusculan Disputations",
+      "pages": {"prefix": "Cicero's Tusculan Disputations/Tusculan Disputations/", "pattern": "^Book (\\d)$"},
+      "sections": null,
+      "note": "Five books: on the fear of death (1), bearing pain (2), grief (3), other disturbing emotions (4), and whether virtue is enough for a happy life (5)."
+    },
     "confessions": {
       "author": "Augustine",
       "title": "Confessions",
@@ -92,6 +123,27 @@
       "work_page": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions",
       "pages": {"prefix": "Nicene and Post-Nicene Fathers: Series I/Volume I/Confessions/", "pattern": "^Book ([IVXL]+)/Chapter (\\d+)$"},
       "sections": null
+    },
+    "consolation": {
+      "author": "Boethius",
+      "title": "The Consolation of Philosophy",
+      "translation": "H. R. James (1897)",
+      "location_format": "the section's title as printed, e.g. Fortune's Malice",
+      "work_page": "The Consolation of Philosophy (James)",
+      "pages": {"prefix": "The Consolation of Philosophy (James)/",
+                "pattern": "^(?!Preface$|Proem$|Epilogue$|References To Quotations In The Text$)([^/]+)$"},
+      "sections": null,
+      "note": "Written in prison awaiting execution: Lady Philosophy consoles Boethius on lost fortune, false goods (wealth, fame, power, pleasure), true happiness, evil, and free will. Alternates prose and verse."
+    },
+    "proslogium": {
+      "author": "Anselm of Canterbury",
+      "title": "Proslogium",
+      "translation": "Sidney Norton Deane (1903)",
+      "location_format": "chapter number, e.g. 1",
+      "work_page": "Proslogium and Monologium/Proslogium",
+      "pages": {"prefix": "Proslogium and Monologium/Proslogium/", "pattern": "^Chapter(\\d+)$"},
+      "sections": null,
+      "note": "A prayerful meditation: 'faith seeking understanding' and 'I believe in order to understand' (chapter 1), and the argument for God as that than which nothing greater can be conceived."
     },
     "summa": {
       "author": "Thomas Aquinas",
@@ -103,6 +155,36 @@
       "pages": {"prefix": "Summa Theologiae/", "pattern": "^(First Part of the Second Part|Second Part of the Second Part)/Question (\\d+)$",
                 "aliases": {"First Part of the Second Part": "I-II", "Second Part of the Second Part": "II-II"}},
       "sections": null
+    },
+    "inferno": {
+      "author": "Dante Alighieri",
+      "title": "Inferno",
+      "translation": "Henry Wadsworth Longfellow (1867)",
+      "location_format": "canto number, e.g. 5",
+      "work_page": "Divine Comedy (Longfellow 1867)/Volume 1",
+      "pages": {"prefix": "Divine Comedy (Longfellow 1867)/Volume 1/", "pattern": "^Canto (\\d+)$"},
+      "sections": null,
+      "note": "The first part of the Divine Comedy: lost 'midway upon the journey of our life', Dante descends through Hell, where each sin becomes its own punishment."
+    },
+    "purgatorio": {
+      "author": "Dante Alighieri",
+      "title": "Purgatorio",
+      "translation": "Henry Wadsworth Longfellow (1867)",
+      "location_format": "canto number, e.g. 17",
+      "work_page": "Divine Comedy (Longfellow 1867)/Volume 2",
+      "pages": {"prefix": "Divine Comedy (Longfellow 1867)/Volume 2/", "pattern": "^Canto (\\d+)$"},
+      "sections": null,
+      "note": "The climb up the mountain of Purgatory: change as slow, patient work; love misdirected, too weak, or excessive as the root of every fault (cantos 17-18)."
+    },
+    "paradiso": {
+      "author": "Dante Alighieri",
+      "title": "Paradiso",
+      "translation": "Henry Wadsworth Longfellow (1867)",
+      "location_format": "canto number, e.g. 3",
+      "work_page": "Divine Comedy (Longfellow 1867)/Volume 3",
+      "pages": {"prefix": "Divine Comedy (Longfellow 1867)/Volume 3/", "pattern": "^Canto (\\d+)$"},
+      "sections": null,
+      "note": "The ascent through Heaven: contentment ('in His will is our peace', canto 3), and the love that moves the sun and the other stars."
     },
     "descartes_meditations": {
       "author": "René Descartes",
@@ -121,6 +203,17 @@
       "work_page": "Discourse on the Method",
       "pages": {"template": "Discourse on the Method/Part {n}", "levels": [6]},
       "sections": null
+    },
+    "pensees": {
+      "author": "Blaise Pascal",
+      "title": "Pensées (Thoughts)",
+      "translation": "W. F. Trotter (1910)",
+      "location_format": "thought number, e.g. 139",
+      "work_page": "Blaise Pascal/Thoughts",
+      "pages": {"prefix": "Blaise Pascal/Thoughts/", "pattern": "^Section ([1-3])$"},
+      "sections": "numbered_paragraphs",
+      "location_from_section": true,
+      "note": "Only Sections I-III (thoughts 1-241) are available to quote: on the mind and style, the misery of man without God (diversion and restlessness: 'all the unhappiness of men arises from one single fact, that they cannot stay quietly in their own chamber', 139; vanity, habit, self-love), and the wager (233). Ideas from later sections, such as the heart having its reasons (277) or the thinking reed (347), may be paraphrased and attributed but not quoted."
     },
     "ethics_spinoza": {
       "author": "Baruch Spinoza",
@@ -177,34 +270,34 @@
       "pages": {"single": "Critique of Practical Reason"},
       "sections": null
     },
-    "beyond_good_and_evil": {
-      "author": "Friedrich Nietzsche",
-      "title": "Beyond Good and Evil",
-      "translation": "Helen Zimmern (1907)",
-      "location_format": "aphorism number, e.g. 146",
-      "work_page": "Beyond Good and Evil",
-      "pages": {"template": "Beyond Good and Evil/Chapter {roman}", "levels": [9]},
-      "sections": "numbered_paragraphs",
-      "location_from_section": true
+    "kierkegaard_selections": {
+      "author": "Søren Kierkegaard",
+      "title": "Selections from the Writings of Kierkegaard",
+      "translation": "Lee M. Hollander (1923)",
+      "location_format": "the selection's title, e.g. Diapsalmata, Fear and Trembling, The Banquet, Preparation for a Christian Life, or The Present Moment",
+      "work_page": "Selections from the writings of Kierkegaard",
+      "pages": {"prefix": "Selections from the writings of Kierkegaard/",
+                "pattern": "^(Diapsalmata|The Banquet|Fear and Trembling|Preparation for a Christian Life|The Present Moment)$"},
+      "sections": null,
+      "note": "Selections only: Diapsalmata (aphorisms of the restless 'aesthetic' life), The Banquet (from Stages on Life's Way), Fear and Trembling (abridged: Abraham and the leap of faith), and late religious writings. Quote only from these."
     },
-    "zarathustra": {
-      "author": "Friedrich Nietzsche",
-      "title": "Thus Spake Zarathustra",
-      "translation": "Thomas Common (1909)",
-      "location_format": "Prologue.section (e.g. Prologue.4), or part number and discourse title (e.g. 1, The Way of the Creating One)",
-      "work_page": "Thus Spake Zarathustra",
-      "pages": {"prefix": "Thus Spake Zarathustra/", "pattern": "^(Prologue|Part One|Part Two|Part Three|Part Four)$",
-                "aliases": {"Part One": "1", "Part Two": "2", "Part Three": "3", "Part Four": "4"}},
+    "utilitarianism": {
+      "author": "John Stuart Mill",
+      "title": "Utilitarianism",
+      "translation": "original English edition (1863)",
+      "location_format": "chapter number, e.g. 2",
+      "work_page": "Utilitarianism",
+      "pages": {"prefix": "Utilitarianism/", "pattern": "^Chapter (\\d)$"},
       "sections": null
     },
-    "genealogy_of_morals": {
-      "author": "Friedrich Nietzsche",
-      "title": "The Genealogy of Morals",
-      "translation": "Horace B. Samuel (1913)",
-      "location_format": "essay.section, e.g. 2.1",
-      "work_page": "The Genealogy of Morals",
-      "pages": {"prefix": "The Genealogy of Morals/", "pattern": "^(First|Second|Third) Essay$"},
-      "sections": "numbered_paragraphs"
+    "on_liberty": {
+      "author": "John Stuart Mill",
+      "title": "On Liberty",
+      "translation": "original English edition (1859)",
+      "location_format": "chapter number, e.g. 3",
+      "work_page": "On Liberty",
+      "pages": {"prefix": "On Liberty/", "pattern": "^Chapter (\\d)$"},
+      "sections": null
     },
     "meditations": {
       "author": "Marcus Aurelius",

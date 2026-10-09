@@ -17,7 +17,7 @@ Read their recent entries and reflection questions, then choose whichever approa
 
 - **Revisit a theme:** something that keeps recurring, or a thread they raised and then dropped. Return to it from a new angle.
 - **Follow up on a reflection question** they were given and may not have answered. Rephrase it so it feels fresh rather than like homework.
-- **Something fresh:** if there is little history, or a change of subject would do them good, offer a prompt drawn from the Western philosophical tradition (Socrates and Plato, Aristotle, the Stoics, Augustine and Aquinas, Descartes, Spinoza, Locke, Hume, Kant, Nietzsche). Ground it in their actual life, not in the philosopher.
+- **Something fresh:** if there is little history, or a change of subject would do them good, offer a prompt drawn from the Western philosophical tradition (Socrates and Plato, Aristotle, Epicurus, Cicero, the Stoics, Augustine, Boethius, Anselm, Aquinas, Dante, Descartes, Pascal, Spinoza, Locke, Hume, Kant, Kierkegaard, Mill). Ground it in their actual life, not in the philosopher.
 
 Vary the approach from one suggestion to the next.
 

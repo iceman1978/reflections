@@ -8,6 +8,7 @@ If not, the reflection uses Claude's paraphrase instead, with no link.
 """
 import json
 import logging
+import random
 import re
 import threading
 import unicodedata
@@ -121,9 +122,10 @@ def page_url(title):
 
 
 def describe_for_prompt():
-    """The list of quotable works, appended to the reflection system prompt."""
+    """The list of quotable works, appended to the reflection system prompt.
+    Shuffled each time, so no thinker gets an edge just from coming first."""
     lines = []
-    for work_id, w in works().items():
+    for work_id, w in random.sample(list(works().items()), len(works())):
         line = (f'- "{work_id}": {w["author"]}, {w["title"]} ({w["translation"]}). '
                 f'Location format: {w["location_format"]}.')
         if w.get("note"):

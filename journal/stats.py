@@ -54,4 +54,13 @@ def journal_stats():
     result = compute((local_date(e["created_at"]) for e in entries), today)
     result["total_entries"] = len(entries)
     result["today"] = today.isoformat()
+    # The record for the "longest entry yet" milestone (entries you can see).
+    shown = [e for e in entries if not e.get("hidden")]
+    longest = None
+    for e in sorted(shown, key=lambda e: e["created_at"]):   # only beating it takes the record; a tie doesn't
+        if longest is None or (e.get("word_count") or 0) > (longest.get("word_count") or 0):
+            longest = e
+    result["shown_entries"] = len(shown)
+    result["longest_words"] = (longest or {}).get("word_count") or 0
+    result["longest_id"] = (longest or {}).get("id")
     return result
