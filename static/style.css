@@ -625,6 +625,10 @@ button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(
   border-radius: 8px;
   background: var(--panel);
   backdrop-filter: blur(6px);
+  /* The blur gives this panel its own layer, so the calendar pop-up inside it
+     can only sit above what follows (the footer) if the panel itself does. */
+  position: relative;
+  z-index: 2;
 }
 .past-header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .past h2 { font-family: var(--hand); font-weight: 500; font-size: 1.6rem; color: var(--ink); margin: 0; }

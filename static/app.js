@@ -486,6 +486,14 @@
     } else if (n > 0) {
       box.append(document.createTextNode(` · ${n}-day streak`));
     }
+    const cm = state.countMilestone;
+    if (cm && Date.now() < cm.until) {
+      const badge = document.createElement("span");
+      badge.className = "streak-badge milestone celebrate";
+      if (!cm.popped) { badge.classList.add("pop"); cm.popped = true; }   // animate once
+      badge.textContent = `✦ Your ${cm.n}th entry`;   // 5th, 10th, 25th, 50th, 100th… all take "th"
+      box.append(document.createTextNode(" "), badge);
+    }
     const r = state.record;
     if (r && Date.now() < r.until) {
       const rec = document.createElement("span");
@@ -521,20 +529,34 @@
   // Called after Finish & reflect: celebrate if this entry reached a milestone.
   const RECORD_FROM = 3;  // earlier entries needed before "longest yet" counts
 
+  // Entry-count milestones: 5, 10, 25, 50, then every 50 (100, 150, 200…).
+  const isCountMilestone = (n) => n === 5 || n === 10 || n === 25 || (n >= 50 && n % 50 === 0);
+
+  // After Finish & reflect: celebrate whatever this entry achieved (a streak
+  // milestone, a new longest entry, an entry-count milestone, or several).
   async function checkMilestone(before, entry) {
     const after = await refreshStats();
     if (!before || !after) return;
+    const until = Date.now() + 8000;
+    let any = false;
     if (entry && before.shown_entries >= RECORD_FROM && entry.word_count > before.longest_words) {
-      state.record = { words: entry.word_count, until: Date.now() + 8000 };
-      renderStats(after);
-      setTimeout(() => { if (state.lastStats) renderStats(state.lastStats); }, 8100);
+      state.record = { words: entry.word_count, until };
+      any = true;
       if (state.current && state.current.id === entry.id) showEntryWords(state.current);
     }
     const n = after.current_streak;
     if (n > before.current_streak && isMilestone(n)) {
-      state.celebrating = { n, until: Date.now() + 8000 };
+      state.celebrating = { n, until };
+      any = true;
+    }
+    const count = after.total_entries;
+    if (count > before.total_entries && isCountMilestone(count)) {
+      state.countMilestone = { n: count, until };
+      any = true;
+    }
+    if (any) {
       renderStats(after);
-      setTimeout(() => { if (state.lastStats) renderStats(state.lastStats); }, 8100);  // settle to "✦ N-day streak"
+      setTimeout(() => { if (state.lastStats) renderStats(state.lastStats); }, 8100);  // settle back afterwards
     }
   }
 

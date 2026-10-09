@@ -64,6 +64,10 @@ The header shows your total entries, your current streak (consecutive days with 
 - Days follow your time zone setting (Toronto by default), so an entry at 11:30 pm counts for that day.
 - From 3 days on, the streak shows as a small badge (**✦ 9-day streak**). When **Finish & reflect** brings you to a milestone (3 days, 1 week, then every further week: 2 weeks, 3 weeks, …), the badge gently pops and reads the milestone for a few seconds (*Three days in a row*, *A full week of writing*, *Two weeks of writing*…) before settling back. It only celebrates the entry that reaches the milestone, not later entries the same day.
 
+### Entry milestones
+
+Finishing your **5th, 10th, 25th and 50th** entry, and every 50th after that (100th, 150th, 200th…), brings up a gold **"✦ Your 50th entry"** badge beside your streak for a few seconds. Hidden entries count too, matching the entry count in the header.
+
 ### Longest entry yet
 
 From your fourth entry on, finishing an entry with more words than any you've written before brings up a gold **"✦ Your longest entry yet · 612 words"** badge beside your streak. That entry then shows **"✦ longest"** next to its word count, until another entry beats it (a tie keeps the record where it is; hidden entries don't count).
