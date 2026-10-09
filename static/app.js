@@ -1092,6 +1092,7 @@
     }
     refreshHidden();
     refreshUsage();
+    refreshInviteRequests();
     refreshFeedbackList();
   }
 
@@ -1369,6 +1370,111 @@
     }
   }
   if ($("feedback-show-done")) $("feedback-show-done").addEventListener("change", refreshFeedbackList);
+
+  // ---- Invitations (web version) ------------------------------------------
+
+  const INVITE_STATUS = { requested: "Requested", added: "Has access", declined: "Declined" };
+
+  function renderMyInvites(list) {
+    $("my-invites-box").hidden = !list.length;
+    $("my-invites").replaceChildren(...list.map((i) => {
+      const li = document.createElement("li");
+      const who = document.createElement("span");
+      who.textContent = i.name ? `${i.name} (${i.email})` : i.email;
+      const status = document.createElement("span");
+      status.className = `invite-status ${i.status}`;
+      status.textContent = INVITE_STATUS[i.status] || i.status;
+      li.append(who, status);
+      return li;
+    }));
+  }
+
+  async function openInvite() {
+    $("invite-error").hidden = true;
+    $("invite-dialog").showModal();
+    $("invite-email").focus();
+    try { renderMyInvites(await api("GET", "/api/invites")); } catch (_) {}
+  }
+
+  async function sendInvite(ev) {
+    ev.preventDefault();
+    const btn = $("invite-send-btn");
+    btn.disabled = true;
+    $("invite-error").hidden = true;
+    try {
+      const res = await api("POST", "/api/invites", {
+        email: $("invite-email").value, name: $("invite-name").value, note: $("invite-note").value,
+      });
+      $("invite-email").value = $("invite-name").value = $("invite-note").value = "";
+      renderMyInvites(res.invites);
+      showNotice("Thanks! Your invitation request has been sent.", 5000);
+    } catch (err) {
+      $("invite-error").textContent = sentence(err.message);
+      $("invite-error").hidden = false;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  if ($("invite-btn")) {
+    $("invite-btn").addEventListener("click", openInvite);
+    $("invite-form").addEventListener("submit", sendInvite);
+    $("invite-cancel-btn").addEventListener("click", () => $("invite-dialog").close());
+  }
+
+  // Settings → Invitation requests (only for whoever runs the app).
+  async function refreshInviteRequests() {
+    const ul = $("invite-requests");
+    if (!ul) return;
+    let items;
+    try { items = await api("GET", "/api/admin/invites"); } catch (_) { return; }
+    const showAll = $("invites-show-all").checked;
+    const shown = items.filter((i) => showAll || i.status === "requested");
+    ul.replaceChildren();
+    for (const i of shown) {
+      const li = document.createElement("li");
+      li.className = i.status === "requested" ? "" : "done";
+      const meta = document.createElement("div");
+      meta.className = "feedback-meta";
+      meta.textContent = `${longDate(i.created_at)} · asked by ${i.requester_email || i.requester_name || "someone"}`;
+      const body = document.createElement("p");
+      body.className = "feedback-body";
+      body.textContent = (i.name ? `${i.name}, ${i.email}` : i.email) + (i.note ? `\n“${i.note}”` : "");
+      const actions = document.createElement("div");
+      actions.className = "invite-actions";
+      const status = document.createElement("span");
+      status.className = `invite-status ${i.status}`;
+      status.textContent = INVITE_STATUS[i.status] || i.status;
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.textContent = "Copy address";
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(i.email); copy.textContent = "Copied"; } catch (_) { copy.textContent = i.email; }
+      });
+      actions.append(status, copy);
+      if (i.status !== "added") {
+        const flip = document.createElement("button");
+        flip.type = "button";
+        flip.textContent = i.status === "declined" ? "Reopen" : "Decline";
+        flip.addEventListener("click", async () => {
+          try {
+            await api("POST", `/api/admin/invites/${i.id}`, { status: i.status === "declined" ? "requested" : "declined" });
+            refreshInviteRequests();
+          } catch (err) { state.clientError = `Couldn't update that: ${sentence(err.message)}`; renderBanner(); }
+        });
+        actions.append(flip);
+      }
+      li.append(meta, body, actions);
+      ul.append(li);
+    }
+    if (!shown.length) {
+      const li = document.createElement("li");
+      li.className = "subtle";
+      li.textContent = items.length ? "No requests waiting." : "No invitation requests yet.";
+      ul.append(li);
+    }
+  }
+  if ($("invites-show-all")) $("invites-show-all").addEventListener("change", refreshInviteRequests);
 
   // Settings → Usage (only on the page for whoever runs the app).
   function daysAgo(n) {

@@ -388,6 +388,47 @@ class LongestEntryTests(unittest.TestCase):
         self.assertEqual(stats.journal_stats()["longest_id"], longer["id"])
 
 
+class InviteTests(unittest.TestCase):
+    def setUp(self):
+        fresh_journal()
+        self._allowed = set(config.ALLOWED_EMAILS)
+        config.ALLOWED_EMAILS.clear()
+        config.ALLOWED_EMAILS.update({"ann@example.com", "friend-in@example.com"})
+
+    def tearDown(self):
+        config.ALLOWED_EMAILS.clear()
+        config.ALLOWED_EMAILS.update(self._allowed)
+
+    def test_request_and_status(self):
+        from journal import invites
+        inv = invites.add("u-ann", "ann@example.com", "Ann", " New.Friend@Gmail.com ", "Sam", "my cousin")
+        self.assertEqual((inv["email"], inv["status"], inv["name"]), ("new.friend@gmail.com", "requested", "Sam"))
+        self.assertEqual([i["email"] for i in invites.mine("u-ann")], ["new.friend@gmail.com"])
+        self.assertEqual(invites.mine("u-bob"), [])                           # only your own requests
+        config.ALLOWED_EMAILS.add("new.friend@gmail.com")                    # added on the server
+        self.assertEqual(invites.mine("u-ann")[0]["status"], "added")
+        invites.set_status(inv["id"], "declined")
+        config.ALLOWED_EMAILS.discard("new.friend@gmail.com")
+        self.assertEqual(invites.all_requests()[0]["status"], "declined")
+        with self.assertRaises(ValueError):
+            invites.set_status(inv["id"], "added")                           # worked out, never stored
+        with self.assertRaises(KeyError):
+            invites.set_status(9999, "declined")
+
+    def test_refusals(self):
+        from journal import invites
+        for email in ("not an email", "ann@example.com", "friend-in@example.com"):   # bad, own, already in
+            with self.assertRaises(invites.InviteProblem):
+                invites.add("u-ann", "ann@example.com", "Ann", email)
+        invites.add("u-ann", "ann@example.com", "Ann", "pal@gmail.com")
+        with self.assertRaises(invites.InviteProblem):
+            invites.add("u-bob", "bob@example.com", "Bob", "PAL@gmail.com")           # already requested
+        for i in range(invites.PER_DAY - 1):
+            invites.add("u-ann", "ann@example.com", "Ann", f"p{i}@gmail.com")
+        with self.assertRaises(invites.InviteProblem):
+            invites.add("u-ann", "ann@example.com", "Ann", "one-too-many@gmail.com")  # daily cap
+
+
 class UpgradeTests(unittest.TestCase):
     """A single-person encrypted journal (before accounts) becomes the 'local' user."""
 

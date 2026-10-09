@@ -22,7 +22,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, migrate, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, migrate, reflection, stats, store, usage, users, vault,
                      wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -807,6 +807,51 @@ def export_feedback():
     data = feedback.as_csv().encode("utf-8")
     return send_file(io.BytesIO(data), as_attachment=True, mimetype="text/csv",
                      download_name=f"reflections-feedback-{datetime.now(TZ):%Y-%m-%d}.csv")
+
+
+# ---- Invitations (web version) ------------------------------------------------
+
+@app.post("/api/invites")
+def request_invite():
+    """Ask for someone to be added to the invite list (goes to whoever runs the app)."""
+    if not HOSTED:
+        return jsonify(error="Not available here."), 404
+    data = request.get_json(silent=True) or {}
+    user = users.get(g.user_id) or {}
+    try:
+        inv = invites.add(g.user_id, user.get("email"), users.prefs(g.user_id)["user_name"] or user.get("name"),
+                          data.get("email"), data.get("name"), data.get("note"))
+    except invites.InviteProblem as e:
+        return jsonify(error=str(e)), 400
+    log.info("Invitation request #%d (%s)", inv["id"], g.user_id)
+    return jsonify(ok=True, invites=invites.mine(g.user_id))
+
+
+@app.get("/api/invites")
+def my_invites():
+    if not HOSTED:
+        return jsonify([])
+    return jsonify(invites.mine(g.user_id))
+
+
+@app.get("/api/admin/invites")
+def all_invites():
+    if (resp := _need_admin()):
+        return resp
+    return jsonify(invites.all_requests())
+
+
+@app.post("/api/admin/invites/<int:invite_id>")
+def invite_status(invite_id):
+    if (resp := _need_admin()):
+        return resp
+    try:
+        invites.set_status(invite_id, (request.get_json(silent=True) or {}).get("status"))
+    except ValueError:
+        return jsonify(error="Unknown status."), 400
+    except KeyError:
+        return jsonify(error="Not found"), 404
+    return jsonify(ok=True)
 
 
 # ---- Usage stats (admins) -------------------------------------------------

@@ -300,6 +300,12 @@ The **speech bubble** at the top (left of the padlock) opens a short form: choos
 
 You read it in **Settings → Feedback received**: newest first, with a **Done** tick-box to clear things you've handled, and **Download (CSV)** for a spreadsheet. Only addresses in `ADMIN_EMAILS` on Render see that section (on your own computer, you always do). Each person can send up to 20 a day.
 
+### Invitations
+
+On the web version, the **gift icon** (between Feedback and the padlock) lets anyone ask for a friend to be invited: their Google address, plus an optional name and note. Below the form they see their own requests: *Requested*, *Has access* or *Declined*.
+
+You see the requests in **Settings → Invitation requests** (admins only), with **Copy address** and **Decline**. To let someone in, add them as before (Google *Test users* if the sign-in is still in Testing, and `ALLOWED_EMAILS` on Render); the request then shows *Has access* by itself, for you and for whoever asked. Each request records who asked, ready for rewards for successful invitations later. Up to 10 requests per person per day.
+
 ### Usage stats
 
 **Settings → Usage** (only for addresses in `ADMIN_EMAILS`; on your own computer, you always see it) shows how Reflections is being used:

@@ -49,6 +49,9 @@
           because it's meant to be read by {% if hosted %}whoever runs {{ app_name }}{% else %}you{% endif %}. It's stored
           with {% if hosted %}your email, {% endif %}the date, the screen you were on and your browser type.
           It's never mixed with your journal.</li>
+        {% if hosted %}<li><strong>Invitations:</strong> if you ask for someone to be invited (the gift icon), their
+          address, the name and note you give, and that the request came from you are kept so the person who runs
+          {{ app_name }} can add them. Like feedback, this isn't encrypted.</li>{% endif %}
       </ul>
       <p>No analytics, advertising or tracking scripts are used. The only cookies keep you signed in and
         remember that this browser has unlocked your journal.</p>

@@ -10,6 +10,8 @@ Tables
   usage    how many reflections / prompts each person used per day (for limits)
   activity which days each person used the app and how many entries they wrote
            (for the usage stats; never what they wrote)
+  invites  requests to invite someone (their address, who asked), for whoever
+           runs the app to add to the allowed list
   feedback suggestions sent with the Feedback button. NOT encrypted: they're
            meant to be read by whoever runs the app (Settings → Feedback received)
 
@@ -39,6 +41,9 @@ CREATE TABLE IF NOT EXISTS usage   (user_id TEXT NOT NULL, day TEXT NOT NULL, ki
                                     count INTEGER NOT NULL, PRIMARY KEY (user_id, day, kind));
 CREATE TABLE IF NOT EXISTS activity (user_id TEXT NOT NULL, day TEXT NOT NULL, entries INTEGER NOT NULL DEFAULT 0,
                                     PRIMARY KEY (user_id, day));
+CREATE TABLE IF NOT EXISTS invites  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL,
+                                    requester_email TEXT, requester_name TEXT, email TEXT NOT NULL, name TEXT,
+                                    note TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'requested');
 CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT,
                                     name TEXT, created_at TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL,
                                     screen TEXT, device TEXT, done INTEGER NOT NULL DEFAULT 0);
