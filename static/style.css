@@ -56,6 +56,7 @@
   --muted: hsl(var(--hue) 10% 41%);
   --accent: hsl(var(--hue) var(--sat) 33%);
   --accent-ink: #fff;
+  --logo-colour: hsl(var(--hue) var(--sat) 28%);   /* the header logo; deep in every shade */
   --gold: #b8862a;          /* favourite stars stay gold in every theme */
   --rule: hsl(var(--paper-hue) calc(var(--paper-sat) * 0.45) 84%);
   --line: hsl(var(--hue) var(--sat) 33% / 0.11);                    /* notebook ruling */
@@ -228,6 +229,13 @@ a { color: var(--accent); }
    Homemade Apple has one weight, so the "bold" is a thin outline of the same colour. */
 .journal-brand { display: flex; align-items: center; gap: 10px; min-width: 0; margin-right: auto; }  /* buttons stay right */
 .journal-logo { width: 40px; height: 40px; border-radius: 10px; flex: none; }
+/* The logo in the theme's colour: white, with the logo's dark parts painted in
+   --logo-colour through a cut-out made by tools/make_icons.py (logo-mask.png). */
+.journal-logo.themed { position: relative; overflow: hidden; background: #f5f6f7; }
+.journal-logo.themed::before {
+  content: ""; position: absolute; inset: 0; background: var(--logo-colour);
+  -webkit-mask: var(--logo-mask) center / cover no-repeat; mask: var(--logo-mask) center / cover no-repeat;
+}
 .journal-name {
   font-family: var(--hand);
   font-size: 1.2rem;
@@ -932,6 +940,20 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .test-signin label { display: block; margin-bottom: 10px; }
 .test-signin button { margin-bottom: 8px; }
 .privacy-brand { font-family: var(--hand); font-size: 1.6rem; color: var(--accent); margin: 0; }
+/* Sources, Terms and Privacy: a clear way back, then tabs like Settings'. */
+.info-back {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0 0 18px; padding: 7px 16px;
+  border: 1px solid var(--rule); border-radius: 999px; color: var(--accent); text-decoration: none; font-size: 1rem;
+}
+.info-back:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.info-tabs { display: flex; flex-wrap: wrap; gap: 4px 2px; margin: 0 0 22px; border-bottom: 1px solid var(--rule); }
+.info-tabs a {
+  padding: 6px 12px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  color: var(--muted); text-decoration: none; font-size: 1rem;
+}
+.info-tabs a:hover { color: var(--ink); }
+.info-tabs a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
+@media (max-width: 640px) { .info-tabs a { padding: 6px 8px; font-size: 0.95rem; } }
 /* The quote above the passphrase card: like the welcome page's, in the theme's
    blue, straight on the background. A soft paper-coloured halo keeps it
    readable when a background photo is behind it. */
@@ -1002,6 +1024,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   opacity: 0.75;
 }
 .brand-title { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
+.brand-name.long-name { font-size: calc(var(--name-size) * 0.74); white-space: nowrap; }   /* "A Life Well Lived" on one line */
 .brand-tagline { font-family: var(--serif); font-size: 1.05rem; letter-spacing: 0.16em; text-transform: uppercase; margin: 0; opacity: 0.8; }
 .brand-name { font-family: var(--hand); font-weight: 500; word-spacing: 0.25em; font-size: var(--name-size); line-height: 1; margin: 0; }
 .landing-lead { font-size: 1.25rem; line-height: 1.45; margin: 0; max-width: 560px; opacity: 0.95; }

@@ -10,7 +10,7 @@
 <body>
   <main class="book privacy sources">
     <section class="page">
-      <p class="privacy-brand">{{ app_name }}</p>
+      {% set page = "sources" %}{% include "_info_nav.html" %}
       <h1 class="prompt-heading">Where the wisdom comes from</h1>
 
       {% if edition.sources_intro %}<p>{{ edition.sources_intro }}</p>{% endif %}
@@ -52,7 +52,7 @@
 
       {% if edition.welcome_quote and edition.welcome_quote.credit %}<p class="subtle">{{ edition.welcome_quote.credit }}</p>{% endif %}
 
-      <p><a href="/">← Back to {{ app_name }}</a> · <a href="/privacy">Privacy</a></p>
+      <p><a href="/">← Back to {{ app_name }}</a></p>
       <p class="subtle copyright">{{ copyright }}</p>
     </section>
   </main>

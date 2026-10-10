@@ -77,7 +77,7 @@ else:
 
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
-PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/healthz",
+PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/vault/passkey-options", "/api/vault/unlock-passkey",
@@ -167,7 +167,7 @@ def _static_versions():
         return f"/static/{filename}?v={version}"
     return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "app_version": config.APP_VERSION, "test_login": bool(HOSTED and TEST_LOGIN),
             "test_emails": sorted(config.ALLOWED_EMAILS),
-            "logo_url": _brand_file("logo"), "hero_url": _brand_file("hero"),
+            "logo_url": _brand_file("logo"), "logo_mask_url": _brand_file("logo-mask"), "hero_url": _brand_file("hero"),
             "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR,
             "edition": config.EDITION, "brand_url": BRAND_URL, "brand_path": f"brands/{config.EDITION_NAME}"}
 
@@ -237,8 +237,7 @@ def index():
 
 @app.get("/privacy")
 def privacy():
-    return render_template("privacy.html", hosted=HOSTED,
-                           reflections_per_day=config.REFLECTIONS_PER_DAY, prompts_per_day=config.PROMPTS_PER_DAY)
+    return render_template("privacy.html", hosted=HOSTED)
 
 
 SITE_NAMES = {"en.wikisource.org": "Wikisource", "ccel.org": "CCEL", "www.gutenberg.org": "Project Gutenberg",
@@ -268,6 +267,16 @@ def source_groups():
             {"author": works[w]["author"], "title": works[w]["title"], "translation": works[w]["translation"],
              "url": sources.page_url(works[w]["work_page"]), "site": ""} for w in rest]})
     return groups
+
+
+TERMS_UPDATED = "October 9, 2026"   # change when the terms change
+
+
+@app.get("/terms")
+def terms_page():
+    return render_template("terms.html", hosted=HOSTED, terms_updated=TERMS_UPDATED, edition_name=config.EDITION_NAME,
+                           reflections_per_day=config.REFLECTIONS_PER_DAY or "unlimited",
+                           prompts_per_day=config.PROMPTS_PER_DAY or "unlimited")
 
 
 @app.get("/sources")

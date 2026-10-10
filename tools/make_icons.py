@@ -140,6 +140,28 @@ def drawing_icon(spec, size=512, fill=0.8, radius=0.2):
     return img
 
 
+def colour_mask(img, size=160):
+    """For logos drawn in one dark colour on white (both of ours): a white image
+    whose transparency says where the dark colour goes. The header lays it over
+    a square in the current theme's colour, so the logo follows the theme."""
+    small = resized(img, size).convert("L")
+    counts, total = small.histogram(), size * size
+
+    def level(share):                    # the brightness below which `share` of the pixels fall
+        seen = 0
+        for value, n in enumerate(counts):
+            seen += n
+            if seen >= share * total:
+                return value
+        return 255
+    dark, light = level(0.02), level(0.98)   # ignore the odd stray pixel
+    span = max(1, light - dark)
+    alpha = small.point(lambda v: max(0, min(255, round((light - v) * 255 / span))))
+    mask = Image.new("RGBA", (size, size), (255, 255, 255, 0))
+    mask.putalpha(alpha)
+    return mask
+
+
 def resized(img, size):
     return img.resize((size, size), Image.LANCZOS)
 
@@ -175,6 +197,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     save = dict(optimize=True)
     resized(img, 384).save(OUT / "logo.png", **save)
+    colour_mask(img).save(OUT / "logo-mask.png", **save)     # the header's theme-coloured logo
     tab = drawing_icon(_edition["tab_drawing"], size=1536) if _edition.get("tab_drawing") else letter_icon()
     tab.resize((32, 32), Image.LANCZOS).save(OUT / "favicon-32.png", **save)
     tab.resize((48, 48), Image.LANCZOS).save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])

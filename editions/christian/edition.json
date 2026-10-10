@@ -1,6 +1,6 @@
 {
   "_about": [
-    "In His Steps: the Christian edition, for daily quiet times. Same app as Well Lived,",
+    "In His Steps: the Christian edition, for daily quiet times. Same app as A Life Well Lived,",
     "with its own name, welcome page, quotes, colours and voices. The library of quotable",
     "works is sources.json in this folder (made by tools/make_christian_sources.py), and",
     "Claude's instructions are in prompts/. Run it with EDITION=christian."

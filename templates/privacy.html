@@ -10,7 +10,7 @@
 <body>
   <main class="book privacy">
     <section class="page">
-      <p class="privacy-brand">{{ app_name }}</p>
+      {% set page = "privacy" %}{% include "_info_nav.html" %}
       <h1 class="prompt-heading">How your writing is kept private</h1>
 
       <h2>Who can read your entries</h2>
@@ -72,16 +72,12 @@
         write, no titles, no times of day, and nothing about what you read or click.</p>
 
       {% if hosted %}
-      <h2>Limits</h2>
-      <p>To share one Claude account fairly, each person gets {{ reflections_per_day }} reflections and
-        {{ prompts_per_day }} writing prompts a day. Entries are always saved, with or without a reflection.</p>
-
       <h2>Leaving</h2>
       <p>Use Settings → Export to keep a copy, then Settings → Wipe journal to delete your entries,
         including from the server's backup copies.</p>
       {% endif %}
 
-      <p><a href="/">← Back to {{ app_name }}</a> · <a href="/sources">Sources</a></p>
+      <p><a href="/">← Back to {{ app_name }}</a></p>
       <p class="subtle copyright">{{ copyright }}</p>
     </section>
   </main>

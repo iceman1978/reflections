@@ -5,7 +5,7 @@ rem   - a "sign in as..." box instead of Google, so you can be yourself or a pre
 rem   - reflections and prompts are real (they use the API key in .env), with the web's daily limits
 rem Close this window to stop it. Delete data\test-web to start the test copy from scratch.
 cd /d "%~dp0"
-title Well Lived - web test copy
+title A Life Well Lived - web test copy
 set "JOURNAL_DATA_DIR=%~dp0data\test-web"
 set "JOURNAL_PORT=5061"
 set "JOURNAL_TEST_LOGIN=1"

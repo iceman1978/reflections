@@ -40,7 +40,7 @@
         <div class="brand-logo brand-logo-placeholder" title="Add a logo: see static/brands/README.txt">Logo</div>
         {% endif %}
         <div class="brand-title">
-          <h1 class="brand-name">{{ app_name }}</h1>
+          <h1 class="brand-name{% if app_name | length > 14 %} long-name{% endif %}">{{ app_name }}</h1>
           {% if edition.tagline %}<p class="brand-tagline">{{ edition.tagline }}</p>{% endif %}
         </div>
       </div>
@@ -147,14 +147,15 @@
         </div>
       </form>
 
-      <p class="vault-footer subtle"><a href="/sources">Sources</a> · <a href="/privacy">Privacy</a><br><span class="copyright">{{ copyright }}</span></p>
+      <p class="vault-footer subtle"><a href="/sources">Sources</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a><br><span class="copyright">{{ copyright }}</span></p>
     </div>
   </div>
 
   <main id="book" class="book" hidden>
     <header class="book-header">
       <div class="journal-brand">
-        {% if logo_url %}<img class="journal-logo" src="{{ logo_url }}" alt="">{% endif %}
+        {% if logo_mask_url %}<span class="journal-logo themed" style="--logo-mask: url('{{ logo_mask_url }}')" aria-hidden="true"></span>
+        {% elif logo_url %}<img class="journal-logo" src="{{ logo_url }}" alt="">{% endif %}
         <div id="journal-name" class="journal-name">{{ journal_name }}</div>
       </div>
       <div id="stats" class="stats" aria-live="polite"></div>
@@ -291,7 +292,7 @@
         <div id="panel-basic" role="tabpanel" aria-labelledby="tab-basic" class="settings-panel">
           {% if hosted %}
         <h2>Account</h2>
-        <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/privacy" target="_blank" rel="noopener">Privacy</a></p>
+        <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
         <p id="limits-note" class="hint"></p>
           {% endif %}
           <label>Your name
@@ -514,8 +515,9 @@
     <footer class="book-footer">
       <span class="footer-name">{{ app_name }}</span>
       {% if app_version %}· <span class="app-version" title="Version">{{ app_version }}</span>{% endif %}
-      · <a href="/sources" target="_blank" rel="noopener">Sources</a>
-      · <a href="/privacy" target="_blank" rel="noopener">Privacy</a>
+      · <a href="/sources">Sources</a>
+      · <a href="/terms">Terms</a>
+      · <a href="/privacy">Privacy</a>
       {% if hosted %}· <a href="/logout">Sign out</a>{% endif %}
       <br><span class="copyright">{{ copyright }}</span>
     </footer>

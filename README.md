@@ -1,4 +1,4 @@
-# Well Lived and In His Steps
+# A Life Well Lived and In His Steps
 
 A private journal that runs on your own computer. You write in your browser, and every entry is saved, encrypted, in a database on your machine that only your passphrase can open.
 
@@ -188,7 +188,7 @@ Your personal choices (name, journal name, day/evening, colour, photo, draft sav
 | Setting | What it does | Default |
 |---|---|---|
 | `user_name` | Your name in the greeting ("Hi …, what's on your mind?") | *(empty)* |
-| `journal_name` | The title at the top of your journal, in the theme colour (blank = the app name, e.g. *Well Lived*) | *(empty)* |
+| `journal_name` | The title at the top of your journal, in the theme colour (blank = the app name, e.g. *A Life Well Lived*) | *(empty)* |
 | `port` | The number in the browser address | `5050` |
 | `open_browser_on_start` | Open the browser automatically | `true` |
 | `timezone` | Time zone for dates and streaks | `America/Toronto` |
@@ -261,8 +261,8 @@ This puts the journal at **https://reflections-j7o5.onrender.com** (Render added
 
 ### 2. Create the Google sign-in
 
-1. Go to <https://console.cloud.google.com>, create a project (e.g. *Well Lived*).
-2. **APIs & Services → OAuth consent screen** (or *Google Auth Platform*): choose **External**, app name *Well Lived*, your email as support and developer contact. Scopes: just the defaults (`openid`, `email`, `profile`).
+1. Go to <https://console.cloud.google.com>, create a project (e.g. *A Life Well Lived*).
+2. **APIs & Services → OAuth consent screen** (or *Google Auth Platform*): choose **External**, app name *A Life Well Lived*, your email as support and developer contact. Scopes: just the defaults (`openid`, `email`, `profile`).
 3. Leave it in **Testing** mode and add each family member's Gmail address under **Test users** (up to 100). Nobody else can sign in, and Google doesn't need to review the app.
 4. **Credentials → Create credentials → OAuth client ID** → *Web application*.
    - Authorised JavaScript origin: `https://reflections.onrender.com`
@@ -291,10 +291,10 @@ If the name `reflections` is taken on Render, it will give the service a slightl
 
 Signed-out visitors see a welcome page: what the app is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
 
-- **Logo and app icons:** the master is `brand-source/<edition>/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py <edition>` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon and the "Install app" icons in `static/brands/<edition>/`.
+- **Logo and app icons:** the master is `brand-source/<edition>/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py <edition>` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon, the "Install app" icons, and `logo-mask.png` (a cut-out of the logo's dark colour, which the header fills with the current colour theme, so its logo matches the theme) in `static/brands/<edition>/`. The cut-out assumes a logo in one dark colour on white, like both current ones.
 - **Installing:** the app offers to install itself where it can. **Settings → Basic → Install as an app** always has it; and from the 3rd entry on, a small invitation appears below the header (**Not now** hides it for a month; it never shows once installed). On Chrome or Edge (Windows, Mac, Android) the **Install** button opens the browser's install dialog; on iPhone/iPad, where websites can't install themselves, it shows the two steps (*Share → Add to Home Screen*). Nothing is offered in browsers that can't install (e.g. Firefox on a computer). A tiny service worker (`static/sw.js`) makes the site installable; it stores nothing on the device.
 - **Picture behind the left side (optional):** `static/brands/<edition>/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
-- **Name:** comes from the edition (`app_name` in `editions/<edition>/edition.json`): *Well Lived* for philosophy, *In His Steps* for the Christian edition. It shows in the browser tab, welcome page, privacy page and installed app. `APP_NAME` in `.env` or on Render overrides it, but is best left unset.
+- **Name:** comes from the edition (`app_name` in `editions/<edition>/edition.json`): *A Life Well Lived* for philosophy, *In His Steps* for the Christian edition. It shows in the browser tab, welcome page, privacy page and installed app. `APP_NAME` in `.env` or on Render overrides it, but is best left unset.
 
 Files in `static/brands/<edition>/` are public (the welcome page is visible to anyone), unlike `static/backgrounds/`, which only signed-in people can see.
 
@@ -365,6 +365,10 @@ Locally: *Settings → Export (CSV)*. On the web: sign in, set your passphrase, 
 - Unlocked journals are held in the server's memory, so a restart (an update, or Render's maintenance) locks everyone; they just unlock again.
 - The server keeps 14 daily backups of the (encrypted) database on the same disk. For an extra copy, Render's disk snapshots can be restored from the dashboard.
 - `logs/journal.log` on the disk, and Render's *Logs* tab, contain only IDs, counts and errors, never anyone's writing.
+
+## Terms
+
+The **Terms** page (`/terms`, linked from the footer, the lock screen, Settings → Account, and the Privacy and Sources pages) is the plain-language terms of use: beta and invitation-only, your writing is yours (and unrecoverable without passphrase or recovery key), reflections are AI-written and not professional advice, fair use and the daily limits (read from the settings), leaving, no guarantees, and changes. It's in `templates/terms.html`; when you change it, update `TERMS_UPDATED` in `app.py` so the date at the top is right. Have it reviewed by a lawyer before relying on it, especially before charging.
 
 ## Privacy
 

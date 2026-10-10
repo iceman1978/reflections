@@ -5,7 +5,7 @@
     "and Claude's instructions are in prompts/. Choose the edition with the EDITION",
     "setting (default: philosophy)."
   ],
-  "app_name": "Well Lived",
+  "app_name": "A Life Well Lived",
   "tagline": "A Daily Journal",
   "tab_letter": "W",
   "description": "A private journal, with a thoughtful reflection after every entry.",

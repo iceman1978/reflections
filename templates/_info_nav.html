@@ -1,0 +1,8 @@
+{# The top of the Sources, Terms and Privacy pages: a way back, and tabs between them.
+   Set `page` (sources / terms / privacy) before including this. #}
+<a class="info-back" href="/">← Back to {{ app_name }}</a>
+<nav class="info-tabs" aria-label="About {{ app_name }}">
+  <a href="/sources"{% if page == "sources" %} aria-current="page"{% endif %}>Sources</a>
+  <a href="/terms"{% if page == "terms" %} aria-current="page"{% endif %}>Terms</a>
+  <a href="/privacy"{% if page == "privacy" %} aria-current="page"{% endif %}>Privacy</a>
+</nav>

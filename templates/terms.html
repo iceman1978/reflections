@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terms · {{ app_name }}</title>
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy">
+    <section class="page">
+      {% set page = "terms" %}{% include "_info_nav.html" %}
+      <h1 class="prompt-heading">Terms of use</h1>
+      <p class="subtle">Last updated {{ terms_updated }}</p>
+
+      <p>These terms are the agreement between you and the person who runs {{ app_name }}. They're written to be read,
+        not skimmed past. By using {{ app_name }}, you agree to them.</p>
+
+      <h2>A beta, by invitation</h2>
+      <p>{{ app_name }} is in beta{% if hosted %} and open by invitation only{% endif %}. It's offered free for now,
+        and it will keep changing: features may be added, changed or removed, and it may sometimes be unavailable.
+        If it ever becomes a paid service, you'll be told clearly beforehand, and nothing will be charged without
+        your agreement.</p>
+
+      <h2>Your writing is yours</h2>
+      <p>Everything you write stays yours. {{ app_name }} claims no rights to it and never uses it for anything except
+        showing it to you and preparing your reflections and writing prompts. Your entries are encrypted so that only you
+        can read them (see <a href="/privacy">Privacy</a>).</p>
+      <p>That privacy has a cost you should know about: <strong>if you lose both your passphrase and your recovery key,
+        nobody can get your entries back</strong>, not even the person who runs the site. You can download your whole
+        journal at any time (Settings → Security &amp; Data → Export), and it's wise to keep a copy somewhere safe.</p>
+
+      <h2>About the reflections</h2>
+      <p>Reflections and writing prompts are written by an AI (Claude, made by Anthropic), drawing on
+        {% if edition_name == "christian" %}Scripture and the writers listed under <a href="/sources">Sources</a>{% else %}the
+        thinkers listed under <a href="/sources">Sources</a>{% endif %}. Quotations are checked against the original texts,
+        but the reflections themselves can still be mistaken, incomplete or simply miss the point. Read them as a
+        thoughtful companion's suggestions, not as authority.</p>
+      <p><strong>{{ app_name }} is not professional advice.</strong> It isn't a substitute for a doctor, therapist or
+        counsellor{% if edition_name == "christian" %}, or for your pastor or church{% endif %}, or for legal or
+        financial advice. If you're struggling, please talk to someone you trust or a professional. If you or someone
+        else is in danger, contact your local emergency services.</p>
+
+      <h2>Using it fairly</h2>
+      <p>To share the cost fairly, each person can ask for a limited number of reflections and writing prompts a day
+        (currently {{ reflections_per_day }} and {{ prompts_per_day }}). Your entries are always saved, with or without
+        a reflection. Please also:</p>
+      <ul>
+        <li>keep your account to yourself: one person, one journal;</li>
+        <li>not try to get around the limits, automate the app, or break or probe its security;</li>
+        <li>not use it to store or create anything unlawful;</li>
+        {% if hosted %}<li>only invite people who you think would welcome it.</li>{% endif %}
+      </ul>
+
+      <h2>Feedback</h2>
+      <p>Ideas and feedback are very welcome. If you send some, it may be used to improve {{ app_name }}, without any
+        obligation or payment to you.</p>
+
+      <h2>Leaving, or losing access</h2>
+      <p>You can stop using {{ app_name }} at any time: export your journal, then wipe it (Settings → Security &amp;
+        Data). Access may be ended for anyone who misuses the service, or for everyone if the beta closes. Except in
+        cases of misuse, you'll be given notice and time to export your journal first.</p>
+
+      <h2>No guarantees</h2>
+      <p>{{ app_name }} is provided as it is, without guarantees of any kind, including that it will always be available
+        or free of errors. As far as the law allows, the person who runs it isn't responsible for any loss that comes
+        from using it, including lost entries. That's one more reason to keep your own exported copy.</p>
+      <p>Links to the original texts (on Wikisource, CCEL, Project Gutenberg, Bible Hub and other sites) lead to sites
+        that {{ app_name }} doesn't run or control.</p>
+
+      <h2>Changes to these terms</h2>
+      <p>These terms may change as {{ app_name }} grows. The date at the top shows when they last did, and important
+        changes will be pointed out in the app. Using {{ app_name }} after a change means you accept the new terms.</p>
+
+      <h2>Questions</h2>
+      <p>Use the feedback button at the top of your journal, or reply to whoever invited you.</p>
+
+      <p><a href="/">← Back to {{ app_name }}</a></p>
+      <p class="subtle copyright">{{ copyright }}</p>
+    </section>
+  </main>
+</body>
+</html>
