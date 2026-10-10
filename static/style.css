@@ -538,8 +538,8 @@ button.prompt-btn.nudge-glow {
   margin-bottom: 2px;
 }
 .citations { list-style: none; padding: 0; margin: 14px 0 0; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+.citations:empty { display: none; }
 .citations li { margin: 2px 0; }
-.citations .cite-kind { font-style: normal; font-size: 0.8rem; }
 .citations a { font-style: normal; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .reflection-footer { display: flex; justify-content: flex-end; margin-top: 6px; }
 .reflection-working { display: flex; align-items: center; gap: 12px; color: var(--muted); font-style: italic; }
@@ -1107,7 +1107,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 
 /* Small links under the journal: name, privacy, sign out */
 .copyright { font-size: 0.75rem; color: var(--muted); }
-.footer-name { font-family: var(--hand); font-size: 1.35em; line-height: 1; vertical-align: -0.05em; padding-right: 0.15em; }
+.footer-name { font-family: var(--hand); font-size: 1.35em; line-height: 1; vertical-align: -0.05em; padding-right: 0.15em; word-spacing: 0.25em; }   /* spacing: the swashes otherwise close the gaps */
 .book-footer {
   width: fit-content;
   margin: 18px auto 0;

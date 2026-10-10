@@ -699,8 +699,13 @@ def create_entry():
     return jsonify(entry=_for_page(entry)), 201
 
 
+WAIT_FOR_REFLECTION = "Please wait until the reflection is ready, then try again."
+
+
 @app.put("/api/entries/<entry_id>")
 def edit_entry(entry_id):
+    if entry_id in _reflecting:
+        return jsonify(error=WAIT_FOR_REFLECTION), 409
     text, _, err = _read_text()
     if err:
         return err
@@ -760,6 +765,8 @@ def unhide_entry(entry_id):
 
 @app.delete("/api/entries/<entry_id>")
 def delete_entry(entry_id):
+    if entry_id in _reflecting:
+        return jsonify(error=WAIT_FOR_REFLECTION), 409
     try:
         failed_backups = store.delete_entry_permanently(entry_id)  # also removed from backups
     except KeyError:

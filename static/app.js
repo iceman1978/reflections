@@ -654,6 +654,13 @@
   function renderReflection(entry, { working = false } = {}) {
     renderTitle(entry);  // a suggested title arrives with the reflection
     const busy = working || entry.reflecting;
+    // No editing or deleting while Claude is writing the reflection: it would
+    // answer the old text (or have nowhere to go). Back as soon as it's done,
+    // fails, or is refused (e.g. the daily limit).
+    for (const id of ["edit-btn", "delete-btn"]) {
+      $(id).disabled = busy;
+      $(id).title = busy ? "Available once the reflection is ready" : "";
+    }
     const status = entry.reflection_status;
     const done = status === "Done" && entry.insight;
     $("reflection").hidden = false;
@@ -686,22 +693,19 @@
       ];
       for (const q of sourcesList) {
         const li = document.createElement("li");
-        // Books of the Bible have no author: "— Romans 8:28".
-        li.append(document.createTextNode(`— ${q.author ? `${q.author}, ` : ""}${q.title}${q.location ? ` ${q.location}` : ""} `));
-        if (q.kind === "idea") {
-          const tag = document.createElement("span");
-          tag.className = "cite-kind";
-          tag.textContent = "(idea) ";
-          tag.title = q.idea ? `Paraphrased: ${q.idea}` : "An idea from this work, paraphrased";
-          li.append(tag);
-        }
+        // Books of the Bible have no author: "— Romans 8:28". A named chapter
+        // takes a comma ("…of God, Fourth Conversation"); numbers don't ("Meditations 4.3").
+        const where = !q.location ? "" : /^[\p{L}§]/u.test(q.location) ? `, ${q.location}` : ` ${q.location}`;
+        li.append(document.createTextNode(`— ${q.author ? `${q.author}, ` : ""}${q.title}${where} `));
         if (typeof q.url === "string" && q.url.startsWith("https://")) {
           const a = document.createElement("a");
           a.href = q.kind === "quote" ? passageUrl(q.url, q.quote) : q.url;
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = q.kind === "quote" ? "Read the passage ↗" : "Read the source ↗";
-          a.title = `${q.translation}, on ${siteName(q.url)}`;
+          // "Read the passage" = quoted word for word; "Read the source" = an idea in the reflection's own words.
+          a.title = (q.kind === "idea" ? `Paraphrased${q.idea ? `: ${q.idea}` : ""}. ` : "")
+            + `${q.translation.charAt(0).toUpperCase()}${q.translation.slice(1)}, on ${siteName(q.url)}`;
           li.append(a);
         }
         ul.append(li);
