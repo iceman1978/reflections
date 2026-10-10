@@ -44,14 +44,14 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
 ## Browsing past entries
 
 - **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same, and on a phone or tablet you can **swipe**: right for Older, left for Newer. Going Older from your first entry gives a little bump (there's nothing before it); going Newer from your latest entry turns to a fresh writing page. From an empty writing page, **‹ Older** (or swiping right) turns back to your latest entry; once you've started writing, it won't turn away from your draft.
-- Above the list of past entries are three filters: **All**, **★ Favourites** and **Calendar**.
-  - **★ Favourites** shows only favourites (click it again to turn it off).
+- Above the list of past entries are three filters: **All**, **★ Favorites** and **Calendar**.
+  - **★ Favorites** shows only favorites (click it again to turn it off).
   - **Calendar** pops up a month view that shades the days you wrote. Use it to filter by date:
     - click the **month name** (or **Whole month**) for that whole month;
     - click a **day** for just that day, then click a **second day** to stretch it into a range (e.g. a week);
     - **‹ ›** changes month; **Clear dates** removes the date filter.
     The button then shows the dates (e.g. *Calendar: Sep 8–14*) and a line above the list says what's showing.
-  - Favourites and dates combine (e.g. favourites from September).
+  - Favorites and dates combine (e.g. favorites from September).
   - **All** clears every filter.
 - Older / Newer only steps through the entries the filters are showing.
 - The list shows your 10 newest entries (or newest matches for a filter); 20 more load as you scroll to its end, or with **Show more**. Older / Newer, swiping and the calendar still reach every entry.
@@ -74,9 +74,9 @@ Finishing your **5th, 10th, 25th and 50th** entry, and every 50th after that (10
 
 From your fourth entry on, finishing an entry with more words than any you've written before brings up a gold **"✦ Your longest entry yet · 612 words"** badge beside your streak. That entry then shows **"✦ longest"** next to its word count, until another entry beats it (a tie keeps the record where it is; hidden entries don't count).
 
-## Favourites
+## Favorites
 
-While reading a past entry, click the **☆** next to its title to make it a favourite (★); click again to remove it. The star is hidden while you're editing. Above the list of past entries, choose **★ Favourites** to see only your favourites, or **All** to see everything; the app remembers your choice. Favourites are marked in the *Favourite* column of exports. Starring doesn't change an entry's *Last Updated* time.
+While reading a past entry, click the **☆** next to its title to make it a favorite (★); click again to remove it. The star is hidden while you're editing. Above the list of past entries, choose **★ Favorites** to see only your favorites, or **All** to see everything; the app remembers your choice. Favorites are marked in the *Favorite* column of exports. Starring doesn't change an entry's *Last Updated* time.
 
 ## Reflections
 
@@ -152,7 +152,7 @@ Everything is in the `data` folder, and all of it is encrypted:
 
 | What | Where |
 |---|---|
-| Your journal: entries, reflections, titles, dates, favourites, draft | `data/journal.db` (an encrypted SQLite database) |
+| Your journal: entries, reflections, titles, dates, favorites, draft | `data/journal.db` (an encrypted SQLite database) |
 | Daily backups | `data/backups/journal-YYYY-MM-DD.db` (keeps the last 14; also encrypted) |
 | Error log, to share when debugging | `logs/journal.log` (IDs, counts and errors only, never what you write) |
 
@@ -169,7 +169,7 @@ The database shows nothing about your entries except how many there are: even th
 In **⚙ Settings → Your data**:
 
 - **Export (CSV)** downloads your whole journal (e.g. `journal-2026-10-07.csv`) to your Downloads folder. It opens directly in Excel, with accents and line breaks intact; hidden entries are included and marked. **The export is not encrypted**, so keep it somewhere safe, or delete it when you're done.
-- **Import (CSV)…** adds the entries from a file made with Export: to restore entries after a wipe, or to move your journal to the web version. Titles, favourites, hidden entries, reflections and source links come back too. Entries already in the journal (same date, time and text) are skipped, so importing the same file twice is harmless.
+- **Import (CSV)…** adds the entries from a file made with Export: to restore entries after a wipe, or to move your journal to the web version. Titles, favorites, hidden entries, reflections and source links come back too. Entries already in the journal (same date, time and text) are skipped, so importing the same file twice is harmless.
 - **Wipe journal…** permanently deletes all entries (hidden ones too, with their reflections), your draft, and your entries in every backup in `data/backups/`. Your passphrase, settings, API key, photos and quote sources are kept. To confirm, you're shown a random three-digit number and must type it in words, digit by digit (352 → *three five two*). A wrong answer deletes nothing; each number allows one try. **There's no undo**, so export first if you might want your entries back.
 
 ## Deleting an entry
@@ -181,14 +181,14 @@ Open the entry and click **Delete**. You'll be asked to confirm, then to choose:
 
 ## Settings
 
-Click the **⚙** in the top-right corner. Settings has tabs: **Basic** (your account, name, journal name, draft saving, auto-lock; on your own computer also the app-wide settings under *This computer*), **Theme** (day or evening, colour, background photo), **Security & Data** (passphrase, recovery key, export, import, wipe, hidden entries) and, for admins, **Admin** (usage, invitation requests, feedback). **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
+Click the **⚙** in the top-right corner. Settings has tabs: **Basic** (your account, name, journal name, draft saving, auto-lock; on your own computer also the app-wide settings under *This computer*), **Theme** (day or evening, color, background photo), **Security & Data** (passphrase, recovery key, export, import, wipe, hidden entries) and, for admins, **Admin** (usage, invitation requests, feedback). **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
 
-Your personal choices (name, journal name, day/evening, colour, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
+Your personal choices (name, journal name, day/evening, color, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
 
 | Setting | What it does | Default |
 |---|---|---|
 | `user_name` | Your name in the greeting ("Hi …, what's on your mind?") | *(empty)* |
-| `journal_name` | The title at the top of your journal, in the theme colour (blank = the app name, e.g. *A Life Well Lived*) | *(empty)* |
+| `journal_name` | The title at the top of your journal, in the theme color (blank = the app name, e.g. *A Life Well Lived*) | *(empty)* |
 | `port` | The number in the browser address | `5050` |
 | `open_browser_on_start` | Open the browser automatically | `true` |
 | `timezone` | Time zone for dates and streaks | `America/Toronto` |
@@ -201,7 +201,7 @@ Your personal choices (name, journal name, day/evening, colour, photo, draft sav
 | `api_retries` | Automatic retries when a Claude request fails | `2` |
 | `theme` | Day or evening: `day`, `evening` or `auto` | `day` |
 | `colour_theme` | `lake`, `walnut`, `sage`, `amber`, `claret`, `lavender`, `sea-glass` or `graphite` | `lake` |
-| `background_photo` | Background photo behind the journal (off: a deep shade of the colour theme) | `true` |
+| `background_photo` | Background photo behind the journal (off: a deep shade of the color theme) | `true` |
 | `photo_blur` | Photo blur in pixels, 0–30 | `3` |
 | `photo_visibility` | How clearly the photo shows through, 0–100 (%) | `50` |
 
@@ -216,9 +216,9 @@ The key is read fresh each time, so no restart is needed after changing it. `.en
 ## Look and feel
 
 - **Day or evening:** *Settings → Day or evening* chooses **Day** (the default), **Evening**, or **Automatic** (follows your device's light/dark setting).
-- **Colour:** *Settings → Colour* picks one of eight colour themes: **Lake** (cool blue, the default), **Walnut** (warm brown), **Sage** (green), **Amber** (orange), **Claret** (deep red), **Lavender** (purple), **Sea glass** (teal) and **Graphite** (neutral grey). The colour tints the buttons, links, paper, margin notes, desk and the veil over the photo, and works in both day and evening. Clicking a swatch previews it straight away; **Save** keeps it, **Discard** returns to what you had.
-- **Adding a colour:** in `static/style.css`, copy one line from the *Colour themes* block (e.g. `[data-palette="lake"] { --hue: 212; ... }`), give it a new name and hue (0–360 around the colour wheel: 0 red, 30 orange, 60 yellow, 120 green, 200 blue, 270 purple), then add the name to `COLOUR_THEMES` in `journal/config.py`.
-- **Background photo:** a softly blurred photo sits behind the journal. Every time the page loads or refreshes, a random photo from `static/backgrounds/` appears (never the one you just saw), and finishing an entry fades in another. Turn it off with *Settings → Background photo*; the journal then sits on a deep shade of your colour theme (e.g. navy for Lake), the same in Day and Evening. Day / Evening only changes the journal itself.
+- **Color:** *Settings → Color* picks one of eight color themes: **Lake** (cool blue, the default), **Walnut** (warm brown), **Sage** (green), **Amber** (orange), **Claret** (deep red), **Lavender** (purple), **Sea glass** (teal) and **Graphite** (neutral gray). The color tints the buttons, links, paper, margin notes, desk and the veil over the photo, and works in both day and evening. Clicking a swatch previews it straight away; **Save** keeps it, **Discard** returns to what you had.
+- **Adding a color:** in `static/style.css`, copy one line from the *Color themes* block (e.g. `[data-palette="lake"] { --hue: 212; ... }`), give it a new name and hue (0–360 around the color wheel: 0 red, 30 orange, 60 yellow, 120 green, 200 blue, 270 purple), then add the name to `COLOUR_THEMES` in `journal/config.py`.
+- **Background photo:** a softly blurred photo sits behind the journal. Every time the page loads or refreshes, a random photo from `static/backgrounds/` appears (never the one you just saw), and finishing an entry fades in another. Turn it off with *Settings → Background photo*; the journal then sits on a deep shade of your color theme (e.g. navy for Lake), the same in Day and Evening. Day / Evening only changes the journal itself.
 - **Photo blur and visibility:** two sliders under that setting. *Photo blur* goes from 0 (sharp) to 30 (very soft); *Photo visibility* from 0% (almost hidden behind a paper-coloured veil) to 100% (no veil). They preview as you drag; **Save** keeps them. In evening mode the veil is a little stronger, so the photo never overpowers the dark page.
 - **Your own photos:** drop any `.jpg`, `.png` or `.webp` into `static/backgrounds/`; no restart needed. Photos there are shared by both apps; to show a photo in only one, put it in `static/backgrounds/philosophy/` (Well Lived) or `static/backgrounds/christian/` (In His Steps). Landscape, about 1920 × 1080 (or 1920 × 1280 / 1440), under ~2 MB each works best. Portrait photos work but lose some of their top and bottom.
 - **Motion:** Older / Newer turn the page gently; other screens fade in. If your computer is set to reduce motion (Windows: *Settings → Accessibility → Visual effects → Animation effects*), the app keeps still.
@@ -291,7 +291,7 @@ If the name `reflections` is taken on Render, it will give the service a slightl
 
 Signed-out visitors see a welcome page: what the app is on the left, and *Continue with Google* on the right. Signing in for the first time creates that person's journal (if their address is invited). The page has a **Privacy** link, and so does every journal page (at the bottom, and in *Settings → Account*).
 
-- **Logo and app icons:** the master is `brand-source/<edition>/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py <edition>` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon, the "Install app" icons, and `logo-mask.png` (a cut-out of the logo's dark colour, which the header fills with the current colour theme, so its logo matches the theme) in `static/brands/<edition>/`. The cut-out assumes a logo in one dark colour on white, like both current ones.
+- **Logo and app icons:** the master is `brand-source/<edition>/logo-original.png` (square, 1024 px or larger). After replacing it, run `uv run --with pillow python tools/make_icons.py <edition>` and push: that makes the welcome-page logo, the browser-tab icon, the iPhone home-screen icon, the "Install app" icons, and `logo-mask.png` (a cut-out of the logo's dark color, which the header fills with the current color theme, so its logo matches the theme) in `static/brands/<edition>/`. The cut-out assumes a logo in one dark color on white, like both current ones.
 - **Installing:** the app offers to install itself where it can. **Settings → Basic → Install as an app** always has it; and from the 3rd entry on, a small invitation appears below the header (**Not now** hides it for a month; it never shows once installed). On Chrome or Edge (Windows, Mac, Android) the **Install** button opens the browser's install dialog; on iPhone/iPad, where websites can't install themselves, it shows the two steps (*Share → Add to Home Screen*). Nothing is offered in browsers that can't install (e.g. Firefox on a computer). A tiny service worker (`static/sw.js`) makes the site installable; it stores nothing on the device.
 - **Picture behind the left side (optional):** `static/brands/<edition>/hero.jpg`, about 1600 × 1200, under 1 MB. It's darkened so the words stay readable.
 - **Name:** comes from the edition (`app_name` in `editions/<edition>/edition.json`): *A Life Well Lived* for philosophy, *In His Steps* for the Christian edition. It shows in the browser tab, welcome page, privacy page and installed app. `APP_NAME` in `.env` or on Render overrides it, but is best left unset.

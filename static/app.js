@@ -156,7 +156,7 @@
     $("backdrop").style.visibility = "";  // the saved photo setting decides via loadBackground
   }
 
-  // Show the slider values, and grey the sliders out when the photo is off.
+  // Show the slider values, and gray the sliders out when the photo is off.
   function syncPhotoControls() {
     const f = $("settings-form").elements;
     $("photo-blur-value").textContent = f.photo_blur.value === "0" ? "sharp" : `${f.photo_blur.value} px`;
@@ -174,7 +174,7 @@
     applyPhotoLook(Number(form.elements.photo_blur.value), Number(form.elements.photo_visibility.value));
     const photoOn = form.elements.background_photo.checked;
     $("backdrop").style.visibility = photoOn ? "" : "hidden";
-    document.documentElement.dataset.photo = photoOn ? "on" : "off";  // dark theme-coloured surround when off
+    document.documentElement.dataset.photo = photoOn ? "on" : "off";  // dark theme-colored surround when off
     syncPhotoControls();
   }
 
@@ -313,7 +313,7 @@
   // ---- Older / Newer ----------------------------------------------------
 
   const when = (e) => Date.parse(e.created_at);
-  // Entries passing the favourites filter (what the calendar shades).
+  // Entries passing the favorites filter (what the calendar shades).
   const favShown = () => (state.favOnly
     ? (state.allEntries || []).filter((e) => e.favourite)
     : (state.allEntries || []));
@@ -323,7 +323,7 @@
 
   function filterDescription() {
     const parts = [];
-    if (state.favOnly) parts.push("favourites");
+    if (state.favOnly) parts.push("favorites");
     if (state.range) parts.push(`${state.range.prep} ${state.range.label}`);
     return parts.join(" ");
   }
@@ -806,13 +806,13 @@
     renderStar(!!entry.favourite);
   }
 
-  // ---- Favourites -------------------------------------------------------
+  // ---- Favorites -------------------------------------------------------
 
   function renderStar(on) {
     const b = $("star-btn");
     b.textContent = on ? "★" : "☆";
     b.setAttribute("aria-pressed", String(on));
-    const label = on ? "Remove from favourites" : "Add to favourites";
+    const label = on ? "Remove from favorites" : "Add to favorites";
     b.title = label;
     b.setAttribute("aria-label", label);
   }
@@ -830,14 +830,14 @@
     } catch (err) {
       entry.favourite = !want;
       if (state.current && state.current.id === entry.id) renderStar(!want);
-      state.clientError = `Couldn't update favourites: ${err.message}`;
+      state.clientError = `Couldn't update favorites: ${err.message}`;
       renderBanner();
     }
   }
 
-  // ---- Filters: All · Favourites · Calendar (dates) ----------------------
-  // Favourites and a date range can be combined; All clears both.
-  // The favourites choice is remembered; a date range lasts until All.
+  // ---- Filters: All · Favorites · Calendar (dates) ----------------------
+  // Favorites and a date range can be combined; All clears both.
+  // The favorites choice is remembered; a date range lasts until All.
 
   const FILTER_KEY = "journal.filter";
   state.favOnly = (() => { try { return localStorage.getItem(FILTER_KEY) === "fav"; } catch (_) { return false; } })();
@@ -979,8 +979,8 @@
         const li = document.createElement("li");
         li.className = "subtle";
         li.textContent = !all.length ? "No entries yet."
-          : state.range ? `No ${state.favOnly ? "favourites" : "entries"} ${state.range.prep} ${state.range.label}. Click All to see everything.`
-          : "No favourites yet. Open an entry and click ☆ to add it here.";
+          : state.range ? `No ${state.favOnly ? "favorites" : "entries"} ${state.range.prep} ${state.range.label}. Click All to see everything.`
+          : "No favorites yet. Open an entry and click ☆ to add it here.";
         ul.append(li);
       }
     }
@@ -2134,7 +2134,7 @@
 
   // Plain-language messages for what the browser's passkey prompt can report.
   function passkeyError(err, fallback) {
-    if (err && err.name === "NotAllowedError") return "The passkey prompt was cancelled or timed out.";
+    if (err && err.name === "NotAllowedError") return "The passkey prompt was canceled or timed out.";
     if (err && err.name === "InvalidStateError") return "This device already has a passkey for your journal.";
     if (err && err.name === "SecurityError") return "Passkeys don't work on this address.";
     return (err && err.message) || fallback;

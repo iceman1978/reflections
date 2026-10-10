@@ -24,6 +24,7 @@ Vary the approach from one suggestion to the next.
 ## Writing the prompt
 
 - One or two sentences. Specific, concrete and open-ended.
+- Use American spelling (color, favorite, honor, realize).
 - Invite reflection on experience: a moment, a person, a choice, a habit. Avoid abstract essay questions ("What is justice?").
 - Make it something they could start writing about immediately.
 - Don't presume feelings they haven't expressed, and don't diagnose.

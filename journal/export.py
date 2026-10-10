@@ -11,7 +11,7 @@ from . import store
 from .config import TZ
 
 COLUMNS = ["Date", "Time", "Title", "Writing Prompt", "Entry", "Word Count", "Insight", "Question",
-           "Sources", "Reflection Status", "Last Updated", "Favourite", "Hidden"]
+           "Sources", "Reflection Status", "Last Updated", "Favorite", "Hidden"]
 
 
 def _local(iso):

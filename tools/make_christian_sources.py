@@ -50,7 +50,7 @@ BIBLE = [
      "bearing one another's burdens (6)."),
     ("ephesians", "Ephesians", "ephesians", "Ephesians",
      "Saved by grace through faith (2), rooted in love (3), the old self and the new (4), speech and anger (4), "
-     "walking as children of light (5), the armour of God (6)."),
+     "walking as children of light (5), the armor of God (6)."),
     ("philippians", "Philippians", "philippians", "Philippians",
      "The mind of Christ and his humility (2), counting all as loss (3), pressing on (3), anxiety and peace, "
      "whatever is true, contentment in all circumstances (4)."),
@@ -61,9 +61,9 @@ BIBLE = [
     ("2_timothy", "2 Timothy", "2_timothy", "2 Timothy",
      "Not a spirit of fear (1), endurance (2), Scripture (3), finishing the race (4)."),
     ("hebrews", "Hebrews", "hebrews", "Hebrews",
-     "A high priest who sympathises with weakness (4), faith (11), running the race and discipline (12), contentment (13)."),
+     "A high priest who sympathizes with weakness (4), faith (11), running the race and discipline (12), contentment (13)."),
     ("james", "James", "james", "James",
-     "Trials and wisdom (1), doers of the word (1), favouritism (2), faith and works (2), the tongue (3), "
+     "Trials and wisdom (1), doers of the word (1), favoritism (2), faith and works (2), the tongue (3), "
      "humility and planning (4), patience (5)."),
     ("1_peter", "1 Peter", "1_peter", "1 Peter",
      "Living hope (1), suffering for doing good (2-4), casting your anxieties on him (5:7), humility (5)."),
@@ -152,7 +152,7 @@ WRITERS = {
         "author": "Charles Spurgeon", "title": "Morning and Evening",
         "translation": "original English (1865-1868)",
         "location_format": "reading, e.g. Morning, January 14 or Evening, March 3",
-        "note": "Daily devotional readings, each on one verse: warm, vivid, Christ-centred.",
+        "note": "Daily devotional readings, each on one verse: warm, vivid, Christ-centered.",
         "work_page": "https://ccel.org/ccel/spurgeon/morneve",
         "pages": {"ccel": "spurgeon/morneve"}, "sections": None},
     "ryle_holiness": {

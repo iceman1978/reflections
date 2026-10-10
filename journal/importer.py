@@ -98,7 +98,7 @@ def import_csv(data: bytes):
             "references": references,
             "reflection_status": status,
             "reflection_error": None,
-            "favourite": (row.get("Favourite") or "").strip().lower() in ("yes", "★", "true"),
+            "favourite": (row.get("Favorite") or row.get("Favourite") or "").strip().lower() in ("yes", "★", "true"),
             "hidden": (row.get("Hidden") or "").strip().lower() in ("yes", "true"),
         }
         store.put_entry(entry)

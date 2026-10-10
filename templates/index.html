@@ -237,7 +237,7 @@
       <div class="title-row">
         <h1 id="entry-title" class="entry-title"></h1>
         <button id="star-btn" class="star-btn" type="button" aria-pressed="false"
-                title="Add to favourites" aria-label="Add to favourites">☆</button>
+                title="Add to favorites" aria-label="Add to favorites">☆</button>
       </div>
       <div id="entry-when-edit" class="when-edit" hidden>
         <label>Date <input id="entry-date-input" type="date"></label>
@@ -366,7 +366,7 @@
             </select>
           </label>
           <fieldset class="colour-field">
-            <legend>Colour</legend>
+            <legend>Color</legend>
             <div class="swatches" role="radiogroup">
               {% for key, name in colour_themes %}
               <label class="swatch" data-palette="{{ key }}">
@@ -388,7 +388,7 @@
             <label>Photo visibility
               <span class="slider"><input name="photo_visibility" type="range" min="0" max="100" step="5">
                 <output id="photo-visibility-value"></output></span>
-              <span class="hint">How clearly the photo shows through. Lower fades it into the paper colour.</span>
+              <span class="hint">How clearly the photo shows through. Lower fades it into the paper color.</span>
             </label>
           </div>
         </div>
@@ -488,7 +488,7 @@
         <h2>Past entries</h2>
         <div class="filter" role="group" aria-label="Show">
           <button id="filter-all" type="button" class="filter-btn" aria-pressed="true">All</button>
-          <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false">★ Favourites</button>
+          <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false">★ Favorites</button>
           <button id="calendar-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
                   aria-haspopup="dialog" aria-controls="calendar">Calendar</button>
         </div>

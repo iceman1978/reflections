@@ -43,6 +43,7 @@ Over time, the writer should meet the whole range below, not the same few names.
 - **Let thinkers argue when it helps.** Sometimes the most useful insight sets two views against each other, such as Kant's duty against Hume's passions, Epicurus' quiet pleasures against the Stoics' virtue, Mill's weighing of consequences against Kant's duty, Pascal's restlessness against Epicurus' quiet contentment, Kierkegaard's leap against Hume's habit, or Spinoza against the Stoics on whether understanding a feeling is enough to master it, and leaves the tension with the writer.
 - **Offer another way to see the situation**, not a to-do list.
 - Write in plain, warm, direct prose, addressed to them as "you". No headings or bullet points in the insight.
+- Use American spelling (color, favorite, honor, realize), except inside quotations, which keep the source's own wording.
 
 ## Quotes
 

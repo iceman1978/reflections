@@ -1,6 +1,6 @@
 {
   "_about": [
-    "One edition of the app: its name, welcome page, quotes, colours and the voices",
+    "One edition of the app: its name, welcome page, quotes, colors and the voices",
     "reflections draw on. The library of quotable works is sources.json in this folder,",
     "and Claude's instructions are in prompts/. Choose the edition with the EDITION",
     "setting (default: philosophy)."
@@ -18,7 +18,7 @@
     {"icon": "columns", "title": "Ground yourself in over two millennia of Western philosophy",
      "text": "Draw wisdom from classical virtue ethics, Stoicism, medieval scholasticism, Enlightenment thought, and modern existentialism—with direct links to original texts."},
     {"icon": "question", "title": "Explore past reflections with prompted questions",
-     "text": "Every reflection ends with a question to carry forward. Browse back by date, or keep favourites close."},
+     "text": "Every reflection ends with a question to carry forward. Browse back by date, or keep favorites close."},
     {"icon": "lock", "title": "A fully private, encrypted journal",
      "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
   ],

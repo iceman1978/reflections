@@ -1,7 +1,7 @@
 {
   "_about": [
     "In His Steps: the Christian edition, for daily quiet times. Same app as A Life Well Lived,",
-    "with its own name, welcome page, quotes, colours and voices. The library of quotable",
+    "with its own name, welcome page, quotes, colors and voices. The library of quotable",
     "works is sources.json in this folder (made by tools/make_christian_sources.py), and",
     "Claude's instructions are in prompts/. Run it with EDITION=christian."
   ],
@@ -25,7 +25,7 @@
     {"icon": "book", "title": "Rooted in Scripture and the great devotional writers",
      "text": "Reflections draw from the Gospels, Paul’s letters, and the Psalms, alongside classic voices like Augustine, Luther, Calvin, Bunyan, Edwards, and Spurgeon, with links to the original texts."},
     {"icon": "sandal", "title": "Grow in His Steps",
-     "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favourites close."},
+     "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favorites close."},
     {"icon": "lock", "title": "A fully private, encrypted journal",
      "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
   ],
@@ -107,7 +107,7 @@
     },
     {
       "name": "Devotional classics",
-      "about": "Two Catholic classics long treasured by Protestants: following Christ in humility, and practising God's presence in ordinary work.",
+      "about": "Two Catholic classics long treasured by Protestants: following Christ in humility, and practicing God's presence in ordinary work.",
       "works": [
         "kempis_imitation",
         "lawrence_practice"
