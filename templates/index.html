@@ -63,15 +63,15 @@
     </section>
     {% endif %}
 
-    <!-- Above the passphrase card -->
-    {% if edition.passphrase_quote %}
-    <figure id="vault-quote" class="vault-quote" hidden>
-      <blockquote>{{ edition.passphrase_quote.text }}</blockquote>
-      <figcaption>{{ edition.passphrase_quote.cite_html | safe }}</figcaption>
-    </figure>
-    {% endif %}
 
     <div class="vault-card page">
+      <!-- On the Secret Passphrase screens, above the heading -->
+      {% if edition.passphrase_quote %}
+      <figure id="vault-quote" class="vault-quote" hidden>
+        <blockquote>{{ edition.passphrase_quote.text }}</blockquote>
+        <figcaption>{{ edition.passphrase_quote.cite_html | safe }}</figcaption>
+      </figure>
+      {% endif %}
       <h1 id="vault-title" class="vault-title">{{ app_name }}</h1>
 
       <p id="vault-offline" class="vault-error" hidden>{% if hosted %}Can't reach {{ app_name }} right now. Check your internet connection and reload the page.{% else %}Can't reach the journal app. Is the start.bat window open?{% endif %}</p>
