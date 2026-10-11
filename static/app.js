@@ -1452,6 +1452,21 @@
   renderGreeting();
   loadBackground();
   $("settings-btn").addEventListener("click", showSettings);
+
+  // On a phone, the header's buttons live in a menu behind ☰.
+  function setHeaderMenu(open) {
+    $("header-actions").classList.toggle("open", open);
+    $("menu-btn").setAttribute("aria-expanded", String(open));
+  }
+  $("menu-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    setHeaderMenu(!$("header-actions").classList.contains("open"));
+  });
+  $("header-actions").addEventListener("click", () => setHeaderMenu(false));   // chose something
+  document.addEventListener("click", (e) => {
+    if (!$("header-actions").contains(e.target)) setHeaderMenu(false);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setHeaderMenu(false); });
   $("settings-back-btn").addEventListener("click", () => {
     restoreSavedLook();  // Discard: undo any unsaved preview, save nothing
     leaveSettings();

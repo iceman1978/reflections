@@ -159,18 +159,27 @@
         <div id="journal-name" class="journal-name">{{ journal_name }}</div>
       </div>
       <div id="stats" class="stats" aria-live="polite"></div>
-      <button id="feedback-btn" class="icon-btn lock-btn" title="Send feedback" aria-label="Send feedback">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>
+      <!-- On a phone these four fold into a menu behind the ☰ button. -->
+      <button id="menu-btn" class="icon-btn menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="header-actions">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-      {% if hosted %}
-      <button id="invite-btn" class="icon-btn lock-btn" title="Invite someone" aria-label="Invite someone">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.5M12 8.5V21M12 8.5c-1.5-3.5-5.5-4.5-5.5-1.8 0 1.4 2 1.8 5.5 1.8zM12 8.5c1.5-3.5 5.5-4.5 5.5-1.8 0 1.4-2 1.8-5.5 1.8z"/></g></svg>
-      </button>
-      {% endif %}
-      <button id="lock-btn" class="icon-btn lock-btn" title="Lock the journal" aria-label="Lock the journal">
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-      </button>
-      <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings">&#9881;</button>
+      <div id="header-actions" class="header-actions">
+        <button id="feedback-btn" class="icon-btn lock-btn" title="Send feedback" aria-label="Send feedback">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>
+          <span class="menu-label">Send feedback</span>
+        </button>
+        {% if hosted %}
+        <button id="invite-btn" class="icon-btn lock-btn" title="Invite someone" aria-label="Invite someone">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7.5M12 8.5V21M12 8.5c-1.5-3.5-5.5-4.5-5.5-1.8 0 1.4 2 1.8 5.5 1.8zM12 8.5c1.5-3.5 5.5-4.5 5.5-1.8 0 1.4-2 1.8-5.5 1.8z"/></g></svg>
+          <span class="menu-label">Invite someone</span>
+        </button>
+        {% endif %}
+        <button id="lock-btn" class="icon-btn lock-btn" title="Lock the journal" aria-label="Lock the journal">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span class="menu-label">Lock journal</span>
+        </button>
+        <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings"><span class="menu-glyph" aria-hidden="true">&#9881;</span><span class="menu-label">Settings</span></button>
+      </div>
     </header>
 
     <!-- Suggestions as entries add up (one at a time): install the app (3rd entry),

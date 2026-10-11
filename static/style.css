@@ -253,6 +253,10 @@ a { color: var(--accent); }
 }
 .stats { font-size: 0.85rem; color: var(--muted); text-align: right; flex: 1; font-style: italic; }
 .stats .nudge { color: var(--accent); }
+/* The header's buttons: in a row on wider screens; on a phone, a menu behind ☰ (see below). */
+.menu-btn { display: none; }
+.header-actions { display: contents; }
+.menu-label { display: none; }
 
 /* Streak badge (3+ days). On reaching a milestone it pops in once, briefly
    reads the milestone ("A full week of writing"), then settles. */
@@ -1224,8 +1228,24 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   }
   .page::before { width: 16px; }
   .book { --book-edge: 9px; }
-  .book-header { border-radius: 12px; flex-wrap: wrap; }
+  .book-header { border-radius: 12px; flex-wrap: wrap; position: relative; z-index: 25; row-gap: 2px; }   /* its menu opens over the page */
   .stats { text-align: left; flex-basis: 100%; order: 3; }
+  /* The buttons fold into a menu: logo and name, ☰ on the right; entries and streak below. */
+  .menu-btn { display: inline-flex; align-items: center; padding: 6px; }
+  .header-actions { display: none; }
+  .header-actions.open {
+    display: flex; flex-direction: column; position: absolute; top: 54px; right: 8px; z-index: 30;
+    min-width: 210px; padding: 6px; border-radius: 12px; background: var(--page);
+    box-shadow: 0 10px 28px var(--shadow), 0 0 0 1px var(--rule);
+  }
+  .header-actions.open button {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 8px;
+    color: var(--ink); font-size: 1rem; text-align: left;
+  }
+  .header-actions.open button:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--accent); }
+  .header-actions.open .menu-label { display: inline; font-family: var(--serif); }
+  .header-actions.open svg { width: 20px; height: 20px; flex: none; }
+  .header-actions.open .menu-glyph { width: 20px; text-align: center; font-size: 1.2rem; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .past { padding: 12px 16px 6px; }
