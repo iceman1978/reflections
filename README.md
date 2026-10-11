@@ -320,7 +320,7 @@ Add (or remove) their address in **both** places: Google's *Test users*, and `AL
 
 ### Credits (Shekels)
 
-On the web, each reflection uses one **credit** (called **Shekels** in In His Steps: `"credit"` in each `edition.json`). Everyone gets `REFLECTIONS_PER_DAY` of them a day (3 by default), back to the full number each day. A small gold coin in the header, between the gift and the padlock, shows how many are left; hovering says *"2 reflections left"* (and at zero it turns gray). The coin says nothing about how credits come back, so it won't need to change when that does (daily now; a monthly allowance or top-ups later). Settings → Basic and the Terms page describe them too. Writing prompts have their own daily allowance (`PROMPTS_PER_DAY`, 10) and aren't counted in credits. Your own computer has no limits, so it shows no coin.
+On the web, each reflection uses one **credit** (called **Shekels** in In His Steps: `"credit"` in each `edition.json`). Everyone gets `REFLECTIONS_PER_DAY` of them a day (3 by default), back to the full number each day. A small gold coin at the start of the header's buttons (coin · giving hand · feedback · settings · padlock) shows how many are left; hovering says *"2 reflections left"* (and at zero it turns gray). The coin says nothing about how credits come back, so it won't need to change when that does (daily now; a monthly allowance or top-ups later). Settings → Basic and the Terms page describe them too. Writing prompts have their own daily allowance (`PROMPTS_PER_DAY`, 10) and aren't counted in credits. Your own computer has no limits, so it shows no coin.
 
 This is the groundwork for paying for reflections later (a small free monthly allowance, top-up credits, or a monthly subscription).
 
@@ -344,7 +344,7 @@ Whether someone has sent feedback or an invitation comes from the server; dismis
 
 ### Invitations
 
-On the web version, the **gift icon** (between Feedback and the padlock) lets anyone ask for a friend to be invited: their Google address, plus an optional name and note. Below the form they see their own requests: *Requested*, *Has access* or *Declined*.
+On the web version, the **giving-hand icon** (a hand holding a heart, next to the coin) lets anyone ask for a friend to be invited: their Google address, plus an optional name and note. Below the form they see their own requests: *Requested*, *Has access* or *Declined*.
 
 You see the requests in **Settings → Invitation requests** (admins only), with **Copy address** and **Decline**. To let someone in, add them as before (Google *Test users* if the sign-in is still in Testing, and `ALLOWED_EMAILS` on Render); the request then shows *Has access* by itself, for you and for whoever asked. Each request records who asked, ready for rewards for successful invitations later. Up to 10 requests per person per day.
 

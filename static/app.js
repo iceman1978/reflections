@@ -1876,7 +1876,7 @@
       id: "invite",
       ready: (s) => CFG.hosted && !s.invites_sent && INVITE_AT.some((n) => s.total_entries >= n && n > (Number(recall("journal.nudge.invite")) || 0)),
       text: () => `<strong>Know someone who'd enjoy this?</strong> ${esc(CFG.appName)} is invitation-only while it's in beta, `
-        + `and grows through people like you. ${esc(CFG.inviteLine)}, any time, with the gift at the top.`,
+        + `and grows through people like you. ${esc(CFG.inviteLine)}, any time, with the giving hand at the top.`,
       go: () => "Invite someone",
       // Opening the form answers this milestone; if no invitation is actually sent,
       // the card comes back at the next one (sent invitations come from the server).
