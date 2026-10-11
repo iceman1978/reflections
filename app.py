@@ -275,6 +275,7 @@ TERMS_UPDATED = "October 9, 2026"   # change when the terms change
 @app.get("/terms")
 def terms_page():
     return render_template("terms.html", hosted=HOSTED, terms_updated=TERMS_UPDATED, edition_name=config.EDITION_NAME,
+                           credit=config.CREDIT,
                            reflections_per_day=config.REFLECTIONS_PER_DAY or "unlimited",
                            prompts_per_day=config.PROMPTS_PER_DAY or "unlimited")
 

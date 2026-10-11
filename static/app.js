@@ -601,17 +601,32 @@
   // Beating an earlier streak of at least 2 days (a first-ever streak isn't a "best yet").
   const newBestStreak = (s) => s.previous_best >= 2 && s.current_streak > s.previous_best;
 
-  // On the web version: how many reflections are left today.
+  // On the web version: the coin in the header shows the credits left (Shekels
+  // in In His Steps), one per reflection. It says nothing about how they come
+  // back (daily now; monthly allowances or top-ups later), so it needn't change.
   function renderLimits(s) {
-    if (s.reflections_left == null) return;
+    const coin = $("credit-coin");
+    if (!coin || s.reflections_left == null) return;
     const left = s.reflections_left;
-    const text = left === 0 ? "No reflections left today"
-      : `${plural(left, "reflection")} left today`;
-    $("finish-btn").title = `${text} (${s.reflections_per_day} a day). Entries are always saved.`;
+    const name = (n) => (n === 1 ? CFG.credit.one : CFG.credit.many);
+    const text = left === 0 ? "No reflections left" : `${plural(left, "reflection")} left`;
+    const was = coin.dataset.left;
+    coin.hidden = false;
+    coin.querySelector(".coin").textContent = left;
+    coin.querySelector(".menu-label").textContent = text;
+    coin.title = text;
+    coin.setAttribute("aria-label", `${left} ${name(left)} left: ${text.toLowerCase()}`);
+    coin.classList.toggle("empty", left === 0);
+    if (was !== undefined && Number(was) !== left) {          // a credit used, or a new day: a little flip
+      coin.classList.remove("pop"); void coin.offsetWidth; coin.classList.add("pop");
+    }
+    coin.dataset.left = left;
     const note = $("limits-note");
     if (note) {
-      note.textContent = `${text}. Each person gets ${s.reflections_per_day} reflections a day; `
-        + "entries are always saved, and an entry without one can be reflected on another day.";
+      const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+      note.textContent = `${cap(CFG.credit.many)}: ${left} of ${s.reflections_per_day} left today. Each reflection `
+        + `uses one, and you get ${s.reflections_per_day} new ${CFG.credit.many} every day. Entries are always saved, `
+        + "and an entry without a reflection can be reflected on another day.";
     }
   }
 
@@ -754,7 +769,7 @@
       renderReflection(state.current);
     }
     refreshList();
-    if (CFG.hosted) refreshStats();  // reflections left today
+    if (CFG.hosted) refreshStats();  // the credit coin
   }
 
   let pollTimer = null;

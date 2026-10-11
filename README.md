@@ -318,6 +318,12 @@ Files in `static/brands/<edition>/` are public (the welcome page is visible to a
 
 Add (or remove) their address in **both** places: Google's *Test users*, and `ALLOWED_EMAILS` on Render (saving it restarts the app in about a minute). Someone removed from `ALLOWED_EMAILS` is signed out on their next click; their encrypted entries stay on the disk.
 
+### Credits (Shekels)
+
+On the web, each reflection uses one **credit** (called **Shekels** in In His Steps: `"credit"` in each `edition.json`). Everyone gets `REFLECTIONS_PER_DAY` of them a day (3 by default), back to the full number each day. A small gold coin in the header, between the gift and the padlock, shows how many are left; hovering says *"2 reflections left"* (and at zero it turns gray). The coin says nothing about how credits come back, so it won't need to change when that does (daily now; a monthly allowance or top-ups later). Settings → Basic and the Terms page describe them too. Writing prompts have their own daily allowance (`PROMPTS_PER_DAY`, 10) and aren't counted in credits. Your own computer has no limits, so it shows no coin.
+
+This is the groundwork for paying for reflections later (a small free monthly allowance, top-up credits, or a monthly subscription).
+
 ### Feedback
 
 The **speech bubble** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.

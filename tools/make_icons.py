@@ -25,15 +25,16 @@ import re
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 EDITION = (sys.argv[1] if len(sys.argv) > 1 else os.environ.get("EDITION", "philosophy")).strip().lower()
 OUT = ROOT / "static" / "brands" / EDITION
 
 # The browser-tab icon is simpler than the logo, so it's readable at 16 px:
-# the edition's "tab_drawing" (a line drawing, e.g. In His Steps' sandal), or
-# else the first letter of its name (or its "tab_letter"), white on its blue.
+# the logo itself if the edition says "tab_from_logo"; or its "tab_drawing" (a
+# line drawing, e.g. In His Steps' sandal); or else the first letter of its
+# name (or its "tab_letter"), white on its blue.
 _edition = json.loads((ROOT / "editions" / EDITION / "edition.json").read_text(encoding="utf-8"))
 TAB_LETTER = _edition.get("tab_letter") or _edition["app_name"].removeprefix("The ")[0]
 TAB_FONT = ROOT / "static" / "fonts" / _edition.get("tab_font", "HomemadeApple-Regular.ttf")   # or EBGaramond-Variable.ttf
@@ -162,6 +163,16 @@ def colour_mask(img, size=160):
     return mask
 
 
+def rounded(img, radius=0.2):
+    """The image with rounded corners (like the letter icons), for the browser tab."""
+    size = img.width
+    mask = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size - 1, size - 1), int(size * radius), fill=255)
+    out = img.convert("RGBA")
+    out.putalpha(mask)
+    return out
+
+
 def resized(img, size):
     return img.resize((size, size), Image.LANCZOS)
 
@@ -198,7 +209,15 @@ def main():
     save = dict(optimize=True)
     resized(img, 384).save(OUT / "logo.png", **save)
     colour_mask(img).save(OUT / "logo-mask.png", **save)     # the header's theme-coloured logo
-    tab = drawing_icon(_edition["tab_drawing"], size=1536) if _edition.get("tab_drawing") else letter_icon()
+    if _edition.get("tab_from_logo"):               # the logo itself, its light lines a little bolder
+        tab = resized(img, 512)                    # so they survive being shrunk to 16-32 px
+        if _edition.get("tab_logo_bold"):
+            tab = tab.filter(ImageFilter.MaxFilter(int(_edition["tab_logo_bold"])))
+        tab = rounded(tab)
+    elif _edition.get("tab_drawing"):
+        tab = drawing_icon(_edition["tab_drawing"], size=1536)
+    else:
+        tab = letter_icon()
     tab.resize((32, 32), Image.LANCZOS).save(OUT / "favicon-32.png", **save)
     tab.resize((48, 48), Image.LANCZOS).save(OUT / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
     resized(img, 180).save(OUT / "apple-touch-icon.png", **save)

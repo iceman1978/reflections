@@ -35,6 +35,8 @@ EDITION = json.loads((EDITION_DIR / "edition.json").read_text(encoding="utf-8"))
 BRAND_DIR = ROOT / "static" / "brands" / EDITION_NAME           # logo and app icons (tools/make_icons.py)
 
 APP_NAME = os.environ.get("APP_NAME") or EDITION["app_name"]   # shown in the browser tab and on the welcome page
+# What a reflection costs is called in this edition: credits, or shekels.
+CREDIT = EDITION.get("credit", {"one": "credit", "many": "credits"})
 COPYRIGHT = "Copyright © 2026, Aaron de Vries"           # shown at the foot of every page
 # The version shown in the footer, e.g. "Beta v0.1". It lives in the VERSION
 # file at the top of the project, so releasing means editing one line there.

@@ -255,6 +255,17 @@ a { color: var(--accent); }
 .stats .nudge { color: var(--accent); }
 /* The header's buttons: in a row on wider screens; on a phone, a menu behind ☰ (see below). */
 .menu-btn { display: none; }
+/* Credits (Shekels in In His Steps): a gold coin with the number left today. */
+.credit-coin { display: inline-flex; align-items: center; padding: 4px; cursor: default; }
+.credit-coin .coin {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
+  font-family: var(--serif); font-weight: 700; font-size: 0.8rem; line-height: 1; color: #6b4a12;
+  background: radial-gradient(circle at 35% 30%, #f6dc8f, #d9a93a 70%, #b8862a);
+  box-shadow: inset 0 0 0 1.5px #b8862a, 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.credit-coin.empty .coin { filter: grayscale(1); opacity: 0.55; }
+.credit-coin.pop .coin { animation: coin-pop 0.5s ease-out; }
+@keyframes coin-pop { 40% { transform: scale(1.25) rotate(-8deg); } }
 .header-actions { display: contents; }
 .menu-label { display: none; }
 
@@ -725,7 +736,14 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 /* Search, above the list of past entries. */
 .search-row { position: relative; margin: 12px 0 2px; color: var(--muted); }
 .search-row svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
-.search-row input { width: 100%; padding: 8px 12px 8px 38px; border-radius: 999px; font: inherit; font-size: 0.95rem; }
+.search-row input {
+  width: 100%; padding: 8px 12px 8px 38px; border-radius: 999px; font: inherit; font-size: 0.95rem;
+  -webkit-appearance: none; appearance: none;                 /* no browser bevel or shadow */
+  border: 1px solid var(--rule); background: var(--field);
+  color: var(--ink); box-shadow: none;
+}
+.search-row input::placeholder { color: var(--muted); font-style: italic; }
+.search-row input:focus, .search-row input:focus-visible { border-color: var(--accent); outline: none; }
 #entry-list mark { background: color-mix(in srgb, var(--gold) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
 #entry-list .found-in { font-style: italic; color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px 0; text-align: center; }  /* no column gap, so a range reads as one band */
@@ -1264,6 +1282,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .header-actions.open .menu-label { display: inline; font-family: var(--serif); }
   .header-actions.open svg { width: 20px; height: 20px; flex: none; }
   .header-actions.open .menu-glyph { width: 20px; text-align: center; font-size: 1.2rem; }
+  .header-actions.open .credit-coin { gap: 12px; width: 100%; padding: 10px 12px; color: var(--ink); }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .past { padding: 12px 16px 6px; }

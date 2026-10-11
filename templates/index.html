@@ -174,6 +174,12 @@
           <span class="menu-label">Invite someone</span>
         </button>
         {% endif %}
+        {% if hosted %}
+        <span id="credit-coin" class="credit-coin" role="img" hidden>
+          <span class="coin" aria-hidden="true"></span>
+          <span class="menu-label"></span>
+        </span>
+        {% endif %}
         <button id="lock-btn" class="icon-btn lock-btn" title="Lock the journal" aria-label="Lock the journal">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3"/><rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
           <span class="menu-label">Lock journal</span>
@@ -632,6 +638,7 @@
     appName: {{ app_name | tojson }},
     inviteLine: {{ edition.invite_line | tojson }},
     themes: {{ themes_enabled | tojson }},
+    credit: {{ edition.credit | default({"one": "credit", "many": "credits"}) | tojson }},
     userName: {{ user_name | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},

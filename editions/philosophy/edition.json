@@ -6,8 +6,9 @@
     "setting (default: philosophy)."
   ],
   "app_name": "A Life Well Lived",
-  "tagline": "A Daily Journal",
-  "tab_letter": "W",
+  "tagline": "Daily Journal",
+  "tab_from_logo": true,
+  "tab_logo_bold": 9,
   "description": "A private journal, with a thoughtful reflection after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",
@@ -30,6 +31,7 @@
     "text": "“Thought and speech are the same thing, except that what we call thought is a silent dialogue of the soul with itself, taking place without the voice.”",
     "cite_html": "The Eleatic Visitor, in Plato’s <cite>Sophist</cite>"
   },
+  "credit": {"one": "credit", "many": "credits"},
   "invite_line": "Invite a fellow thinker",
   "voices_label": "thinkers",
   "voices": ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",

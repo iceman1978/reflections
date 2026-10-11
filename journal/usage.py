@@ -7,7 +7,7 @@ Claude busy) can simply be retried. Days follow the journal's time zone.
 from datetime import datetime
 
 from . import db
-from .config import PROMPTS_PER_DAY, REFLECTIONS_PER_DAY, TZ
+from .config import CREDIT, PROMPTS_PER_DAY, REFLECTIONS_PER_DAY, TZ
 
 LIMITS = {"reflection": REFLECTIONS_PER_DAY, "prompt": PROMPTS_PER_DAY}   # 0 = no limit
 
@@ -41,8 +41,9 @@ def check(user_id, kind):
     left = remaining(user_id, kind)
     if left == 0:
         if kind == "reflection":
-            raise LimitReached(f"You've had today's {LIMITS[kind]} reflections. Your entry is saved; "
-                               "you can ask for its reflection tomorrow.")
+            raise LimitReached(f"You've used today's {LIMITS[kind]} {CREDIT['many']}, one per reflection. Your "
+                               f"entry is saved; your {CREDIT['many']} come back tomorrow, and you can ask for its "
+                               "reflection then.")
         raise LimitReached(f"You've had today's {LIMITS[kind]} writing prompts. More tomorrow.")
 
 
