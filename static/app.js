@@ -301,6 +301,7 @@
     $("entry-date").textContent = `${longDate(entry.created_at)} · ${timeOf(entry.created_at)}`;
     showEntryWords(entry);
     $("entry-text").textContent = entry.text;
+    renderEntryThemes(entry);
     renderTitle(entry);
     $("entry-status").textContent = "";
     setEditing(false);
@@ -319,12 +320,14 @@
     : (state.allEntries || []));
   // Entries passing every filter (the list and Older / Newer).
   const inRange = (e) => !state.range || (e.date >= state.range.start && e.date <= state.range.end);
-  const shown = () => favShown().filter(inRange);
+  const inTheme = (e) => !state.theme || (e.themes || []).includes(state.theme);
+  const shown = () => favShown().filter(inRange).filter(inTheme);
 
   function filterDescription() {
     const parts = [];
     if (state.favOnly) parts.push("favorites");
     if (state.range) parts.push(`${state.range.prep} ${state.range.label}`);
+    if (state.theme) parts.push(`about “${state.theme}”`);
     return parts.join(" ");
   }
 
@@ -534,9 +537,11 @@
   async function refreshStats({ passive = false } = {}) {
     let s;
     try { s = await api("GET", "/api/stats", null, { passive }); } catch (_) { return null; }
+    const longestBefore = state.lastStats && state.lastStats.longest_id;
     state.lastStats = s;
     renderStats(s);
     maybeInviteInstall(s);
+    if (s.longest_id !== longestBefore) renderList();
     return s;
   }
 
@@ -554,52 +559,47 @@
     return `${NUMBER_WORDS[weeks] || weeks} weeks of writing`;
   }
 
+  // The header line: the entry count (or a milestone in its place) and one
+  // streak item. Milestones stay for as long as they're true, not just briefly.
   function renderStats(s) {
     const box = $("stats");
     box.replaceChildren();
-    box.append(document.createTextNode(`${s.total_entries} ${s.total_entries === 1 ? "entry" : "entries"}`));
+    const pop = state.popStats;          // just reached, after Finish & reflect: animate once
+    state.popStats = false;
+    const badge = (text, title, gold) => {
+      const b = document.createElement("span");
+      b.className = "streak-badge" + (gold ? " milestone" : "") + (gold && pop ? " pop" : "");
+      b.textContent = text;
+      b.title = title;
+      return b;
+    };
+    const count = s.total_entries;
+    if (isCountMilestone(count)) {
+      box.append(badge(`✦ Your ${count}th entry`, `${count} entries`, true));   // 5th, 10th, 25th, 50th…
+    } else {
+      box.append(document.createTextNode(`${count} ${count === 1 ? "entry" : "entries"}`));
+    }
+    // One streak item: a milestone day, else a new best, else the plain streak.
     const n = s.current_streak;
-    if (n >= BADGE_FROM) {
-      const c = state.celebrating;
-      const fresh = c && c.n === n && Date.now() < c.until;
-      const badge = document.createElement("span");
-      // Gold on the day a milestone is reached; brighter while it's being celebrated.
-      const milestoneToday = isMilestone(n) && s.wrote_today;
-      badge.className = "streak-badge" + (milestoneToday || fresh ? " milestone" : "") + (fresh ? " celebrate" : "");
-      if (fresh && !c.popped) { badge.classList.add("pop"); c.popped = true; }  // animate once
-      badge.textContent = fresh ? `✦ ${milestoneWords(n)}` : `✦ ${n}-day streak`;
-      badge.title = fresh ? `${n}-day streak` : "Days in a row with at least one entry";
-      box.append(document.createTextNode(" · "), badge);
+    const why = "Days in a row with at least one entry";
+    if (n > 0) box.append(document.createTextNode(" · "));
+    if (n > 0 && isMilestone(n) && s.wrote_today) {
+      box.append(badge(`✦ ${milestoneWords(n)}`, `${n}-day streak`, true));
+    } else if (n > 0 && newBestStreak(s)) {
+      box.append(badge(`✦ Best streak yet · ${plural(n, "day")}`, `Longer than your previous best (${plural(s.previous_best, "day")})`, true));
+    } else if (n >= BADGE_FROM) {
+      box.append(badge(`✦ ${n}-day streak`, why, false));
     } else if (n > 0) {
-      box.append(document.createTextNode(` · ${n}-day streak`));
-    }
-    const cm = state.countMilestone;
-    if (cm && Date.now() < cm.until) {
-      const badge = document.createElement("span");
-      badge.className = "streak-badge milestone celebrate";
-      if (!cm.popped) { badge.classList.add("pop"); cm.popped = true; }   // animate once
-      badge.textContent = `✦ Your ${cm.n}th entry`;   // 5th, 10th, 25th, 50th, 100th… all take "th"
-      box.append(document.createTextNode(" "), badge);
-    }
-    const r = state.record;
-    if (r && Date.now() < r.until) {
-      const rec = document.createElement("span");
-      rec.className = "streak-badge milestone celebrate record-badge";
-      if (!r.popped) { rec.classList.add("pop"); r.popped = true; }   // animate once
-      rec.textContent = `✦ Your longest entry yet · ${plural(r.words, "word")}`;
-      box.append(document.createTextNode(" "), rec);
-    }
-    if (s.longest_streak > n && s.longest_streak > 1) {
-      box.append(document.createTextNode(` · best streak ${plural(s.longest_streak, "day")}`));
-    }
-    if (n > 0 && !s.wrote_today) {
-      const nudge = document.createElement("span");
-      nudge.className = "nudge";
-      nudge.textContent = " · write today to keep it going";
-      box.append(nudge);
+      const plain = document.createElement("span");
+      plain.textContent = `${n}-day streak`;
+      plain.title = why;
+      box.append(plain);
     }
     renderLimits(s);
   }
+
+  // Beating an earlier streak of at least 2 days (a first-ever streak isn't a "best yet").
+  const newBestStreak = (s) => s.previous_best >= 2 && s.current_streak > s.previous_best;
 
   // On the web version: how many reflections are left today.
   function renderLimits(s) {
@@ -615,38 +615,24 @@
     }
   }
 
-  // Called after Finish & reflect: celebrate if this entry reached a milestone.
-  const RECORD_FROM = 3;  // earlier entries needed before "longest yet" counts
-
   // Entry-count milestones: 5, 10, 25, 50, then every 50 (100, 150, 200…).
   const isCountMilestone = (n) => n === 5 || n === 10 || n === 25 || (n >= 50 && n % 50 === 0);
+  const RECORD_FROM = 3;  // earlier entries needed before "longest yet" counts
 
-  // After Finish & reflect: celebrate whatever this entry achieved (a streak
-  // milestone, a new longest entry, an entry-count milestone, or several).
+  // After Finish & reflect: if this entry reached a milestone (count, streak
+  // or best streak), it pops in once; the header then keeps it while it's true.
   async function checkMilestone(before, entry) {
-    const after = await refreshStats();
-    if (!before || !after) return;
-    const until = Date.now() + 8000;
-    let any = false;
-    if (entry && before.shown_entries >= RECORD_FROM && entry.word_count > before.longest_words) {
-      state.record = { words: entry.word_count, until };
-      any = true;
-      if (state.current && state.current.id === entry.id) showEntryWords(state.current);
-    }
-    const n = after.current_streak;
-    if (n > before.current_streak && isMilestone(n)) {
-      state.celebrating = { n, until };
-      any = true;
-    }
-    const count = after.total_entries;
-    if (count > before.total_entries && isCountMilestone(count)) {
-      state.countMilestone = { n: count, until };
-      any = true;
-    }
-    if (any) {
-      renderStats(after);
-      setTimeout(() => { if (state.lastStats) renderStats(state.lastStats); }, 8100);  // settle back afterwards
-    }
+    if (!before) { await refreshStats(); return; }
+    const reached = (s) => [isCountMilestone(s.total_entries), isMilestone(s.current_streak) && s.wrote_today, newBestStreak(s)];
+    const was = reached(before);
+    let after;
+    try { after = await api("GET", "/api/stats", null, {}); } catch (_) { return; }
+    state.popStats = reached(after).some((now, i) => now && !was[i]);
+    state.lastStats = after;
+    renderStats(after);
+    maybeInviteInstall(after);
+    renderList();                                         // the "✦ longest" mark may have moved
+    if (entry && state.current && state.current.id === entry.id) showEntryWords(state.current);
   }
 
   // ---- Reflection -------------------------------------------------------
@@ -845,6 +831,7 @@
   function showAll() {
     state.favOnly = false;
     state.range = null;
+    state.theme = null;
     applyFilters();
   }
 
@@ -855,7 +842,11 @@
 
   function applyFilters() {
     try { localStorage.setItem(FILTER_KEY, state.favOnly ? "fav" : "all"); } catch (_) {}
-    $("filter-all").setAttribute("aria-pressed", String(!state.favOnly && !state.range));
+    $("filter-all").setAttribute("aria-pressed", String(!state.favOnly && !state.range && !state.theme));
+    if ($("themes-btn")) {
+      $("themes-btn").setAttribute("aria-pressed", String(!!state.theme));
+      $("themes-btn").textContent = state.theme ? `Theme: ${state.theme}` : "Themes";
+    }
     $("filter-fav").setAttribute("aria-pressed", String(state.favOnly));
     $("calendar-btn").setAttribute("aria-pressed", String(!!state.range));
     $("calendar-btn").textContent = state.range ? `Calendar: ${state.range.label}` : "Calendar";
@@ -898,6 +889,9 @@
     renderCalendar();
     refreshStats();
     renderList();
+    if (state.search) runSearch();     // results follow edits and deletions
+    renderThemes();
+    backfillThemes();
   }
 
   // The list shows the newest 10, and 20 more each time you scroll to its end
@@ -915,11 +909,13 @@
   function renderList() {
     const all = state.allEntries;
     if (!all) return;
+    if (state.search && state.search.results) return renderSearch();
     const entries = shown().slice();
     const n = entries.length;
-    const noun = state.favOnly ? (n === 1 ? "favourite" : "favourites") : (n === 1 ? "entry" : "entries");
-    $("filter-note").hidden = !state.favOnly && !state.range;
-    $("filter-note").textContent = `Showing ${n} ${noun}${state.range ? ` ${state.range.prep} ${state.range.label}` : ""}`;
+    const noun = state.favOnly ? (n === 1 ? "favorite" : "favorites") : (n === 1 ? "entry" : "entries");
+    $("filter-note").hidden = !state.favOnly && !state.range && !state.theme;
+    $("filter-note").textContent = `Showing ${n} ${noun}${state.range ? ` ${state.range.prep} ${state.range.label}` : ""}`
+      + (state.theme ? ` about “${state.theme}”` : "");
     {
       const ul = $("entry-list");
       ul.replaceChildren();
@@ -936,13 +932,21 @@
           const star = document.createElement("span");
           star.className = "fav-mark";
           star.textContent = "★";
-          star.title = "Favourite";
+          star.title = "Favorite";
           title.prepend(star);
         }
         const snippet = document.createElement("span");
         snippet.className = "snippet";
         snippet.textContent = e.snippet + (e.snippet.length >= 120 ? "…" : "");
         li.append(when, title, snippet);
+        const s = state.lastStats;
+        if (s && s.longest_id === e.id && s.shown_entries > RECORD_FROM) {
+          const tag = document.createElement("span");
+          tag.className = "longest-tag";
+          tag.textContent = " ✦ longest";
+          tag.title = "Your longest entry so far";
+          when.append(tag);
+        }
         if (e.reflection_status !== "Done") {
           const badge = document.createElement("span");
           badge.className = "badge";
@@ -1003,6 +1007,190 @@
   }
 
   let openToken = 0;
+  // ---- Themes ------------------------------------------------------------
+  // Each entry has 1-3 themes from the edition's list (given with its
+  // reflection; earlier entries are tagged quietly while the journal is open).
+
+  function setTheme(theme) {
+    state.theme = theme;
+    applyFilters();
+  }
+
+  function themeChip(name, count, onPick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "theme-chip";
+    b.setAttribute("aria-pressed", String(state.theme === name));
+    b.append(document.createTextNode(name));
+    if (count != null) {
+      const n = document.createElement("span");
+      n.className = "n";
+      n.textContent = count;
+      b.append(n);
+    }
+    b.addEventListener("click", onPick);
+    return b;
+  }
+
+  function renderThemes() {
+    if (!$("theme-chips")) return;
+    const counts = new Map();
+    for (const e of state.allEntries || []) for (const t of e.themes || []) counts.set(t, (counts.get(t) || 0) + 1);
+    const names = [...counts.keys()].sort((a, b) => counts.get(b) - counts.get(a) || a.localeCompare(b));
+    $("theme-chips").replaceChildren(...names.map((name) => themeChip(name, counts.get(name), () => {
+      setTheme(state.theme === name ? null : name);
+      toggleThemes(false);
+    })));
+    const untagged = (state.allEntries || []).filter((e) => e.themes == null).length;
+    $("themes-status").textContent = !names.length && !untagged ? "Themes appear as your entries are reflected on."
+      : untagged ? `Sorting ${untagged} earlier ${untagged === 1 ? "entry" : "entries"} into themes…`
+      : state.theme ? "Click the theme again, or All, to see everything." : "";
+  }
+
+  function toggleThemes(open = $("themes-pop").hidden) {
+    $("themes-pop").hidden = !open;
+    $("themes-btn").setAttribute("aria-expanded", String(open));
+    if (open) renderThemes();
+  }
+  if ($("themes-btn")) {
+    $("themes-btn").addEventListener("click", () => toggleThemes());
+    document.addEventListener("mousedown", (e) => {
+      if (!$("themes-pop").hidden && !$("themes-pop").contains(e.target) && !$("themes-btn").contains(e.target)) toggleThemes(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$("themes-pop").hidden) { toggleThemes(false); $("themes-btn").focus(); }
+    });
+  }
+
+  // Under an entry: its themes; clicking one shows every entry with that theme.
+  function renderEntryThemes(entry) {
+    const box = $("entry-themes");
+    const list = entry.themes || [];
+    box.hidden = !CFG.themes || !list.length;
+    box.replaceChildren(...list.map((name) => themeChip(name, null, () => {
+      setTheme(name);
+      $("past").scrollIntoView({ behavior: "smooth", block: "start" });
+    })));
+  }
+
+  // Earlier entries without themes are tagged a few at a time while the journal is open.
+  let backfilling = false;
+  async function backfillThemes() {
+    if (!CFG.themes || backfilling) return;
+    if (!(state.allEntries || []).some((e) => e.themes == null)) return;
+    backfilling = true;
+    try {
+      for (let round = 0; round < 60; round++) {
+        const res = await api("POST", "/api/themes/backfill", null, { passive: true });
+        if (!res.tagged || !res.remaining) break;
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    } catch (_) { /* try again next time the list loads */ }
+    backfilling = false;
+    try { state.allEntries = await api("GET", "/api/entries", null, { passive: true }); } catch (_) { return; }
+    renderList();
+    renderThemes();
+    if (state.current) {
+      const fresh = state.allEntries.find((e) => e.id === state.current.id);
+      if (fresh && fresh.themes) { state.current.themes = fresh.themes; renderEntryThemes(state.current); }
+    }
+  }
+
+  // ---- Search ------------------------------------------------------------
+  // Results replace the list while there's a search; they respect the
+  // Favorites and Calendar filters. Clearing the box brings the list back.
+
+  // Text with the given [start, end] ranges wrapped in <mark> (built as nodes, never HTML).
+  function highlighted(text, marks) {
+    const frag = document.createDocumentFragment();
+    let at = 0;
+    for (const [s, e] of [...(marks || [])].sort((a, b) => a[0] - b[0])) {
+      if (s < at) continue;
+      frag.append(document.createTextNode(text.slice(at, s)));
+      const m = document.createElement("mark");
+      m.textContent = text.slice(s, e);
+      frag.append(m);
+      at = e;
+    }
+    frag.append(document.createTextNode(text.slice(at)));
+    return frag;
+  }
+
+  function renderSearch() {
+    const { q, results } = state.search;
+    const byId = new Map((state.allEntries || []).map((e) => [e.id, e]));
+    const allowed = new Set(shown().map((e) => e.id));
+    const hits = results.filter((r) => allowed.has(r.id) && byId.has(r.id));
+    const ul = $("entry-list");
+    ul.replaceChildren();
+    if (moreObserver) { moreObserver.disconnect(); moreObserver = null; }
+    const scope = filterDescription();
+    $("filter-note").hidden = false;
+    $("filter-note").textContent = hits.length
+      ? `${hits.length} ${hits.length === 1 ? "entry" : "entries"} matching “${q}”${scope ? ` (${scope})` : ""}${hits.length >= 60 ? ", best first" : ""}`
+      : "";
+    if (!hits.length) {
+      const li = document.createElement("li");
+      li.className = "subtle";
+      li.textContent = `Nothing found for “${q}”${scope ? ` in ${scope}` : ""}. Try fewer or different words.`;
+      ul.append(li);
+      return;
+    }
+    for (const r of hits) {
+      const e = byId.get(r.id);
+      const li = document.createElement("li");
+      const when = document.createElement("span");
+      when.className = "when";
+      when.textContent = `${longDate(e.created_at)} · ${timeOf(e.created_at)} · ${plural(e.word_count, "word")}`;
+      if (r.field === "reflection" || r.field === "question") {
+        const where = document.createElement("span");
+        where.className = "found-in";
+        where.textContent = `in the ${r.field}`;
+        when.append(where);
+      }
+      const title = document.createElement("span");
+      title.className = e.title ? "title" : "title untitled";
+      title.append(e.title ? highlighted(e.title, r.title_marks) : document.createTextNode("No Title"));
+      if (e.favourite) {
+        const star = document.createElement("span");
+        star.className = "fav-mark";
+        star.textContent = "★";
+        star.title = "Favorite";
+        title.prepend(star);
+      }
+      const snippet = document.createElement("span");
+      snippet.className = "snippet";
+      snippet.append(r.snippet ? highlighted(r.snippet, r.marks) : document.createTextNode(e.snippet));
+      li.append(when, title, snippet);
+      li.addEventListener("click", () => openEntry(e.id));
+      ul.append(li);
+    }
+  }
+
+  let searchTimer = null, searchSeq = 0;
+  function runSearch() {
+    clearTimeout(searchTimer);
+    const q = $("search-input").value.trim();
+    if (q.length < 2) {
+      state.search = null;
+      renderList();
+      return;
+    }
+    searchTimer = setTimeout(async () => {
+      const seq = ++searchSeq;                           // only the latest search's results are shown
+      try {
+        const res = await api("GET", `/api/search?q=${encodeURIComponent(q)}`);
+        if (seq !== searchSeq) return;
+        state.search = { q, results: res.results };
+        renderList();
+      } catch (_) { /* keep what's shown */ }
+    }, 220);
+  }
+  $("search-input").addEventListener("input", runSearch);
+  $("search-input").addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && e.target.value) { e.preventDefault(); e.target.value = ""; runSearch(); }
+  });
+
   async function openEntry(id) {
     const token = ++openToken;
     try {
@@ -1394,6 +1582,7 @@
     state.current = null;
     state.range = null;
     state.favOnly = false;
+    state.theme = null;
     applyFilters();
     showWrite();
     refreshList();

@@ -35,14 +35,23 @@ def compute(dates, today):
 
     longest = run = 0
     previous = None
+    runs = []                     # (last day, length) of each unbroken run of days
     for d in sorted(days):
         run = run + 1 if previous is not None and d - previous == one else 1
+        if run == 1 and previous is not None:
+            runs.append((previous, prev_run))
         longest = max(longest, run)
-        previous = d
+        previous, prev_run = d, run
+    if previous is not None:
+        runs.append((previous, prev_run))
+    # The best streak before the current one, so "best streak yet" means beating it.
+    current_end = today if today in days else today - one
+    previous_best = max((n for end, n in runs if not (current and end == current_end)), default=0)
 
     return {
         "current_streak": current,
         "longest_streak": longest,
+        "previous_best": previous_best,
         "wrote_today": today in days,
         "days_written": len(days),
     }

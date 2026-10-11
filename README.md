@@ -58,21 +58,37 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
 
 ## Entry count and streak
 
-The header shows your total entries, your current streak (consecutive days with at least one entry), and your best streak. They're worked out fresh from your entries' dates every time, never stored, so they stay right after edits, deletions or restores.
+The header shows two things: your total entries, and one streak item (consecutive days with at least one entry). Both are worked out fresh from your entries' dates every time, never stored, so they stay right after edits, deletions or restores. Milestones stay in place for as long as they're true, rather than flashing briefly; when **Finish & reflect** brings you to one, it pops in once.
 
 - A day counts once toward the streak, however many entries you write; each entry counts toward the total.
-- If you wrote yesterday but not yet today, the streak still shows, with a gentle *write today to keep it going*. It only resets after a full day with no entry.
+- If you wrote yesterday but not yet today, the streak still shows. It only resets after a full day with no entry.
 - Hidden entries still count. Permanently deleted ones don't.
 - Days follow your time zone setting (Toronto by default), so an entry at 11:30 pm counts for that day.
-- From 3 days on, the streak shows as a small badge (**✦ 9-day streak**). When **Finish & reflect** brings you to a milestone (3 days, 1 week, then every further week: 2 weeks, 3 weeks, …), the badge gently pops and reads the milestone for a few seconds (*Three days in a row*, *A full week of writing*, *Two weeks of writing*…) before settling back. It only celebrates the entry that reaches the milestone, not later entries the same day.
 
-### Entry milestones
+**The entry count** reads *12 entries*, except on a milestone (your **5th, 10th, 25th and 50th** entry, then every 50th: 100th, 150th…), when it reads a gold **✦ Your 50th entry** until your next entry.
 
-Finishing your **5th, 10th, 25th and 50th** entry, and every 50th after that (100th, 150th, 200th…), brings up a gold **"✦ Your 50th entry"** badge beside your streak for a few seconds. Hidden entries count too, matching the entry count in the header.
+**The streak** shows the single most relevant item, in this order:
+1. **A milestone day** (3 days, 1 week, then every further week), once you've written that day: a gold *✦ Three days in a row*, *✦ A full week of writing*, *✦ Two weeks of writing*…
+2. **A new best:** beating an earlier streak of 2 or more days shows a gold **✦ Best streak yet · 10 days** for as long as it's your best (your very first streak isn't called a "best yet").
+3. **Otherwise:** *2-day streak*, or from 3 days a small badge, **✦ 9-day streak**.
 
-### Longest entry yet
+### Longest entry
 
-From your fourth entry on, finishing an entry with more words than any you've written before brings up a gold **"✦ Your longest entry yet · 612 words"** badge beside your streak. That entry then shows **"✦ longest"** next to its word count, until another entry beats it (a tie keeps the record where it is; hidden entries don't count).
+From your fourth entry on, your longest entry (most words; a tie keeps the record where it is; hidden entries don't count) shows **✦ longest** next to its word count, both on the entry itself and in the list of past entries.
+
+## Search
+
+The search box above **Past entries** looks through your entries, titles, reflections and their questions as you type. It's forgiving: word endings don't matter (*forgive* finds forgiving and forgiveness), the last word can be half-typed, and a one-letter slip in a longer word still matches; put "words in quotes" to find an exact phrase. Every word must appear somewhere in the entry; titles count most, then your own words, then the reflection. Matches are highlighted, results marked *in the reflection* or *in the question* when that's where they were found, and the Favorites and Calendar filters still apply. Clear the box (or press Esc) to see the list again.
+
+Search runs in memory on the unlocked journal (`journal/search.py`); nothing readable is written to disk, and the prepared words are forgotten when the journal locks.
+
+## Themes
+
+Each entry is tagged with 1 to 3 **themes** from a fixed list for the app (`editions/<edition>/themes.txt`, one per line: edit it freely). Claude picks them with the reflection, at no extra cost. Entries written before themes existed (or whose reflection didn't come through) are tagged quietly in small batches while the journal is open, using a small, inexpensive model that sees only each entry's title and opening; this doesn't count toward the daily reflection limit (up to 400 a day per person).
+
+Above **Past entries**, **Themes** opens the themes your entries have, with how many entries each; pick one to see only those entries (combined with Favorites, the calendar and search), and **All** clears it. An entry's themes also show under its text; click one to see every entry with that theme.
+
+The two apps share most themes (work, family, grief & loss, gratitude…), each with its own flavor: *Meditation & stillness*, *Virtue*, *What I can control* in A Life Well Lived; *Prayer*, *Grace*, *Trust & surrender* in In His Steps.
 
 ## Favorites
 

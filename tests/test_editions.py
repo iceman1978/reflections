@@ -144,3 +144,34 @@ class LabelTokenTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ThemeTests(unittest.TestCase):
+    def test_each_edition_has_a_theme_list_with_shared_core(self):
+        lists = {}
+        for folder in EDITIONS.iterdir():
+            path = folder / "themes.txt"
+            self.assertTrue(path.exists(), folder.name)
+            lists[folder.name] = [line.strip() for line in path.read_text(encoding="utf-8").splitlines()
+                                  if line.strip() and not line.strip().startswith("#")]
+            self.assertEqual(len(lists[folder.name]), len(set(lists[folder.name])), f"{folder.name}: a theme is listed twice")
+        shared = set(lists["philosophy"]) & set(lists["christian"])
+        self.assertGreaterEqual(len(shared), 30)
+        self.assertIn("Prayer", lists["christian"])
+        self.assertIn("Meditation & stillness", lists["philosophy"])
+
+    def test_clean_keeps_only_listed_themes(self):
+        from journal import themes
+        saved = themes.THEMES
+        themes.THEMES = ["Work", "Family", "Hope", "Prayer"]
+        try:
+            self.assertEqual(themes.clean(["work", "FAMILY", "Nope", "Work", "Prayer", "Hope"]), ["Work", "Family", "Prayer"])
+            self.assertEqual(themes.clean(None), [])
+        finally:
+            themes.THEMES = saved
+
+    def test_only_untagged_entries_with_text_need_tagging(self):
+        from journal import themes
+        self.assertTrue(themes.needs_tagging({"text": "A day at work."}))
+        self.assertFalse(themes.needs_tagging({"text": "A day at work.", "themes": []}))
+        self.assertFalse(themes.needs_tagging({"text": "   "}))

@@ -255,6 +255,7 @@
       <input id="entry-title-input" class="title-input" type="text" maxlength="120"
              placeholder="Title (optional)" title="Leave blank for No Title" hidden>
       <div id="entry-text" class="entry-text"></div>
+      <div id="entry-themes" class="entry-themes" hidden></div>
       <textarea id="entry-editor" hidden></textarea>
       <div class="page-footer">
         <span class="subtle" id="entry-status"></span>
@@ -500,7 +501,16 @@
           <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false">★ Favorites</button>
           <button id="calendar-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
                   aria-haspopup="dialog" aria-controls="calendar">Calendar</button>
+          {% if themes_enabled %}<button id="themes-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
+                  aria-haspopup="dialog" aria-controls="themes-pop">Themes</button>{% endif %}
         </div>
+        {% if themes_enabled %}
+        <!-- Theme filter: pops up under the Themes button -->
+        <div id="themes-pop" class="calendar themes-pop" role="dialog" aria-label="Browse by theme" hidden>
+          <div id="theme-chips" class="theme-chips"></div>
+          <p id="themes-status" class="cal-hint subtle"></p>
+        </div>
+        {% endif %}
 
         <!-- Date filter: pops up under the Calendar button -->
         <div id="calendar" class="calendar" role="dialog" aria-label="Filter by date" hidden>
@@ -516,6 +526,11 @@
             <button id="cal-month-btn" type="button">Whole month</button>
           </div>
         </div>
+      </div>
+      <div class="search-row">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15 15l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="search-input" type="search" placeholder="Search your journal" aria-label="Search your journal"
+               autocomplete="off" spellcheck="false" enterkeyhint="search">
       </div>
       <p id="filter-note" class="filter-note subtle" hidden></p>
       <ul id="entry-list"></ul>
@@ -616,6 +631,7 @@
     hosted: {{ hosted | tojson }},
     appName: {{ app_name | tojson }},
     inviteLine: {{ edition.invite_line | tojson }},
+    themes: {{ themes_enabled | tojson }},
     userName: {{ user_name | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},

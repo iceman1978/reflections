@@ -14,7 +14,7 @@ from datetime import datetime
 import anthropic
 from dotenv import load_dotenv
 
-from . import sources, store
+from . import sources, store, themes
 from .config import EDITION, EDITION_DIR, ROOT, TZ, settings
 
 log = logging.getLogger(__name__)
@@ -189,8 +189,10 @@ def _schema():
                 "type": "boolean",
                 "description": "True only if the entry suggests real distress or risk.",
             },
+            **({"themes": themes.schema_property()} if themes.THEMES else {}),
         },
-        "required": ["title", "insight", "question", "quotes", "references", "thinkers", "wellbeing_concern"],
+        "required": ["title", "insight", "question", "quotes", "references", "thinkers", "wellbeing_concern"]
+                    + (["themes"] if themes.THEMES else []),
         "additionalProperties": False,
     }
 
@@ -314,6 +316,7 @@ def reflect(entry):
         "references": references,
         "wellbeing_concern": bool(data.get("wellbeing_concern")),
         "thinkers": [n for n in (data.get("thinkers") or []) if n in THINKERS][:3],
+        **({"themes": themes.clean(data.get("themes"))} if themes.THEMES else {}),
         "reflection_model": response.model,
         "reflected_at": datetime.now(TZ).isoformat(),
     }

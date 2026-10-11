@@ -44,6 +44,14 @@ class StreakTests(unittest.TestCase):
         s = compute(days_ago(0, 10, 11, 12, 13, 14), TODAY)
         self.assertEqual((s["current_streak"], s["longest_streak"]), (1, 5))
 
+    def test_previous_best_leaves_out_the_current_streak(self):
+        # "Best streak yet" means beating an earlier streak, so the current one isn't counted.
+        self.assertEqual(compute(days_ago(0, 1, 2, 3), TODAY)["previous_best"], 0)          # first streak
+        self.assertEqual(compute(days_ago(0, 1, 2, 10, 11), TODAY)["previous_best"], 2)     # beating 2 with 3
+        self.assertEqual(compute(days_ago(0, 1, 10, 11, 12, 13), TODAY)["previous_best"], 4)
+        self.assertEqual(compute(days_ago(1, 2, 3, 9, 10), TODAY)["previous_best"], 2)      # not written today yet
+        self.assertEqual(compute(days_ago(5, 6, 9), TODAY)["previous_best"], 2)            # no current streak
+
     def test_streak_across_month_and_year(self):
         new_year = date(2027, 1, 1)
         dates = [date(2026, 12, 30), date(2026, 12, 31), new_year]

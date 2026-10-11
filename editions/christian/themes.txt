@@ -1,0 +1,80 @@
+# Themes for In His Steps: DRAFT, edit freely.
+#
+# Not used yet. Once they're switched on, Claude will tag each entry with 1-3 of
+# these (only these), and Past entries will let you browse by theme.
+# One theme per line; lines starting with # are notes. Keep names short.
+# Themes marked (shared) are the same in A Life Well Lived, so the two apps work alike.
+
+# --- Everyday life (shared) ---
+Work
+Money
+Home
+Health
+Body
+Rest
+Time
+Nature
+Travel
+Creativity
+Learning
+
+# --- People (shared) ---
+Family
+Parenting
+Marriage & partnership
+Friendship
+Community
+Loneliness
+Conflict
+Love
+
+# --- Feelings (shared) ---
+Joy
+Gratitude
+Hope
+Fear & anxiety
+Anger
+Grief & loss
+Shame
+Regret
+Envy
+Pride
+
+# --- Character and choices (shared) ---
+Decisions
+Change
+Habits
+Ambition
+Failure
+Success
+Patience
+Courage
+Honesty
+Kindness
+Self-knowledge
+Purpose
+Aging
+Death & mortality
+
+# --- The Christian life (its own flavor) ---
+Prayer
+Scripture
+Worship
+Church
+Faith & doubt
+Trust & surrender
+God's presence
+Waiting on God
+Grace
+Forgiveness
+Sin & temptation
+Repentance
+Holiness
+Humility
+Calling
+Service
+Sharing faith
+Spiritual dryness
+Suffering & trials
+Sabbath
+Contentment

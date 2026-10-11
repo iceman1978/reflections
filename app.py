@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
 from journal import (activity, config, export, feedback, importer, invites, migrate, passkeys, reflection, stats, store, usage, users, vault,
-                     sources, wipe, writing_prompts)
+                     search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
 
@@ -169,7 +169,7 @@ def _static_versions():
             "test_emails": sorted(config.ALLOWED_EMAILS),
             "logo_url": _brand_file("logo"), "logo_mask_url": _brand_file("logo-mask"), "hero_url": _brand_file("hero"),
             "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR,
-            "edition": config.EDITION, "brand_url": BRAND_URL, "brand_path": f"brands/{config.EDITION_NAME}"}
+            "edition": config.EDITION, "brand_url": BRAND_URL, "themes_enabled": bool(themes.THEMES), "brand_path": f"brands/{config.EDITION_NAME}"}
 
 
 BRAND_DIR = config.BRAND_DIR                     # static/brands/<edition>/
@@ -628,6 +628,7 @@ def _summary(e):
         "title": e.get("title"),
         "date": stats.local_date(e["created_at"]).isoformat(),  # local calendar day
         "favourite": bool(e.get("favourite")),
+        "themes": e.get("themes"),                      # None until tagged
         "snippet": " ".join(e["text"].split())[:120],
         "reflection_status": e["reflection_status"],
     }
@@ -665,6 +666,45 @@ def _for_page(entry, reflecting=None):
     if entry.get("wellbeing_concern"):
         out["support_note"] = reflection.support_note()
     return out
+
+
+THEME_TAGS_PER_DAY = 400       # per person: plenty for a backlog, a cap on runaway costs
+_theme_tagged = {}             # (user id, date) -> entries tagged today
+
+
+@app.post("/api/themes/backfill")
+def themes_backfill():
+    """Tag the next few earlier entries with themes (the page calls this
+    repeatedly while the journal is open). Returns how many are left."""
+    if not themes.THEMES:
+        return jsonify(tagged=0, remaining=0)
+    todo = [e for e in store.visible_entries() if themes.needs_tagging(e) and e["id"] not in _reflecting]
+    key = (g.user_id, datetime.now(TZ).date().isoformat())
+    room = THEME_TAGS_PER_DAY - _theme_tagged.get(key, 0)
+    if not todo or room <= 0:
+        return jsonify(tagged=0, remaining=len(todo), paused=room <= 0)
+    batch = todo[:min(themes.BATCH_SIZE, room)]
+    try:
+        tagged = themes.tag_batch(batch)
+    except reflection.ReflectionError as e:
+        return jsonify(error=str(e), remaining=len(todo)), 502
+    for entry_id, chosen in tagged.items():
+        try:
+            store.update_entry(entry_id, touch=False, themes=chosen)
+        except KeyError:
+            pass                                        # deleted meanwhile
+    _theme_tagged[key] = _theme_tagged.get(key, 0) + len(tagged)
+    log.info("Tagged %d earlier entries with themes (%s)", len(tagged), g.user_id)
+    return jsonify(tagged=len(tagged), remaining=len(todo) - len(tagged))
+
+
+@app.get("/api/search")
+def api_search():
+    """Entries matching ?q= (see journal/search.py), best first."""
+    query = (request.args.get("q") or "").strip()[:200]
+    if len(query) < 2:
+        return jsonify(results=[], query=query)
+    return jsonify(results=search.search(store.visible_entries(), query, g.user_id), query=query)
 
 
 @app.get("/api/entries/<entry_id>")

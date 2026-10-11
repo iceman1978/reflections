@@ -710,6 +710,24 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .cal-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .cal-foot button { font-size: 0.85rem; padding: 2px 12px; }
 .filter-note { margin: 6px 0 0; font-style: italic; }
+/* Themes: chips in the Themes pop-up and at the end of an entry. */
+.themes-pop { width: 360px; }
+.theme-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.theme-chip {
+  font-size: 0.85rem; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--rule);
+  background: transparent; color: var(--ink);
+}
+.theme-chip .n { color: var(--muted); font-size: 0.78rem; margin-left: 4px; }
+.theme-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.entry-themes { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; }
+.entry-themes .theme-chip { font-size: 0.8rem; color: var(--muted); }
+.entry-themes .theme-chip:hover { color: var(--accent); border-color: var(--accent); }
+/* Search, above the list of past entries. */
+.search-row { position: relative; margin: 12px 0 2px; color: var(--muted); }
+.search-row svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.search-row input { width: 100%; padding: 8px 12px 8px 38px; border-radius: 999px; font: inherit; font-size: 0.95rem; }
+#entry-list mark { background: color-mix(in srgb, var(--gold) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
+#entry-list .found-in { font-style: italic; color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px 0; text-align: center; }  /* no column gap, so a range reads as one band */
 .cal-dow { font-size: 0.68rem; color: var(--muted); padding-bottom: 4px; letter-spacing: 0.04em; }
 .cal-day {
