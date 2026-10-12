@@ -2410,9 +2410,20 @@
   $("recovery-done").addEventListener("click", () => startJournal());
   $("lock-btn").addEventListener("click", async () => {
     try { sessionStorage.setItem("journal.justLocked", "1"); } catch (_) {}   // no passkey prompt straight back
+    // The book closes: the cover swings over from the spine onto the page you
+    // were on. Then the page reloads (onto the same cover), so nothing that was
+    // unlocked stays in memory.
+    const from = ["entry", "settings", "write"].map((v) => $(`${v}-view`)).find((el) => !el.hidden);
+    const ghost = from ? oldPageCopy(from) : null;
     try { await api("POST", "/api/vault/lock"); } catch (_) {}
     state.unlocked = false;
-    location.reload();
+    if (!ghost) return location.reload();
+    $("past").hidden = true;
+    showVaultPanel("unlock");
+    if ($("passkey-unlock")) $("passkey-unlock").hidden = !state.passkeyUnlock;
+    document.activeElement && document.activeElement.blur();
+    turnPage($("cover-view"), -1, ghost);
+    setTimeout(() => location.reload(), 750);
   });
 
   // ---- Password settings ------------------------------------------------
@@ -2686,6 +2697,7 @@
       $("account-email").textContent = v.email;
       if (location.search) history.replaceState(null, "", "/");
     }
+    state.passkeyUnlock = Boolean(v.passkeys && passkeysPossible());   // for the cover, when the book is closed
     if (v.unlocked) return startJournal();
     if (!v.set_up) {
       $("legacy-note").hidden = !v.legacy_entries;
