@@ -158,6 +158,13 @@ def colour_mask(img, size=160):
     dark, light = level(0.02), level(0.98)   # ignore the odd stray pixel
     span = max(1, light - dark)
     alpha = small.point(lambda v: max(0, min(255, round((light - v) * 255 / span))))
+    # Centre the light line art in the square (a drawing can sit a little off to one
+    # side); the edge this uncovers is filled with the dark colour.
+    left, top, right, bottom = alpha.point(lambda v: 255 if v < 128 else 0).getbbox()
+    dx, dy = (size - left - right) // 2, (size - top - bottom) // 2
+    centred = Image.new("L", (size, size), 255)
+    centred.paste(alpha, (dx, dy))
+    alpha = centred
     mask = Image.new("RGBA", (size, size), (255, 255, 255, 0))
     mask.putalpha(alpha)
     return mask

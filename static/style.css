@@ -642,6 +642,7 @@ a.button-link:hover { background: color-mix(in srgb, var(--accent) 8%, transpare
 a.button-link.primary { background: var(--accent); color: var(--accent-ink); padding: 8px 20px; font-size: 1rem; }
 a.button-link.primary:hover { background: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
 .vault-account { margin: -4px 0 14px; font-size: 0.9rem; overflow-wrap: anywhere; }
+.vault-account .nowrap { white-space: nowrap; }   /* "Not you? Sign out" moves to the next line as a whole */
 .account-line { overflow-wrap: anywhere; }
 button.danger-outline { border-color: var(--danger); color: var(--danger); }
 button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(--danger) 10%, transparent); }
@@ -835,6 +836,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 /* Text-style buttons (Forgot your passphrase?, Back) line up with the box above. */
 .vault-buttons button.quiet { padding-left: 0; padding-right: 0; border: none; background: none; }
 .vault-buttons button.quiet:hover { color: var(--accent); text-decoration: underline; }
+#vault-unlock #show-recover { font-size: 0.85rem; }   /* the same size as "or type your passphrase" */
 
 /* Passkeys: the quick way in on the passphrase screen, and the list in Settings. */
 .source-list { list-style: none; padding: 0; margin: 0 0 8px; }
@@ -1337,4 +1339,12 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .past { padding: 12px 16px 6px; }
+}
+
+/* The welcome card on a phone: a smaller title that fits on one line, and Unlock
+   first (full width) with "Forgot your passphrase?" centred under it. */
+@media (max-width: 640px) {
+  :is(.vault, .cover-view) .vault-title { font-size: 1.4rem; }
+  #vault-unlock .vault-buttons { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
+  #vault-unlock #show-recover { align-self: center; }
 }
