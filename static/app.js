@@ -33,13 +33,22 @@
 
   // passive: timer-driven requests that shouldn't count as activity (so the
   // journal can still lock itself when you've walked away).
+  let lockGen = 0;   // goes up each time the book is closed (see forgetJournal)
   async function api(method, url, body, { passive = false } = {}) {
+    const gen = lockGen;
     const headers = { "X-Journal-Client": "1" };
     if (body) headers["Content-Type"] = "application/json";
     if (passive) headers["X-Journal-Passive"] = "1";
     const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
     let data = {};
     try { data = await res.json(); } catch (_) { /* empty body */ }
+    if (gen !== lockGen) {
+      // Asked for before the book was closed: whatever came back is dropped,
+      // so nothing from the unlocked journal lands in the page afterwards.
+      const stale = new Error("The journal is locked");
+      stale.status = 423;
+      throw stale;
+    }
     if ((res.status === 423 || res.status === 401) && state.unlocked) {
       // Locked (timed out, or locked elsewhere): reload to the lock screen,
       // which also clears everything decrypted off the page.
@@ -2408,22 +2417,79 @@
     }
   });
   $("recovery-done").addEventListener("click", () => startJournal());
+  // ---- Closing the book (the padlock) -------------------------------------
+  // Everything the unlocked journal put in this page is cleared here, without
+  // reloading it: what's remembered (entries, search results, the draft),
+  // what's written on the pages now out of sight, and the timers that fetch more.
+  const FORGET = [   // emptied
+    "entry-list", "cal-grid", "theme-chips", "entry-themes", "entry-words", "insight", "citations", "hidden-list",
+    "passkey-list", "usage-tiles", "usage-chart", "usage-table", "invite-requests", "feedback-list", "my-invites",
+    "dialog-title", "dialog-body", "dialog-buttons", "entry-date", "entry-title", "entry-text", "entry-status", "nav-pos",
+    "question", "support-note", "reflection-missing-text", "prompt-text", "prompt-source", "prompt-status",
+    "draft-state", "filter-note", "themes-status", "limits-note", "nudge-text", "new-recovery-key",
+    "new-recovery-result", "password-result", "passkey-result", "import-result", "test-key-result", "usage-since",
+    "wipe-count", "wipe-number", "wipe-error", "feedback-error", "invite-error", "settings-state",
+  ];
+  function forgetJournal() {
+    lockGen++;                                    // answers still on their way are dropped (see api)
+    openToken++;
+    searchSeq++;
+    for (const t of [pollTimer, searchTimer, promptNudgeTimer, noticeTimer]) clearTimeout(t);
+    for (const t of [autosaveTimer, statusTimer, clockTimer]) clearInterval(t);
+    if (moreObserver) { moreObserver.disconnect(); moreObserver = null; }
+    wipeChallenge = null;
+    activeNudge = null;
+    Object.assign(state, {
+      prompt: null, promptsShown: [], current: null, draftDirty: false, clientError: null, notice: null,
+      allEntries: null, lastStats: null, search: null, navTarget: null, turn: null, olderId: null, newerId: null,
+      range: null, theme: null, listLimit: LIST_FIRST, passkeyInfo: null, popStats: false,
+    });
+    for (const d of document.querySelectorAll("dialog[open]")) d.close();
+    restoreSavedLook();                           // an unsaved preview in Settings
+    setHeaderMenu(false);
+    toggleCalendar(false);
+    if ($("themes-btn")) toggleThemes(false);
+    for (const id of FORGET) if ($(id)) $(id).replaceChildren();
+    // Anything typed: the writing page, an entry being edited, search, passphrases, unsent feedback.
+    // (Settings' own boxes are filled in afresh each time it opens.)
+    for (const el of document.querySelectorAll("#book textarea, #book input, dialog textarea, dialog input")) {
+      if (el.closest("#settings-form") || ["checkbox", "radio", "range", "file", "submit", "button"].includes(el.type)) continue;
+      el.value = "";
+    }
+    for (const id of ["reflection", "support-note", "entry-themes", "new-recovery-box", "my-invites-box", "install-invite"]) {
+      if ($(id)) $(id).hidden = true;
+    }
+    $("word-count").textContent = plural(0, "word");
+    if ($("credit-coin")) delete $("credit-coin").dataset.left;
+    setEditing(false);
+    renderPrompt();
+    applyFilters();
+    renderBanner();
+  }
+
   $("lock-btn").addEventListener("click", async () => {
-    try { sessionStorage.setItem("journal.justLocked", "1"); } catch (_) {}   // no passkey prompt straight back
-    // The book closes: the cover swings over from the spine onto the page you
-    // were on. Then the page reloads (onto the same cover), so nothing that was
-    // unlocked stays in memory.
     const from = ["entry", "settings", "write"].map((v) => $(`${v}-view`)).find((el) => !el.hidden);
-    const ghost = from ? oldPageCopy(from) : null;
-    try { await api("POST", "/api/vault/lock"); } catch (_) {}
+    if (state.draftDirty) await saveDraftToServer();          // what's being written is kept, encrypted
+    if (!state.draftDirty) localClear();                      // ...so this browser's readable copy can go
+    const ghost = from ? oldPageCopy(from) : null;            // the page as it was, for the cover to land on
+    let locked = true;
+    await Promise.all([api("POST", "/api/vault/lock").catch(() => { locked = false; }), scrollToTop()]);
+    window.scrollTo(0, 0);                                    // if the smooth scroll was cut short
     state.unlocked = false;
-    if (!ghost) return location.reload();
-    $("past").hidden = true;
+    if (!locked) return location.reload();                    // couldn't reach the journal: show where things stand
+    // The book closes: the cover swings over from the spine onto the page you were on.
+    const passkey = state.passkeyUnlock;
+    forgetJournal();
     showVaultPanel("unlock");
-    if ($("passkey-unlock")) $("passkey-unlock").hidden = !state.passkeyUnlock;
-    document.activeElement && document.activeElement.blur();
+    $("passkey-unlock").hidden = !passkey;
+    if (document.activeElement) document.activeElement.blur();
     turnPage($("cover-view"), -1, ghost);
-    setTimeout(() => location.reload(), 750);
+    setTimeout(() => {
+      if (state.unlocked) return;
+      state.clientError = null;                               // from a request the lock cut short
+      renderBanner();
+      (passkey ? $("passkey-unlock-btn") : $("unlock-pw")).focus({ preventScroll: true });
+    }, 700);
   });
 
   // ---- Password settings ------------------------------------------------
@@ -2523,6 +2589,7 @@
       return li;
     }));
     ul.hidden = !list.length;
+    state.passkeyUnlock = list.length > 0 && passkeysPossible();   // for the cover, when the book is closed
   }
 
   async function refreshPasskeys() {
@@ -2630,7 +2697,7 @@
     } catch (_) { return asked; }
   })();
 
-  let started = false;
+  let started = false, statusTimer = null, clockTimer = null;
   function startJournal() {
     state.unlocked = true;
     const fromCover = !$("cover-view").hidden;
@@ -2647,18 +2714,20 @@
       showView("write");
       turnPage($("write-view"), 1, ghost);                   // the cover turns away like a page
     }
-    if (started) return;
-    started = true;
+    $("today").textContent = longDate(new Date().toISOString());
     restartAutosave();
-    setInterval(pollStatus, 10000);
-    if (FEEDBACK_ON_START === "sources") {
+    clearInterval(statusTimer);
+    statusTimer = setInterval(pollStatus, 10000);
+    if (!started && FEEDBACK_ON_START === "sources") {
       try { sessionStorage.removeItem("journal.feedbackOnStart"); } catch (_) {}
       history.replaceState(null, "", "/");
       $("feedback-text").value = $("feedback-text").value || "About the sources: ";
       setTimeout(openFeedback, 400);
     }
+    started = true;
     // Keep the date and streak right if the page stays open past midnight.
-    setInterval(() => {
+    clearInterval(clockTimer);
+    clockTimer = setInterval(() => {
       $("today").textContent = longDate(new Date().toISOString());
       refreshStats({ passive: true });
       renderCalendar();
@@ -2713,14 +2782,10 @@
       $("passkey-unlock-btn").focus();   // the quickest way in, when there is one
       // Ask for the passkey straight away, but only in a browser where it has
       // been added or used (elsewhere the device would offer an unhelpful
-      // "use another device" prompt), and not right after pressing the padlock.
-      let usedHere = false, justLocked = false;
-      try {
-        usedHere = localStorage.getItem("journal.passkey") === "1";
-        justLocked = sessionStorage.getItem("journal.justLocked") === "1";
-        sessionStorage.removeItem("journal.justLocked");
-      } catch (_) { /* storage blocked: leave it to the button */ }
-      if (usedHere && !justLocked) setTimeout(() => passkeyUnlock({ auto: true }), 350);
+      // "use another device" prompt). Not after the padlock: that doesn't reload the page.
+      let usedHere = false;
+      try { usedHere = localStorage.getItem("journal.passkey") === "1"; } catch (_) { /* storage blocked: leave it to the button */ }
+      if (usedHere) setTimeout(() => passkeyUnlock({ auto: true }), 350);
     }
   })();
 })();

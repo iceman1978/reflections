@@ -190,6 +190,10 @@ def _brand_file(stem):
 def _headers(resp):
     if request.path == "/" or request.path.startswith("/api/"):
         resp.headers["Cache-Control"] = "no-store"  # nothing from the journal stays in the browser cache
+    elif request.path.startswith("/static/fonts/") and resp.status_code == 200:
+        # The fonts never change (a new one would get a new file name), so browsers keep them
+        # and don't ask again on each visit: asking is what made the handwriting flash on reload.
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("Referrer-Policy", "same-origin")
     resp.headers.setdefault("X-Frame-Options", "DENY")

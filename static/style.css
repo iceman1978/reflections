@@ -23,7 +23,7 @@
   font-family: "Homemade Apple";
   src: url("/static/fonts/HomemadeApple-Regular.ttf") format("truetype");
   font-weight: 400 700;   /* one weight; stops browsers faking a bold */
-  font-display: swap;
+  font-display: block;    /* a moment of nothing rather than a flash of some other font */
   size-adjust: 65%;
   ascent-override: 120%;
   descent-override: 75%;
