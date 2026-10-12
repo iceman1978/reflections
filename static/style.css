@@ -845,7 +845,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .passkey-unlock { display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
 .passkey-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; font-size: 1.05rem; }
 .passkey-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; flex: none; }
-.passkey-or { text-align: center; margin: 0; }
+.passkey-or { text-align: left; margin: 0; }
 .passkey-list { list-style: none; padding: 0; margin: 0 0 14px; }
 .passkey-list li { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 6px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
 .passkey-list li .subtle { flex: 1; }
@@ -1035,7 +1035,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   padding: 56px 32px 26px;
 }
 .cover-logo {   /* the logo in the theme's color, with a white ring so it stands out on the cover */
-  width: 150px; height: 150px; border-radius: 30px; flex: none;
+  width: 150px; height: 150px; border-radius: 30px; flex: none; margin: 0 auto;   /* centred: the themed logo is a block, which text-align leaves at the left */
   box-shadow: 0 0 0 2px hsl(0 0% 100% / 0.85), 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 .cover-name {
@@ -1342,9 +1342,9 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 }
 
 /* The welcome card on a phone: a smaller title that fits on one line, and Unlock
-   first (full width) with "Forgot your passphrase?" centred under it. */
+   first (full width) with "Forgot your passphrase?" under it, at the left. */
 @media (max-width: 640px) {
   :is(.vault, .cover-view) .vault-title { font-size: 1.4rem; }
   #vault-unlock .vault-buttons { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
-  #vault-unlock #show-recover { align-self: center; }
+  #vault-unlock #show-recover { align-self: flex-start; }
 }
