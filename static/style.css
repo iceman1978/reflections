@@ -1029,6 +1029,19 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 /* ---- The journal's cover (locked): a page in the theme's cover color ---- */
 .cover-view {
   background-color: var(--cover);
+  /* Leather: the theme's cover color, with a colorless grain laid over it (so it
+     follows every theme). The grain is drawn by the browser: noise, lit from the
+     top left like a pebbled hide. Over that, a soft light in the middle and
+     darker edges, as if the board were slightly padded. */
+  background-image:
+    radial-gradient(ellipse at 50% 38%, hsl(0 0% 100% / 0.16), transparent 62%),
+    radial-gradient(ellipse at center, transparent 55%, hsl(0 0% 0% / 0.3) 100%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='l' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='4' seed='7' stitchTiles='stitch'/><feDiffuseLighting lighting-color='white' surfaceScale='1.6' diffuseConstant='0.6'><feDistantLight azimuth='225' elevation='58'/></feDiffuseLighting></filter><rect width='100%' height='100%' filter='url(%23l)'/></svg>");
+  background-size: auto, auto, 320px 320px;
+  background-blend-mode: soft-light, multiply, overlay;
+  /* Stitching: a dashed thread a little in from the edge. */
+  outline: 1.5px dashed color-mix(in srgb, var(--cover) 58%, white);
+  outline-offset: -13px;
   color: hsl(var(--paper-hue) 30% 94%);
   display: flex; flex-direction: column; align-items: center; text-align: center;
   min-height: min(82vh, 860px);   /* until it's matched to the writing page's height (app.js) */
@@ -1041,6 +1054,13 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .cover-name {
   font-family: var(--hand); font-weight: 500; line-height: 1.1; word-spacing: 0.25em;
   font-size: clamp(2.4rem, 6vw, 3.4rem); margin: 22px 0 0;
+}
+/* The name and tagline look pressed into the leather: dark above, a faint light edge below. */
+.cover-name, .cover-tagline { text-shadow: 0 -1px 1px hsl(0 0% 0% / 0.45), 0 1px 0 hsl(0 0% 100% / 0.12); }
+/* The hinge: a groove down the cover beside the spine. */
+.cover-view.page::before {
+  width: 30px;
+  background: linear-gradient(to right, hsl(0 0% 0% / 0.28), hsl(0 0% 0% / 0.08) 55%, hsl(0 0% 0% / 0.3) 78%, hsl(0 0% 100% / 0.1) 86%, transparent);
 }
 .cover-name.long-name { font-size: clamp(2rem, 4.6vw, 2.6rem); }
 .cover-tagline {
@@ -1057,12 +1077,13 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .cover-view .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
 .cover-foot { margin-top: auto; padding-top: 34px; }
 .cover-view .vault-footer { color: inherit; opacity: 0.7; margin: 0; }
-.cover-view .vault-footer a { color: inherit; }
+.cover-view .vault-footer a, .cover-view .copyright { color: inherit; }   /* readable on the dark cover */
 /* While locked, the header's buttons are there but grayed out. */
 .book.locked .header-actions > *, .book.locked .menu-btn { opacity: 0.35; pointer-events: none; }
 .book.locked .book-footer { display: none; }   /* the cover carries its own links */
 @media (max-width: 640px) {
-  .cover-view { padding: 40px 18px 20px; }
+  .cover-view { padding: 40px 18px 20px; outline-offset: -8px; }
+  .cover-view.page::before { width: 18px; }
   .cover-logo { width: 116px; height: 116px; border-radius: 24px; }
   .cover-view .vault-card { padding: 22px 20px 18px; }
 }
