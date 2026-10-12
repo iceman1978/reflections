@@ -2297,6 +2297,7 @@
       for (const v of ["write", "entry", "settings"]) $(`${v}-view`).hidden = true;
       $("past").hidden = true;
       $("stats").replaceChildren();
+      matchCoverToPage();
     }
     for (const b of document.querySelectorAll("#header-actions button, #menu-btn")) b.disabled = on;
     const coin = $("credit-coin");
@@ -2307,6 +2308,23 @@
       coin.title = "Unlock your journal first";
     }
   }
+
+  // The cover is exactly as tall as the writing page beneath it, so unlocking
+  // turns it over onto a page of the same size, like a real book.
+  function matchCoverToPage() {
+    const cover = $("cover-view"), page = $("write-view");
+    if (cover.hidden) return;
+    const wasHidden = page.hidden;
+    page.style.visibility = "hidden";               // measured in place, never painted
+    page.hidden = false;
+    const h = page.offsetHeight;
+    page.hidden = wasHidden;
+    page.style.visibility = "";
+    cover.style.minHeight = h ? `${h}px` : "";
+  }
+  window.addEventListener("resize", () => { if (!$("cover-view").hidden) matchCoverToPage(); });
+  // Again once the fonts have loaded: until then the writing page is measured in a fallback font.
+  if (document.fonts) document.fonts.ready.then(() => matchCoverToPage());
 
   function showVaultPanel(name) {
     setCover(name !== "signin");

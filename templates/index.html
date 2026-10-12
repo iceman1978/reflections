@@ -206,7 +206,8 @@
          passphrase card. Unlocking turns it away like a page. -->
     <section id="cover-view" class="page cover-view" hidden>
       <div class="cover-brand">
-        {% if logo_url %}<img class="cover-logo" src="{{ logo_url }}" alt="">{% endif %}
+        {% if logo_mask_url %}<span class="cover-logo themed" style="--logo-mask: url('{{ logo_mask_url }}')" aria-hidden="true"></span>
+        {% elif logo_url %}<img class="cover-logo" src="{{ logo_url }}" alt="">{% endif %}
         <p class="cover-name{% if app_name | length > 14 %} long-name{% endif %}">{{ app_name }}</p>
         {% if edition.tagline %}<p class="cover-tagline">{{ edition.tagline }}</p>{% endif %}
       </div>

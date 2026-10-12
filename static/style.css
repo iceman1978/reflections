@@ -232,8 +232,8 @@ a { color: var(--accent); }
 .journal-logo { width: 40px; height: 40px; border-radius: 10px; flex: none; }
 /* The logo in the theme's colour: white, with the logo's dark parts painted in
    --logo-colour through a cut-out made by tools/make_icons.py (logo-mask.png). */
-.journal-logo.themed { position: relative; overflow: hidden; background: #f5f6f7; }
-.journal-logo.themed::before {
+.journal-logo.themed, .cover-logo.themed { position: relative; overflow: hidden; background: #f5f6f7; display: block; }
+.journal-logo.themed::before, .cover-logo.themed::before {
   content: ""; position: absolute; inset: 0; background: var(--logo-colour);
   -webkit-mask: var(--logo-mask) center / cover no-repeat; mask: var(--logo-mask) center / cover no-repeat;
 }
@@ -378,6 +378,19 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
    up with the header strip and Past entries. */
 .book { --book-edge: 15px; }
 .book .page { margin-right: var(--book-edge); }
+
+/* The spine corner: the stacked page edges (box-shadow above) each start a
+   step further right, which left a notch at the bottom-left. A diagonal in the
+   cover's color, from the page's corner to the cover board's, closes it. */
+.page::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 100%;
+  width: var(--spine, 15px); height: var(--spine, 15px);
+  background: linear-gradient(to top right, transparent calc(50% - 1.6px), var(--cover) calc(50% - 1.6px),
+              var(--cover) calc(50% + 1.6px), transparent calc(50% + 1.6px));
+  pointer-events: none;
+}
 
 .page::before {  /* the binding */
   content: "";
@@ -1016,10 +1029,13 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   background-color: var(--cover);
   color: hsl(var(--paper-hue) 30% 94%);
   display: flex; flex-direction: column; align-items: center; text-align: center;
-  min-height: min(82vh, 860px);
+  min-height: min(82vh, 860px);   /* until it's matched to the writing page's height (app.js) */
   padding: 56px 32px 26px;
 }
-.cover-logo { width: 150px; height: 150px; border-radius: 30px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+.cover-logo {   /* the logo in the theme's color, with a white ring so it stands out on the cover */
+  width: 150px; height: 150px; border-radius: 30px; flex: none;
+  box-shadow: 0 0 0 2px hsl(0 0% 100% / 0.85), 0 8px 24px rgba(0, 0, 0, 0.3);
+}
 .cover-name {
   font-family: var(--hand); font-weight: 500; line-height: 1.1; word-spacing: 0.25em;
   font-size: clamp(2.4rem, 6vw, 3.4rem); margin: 22px 0 0;
@@ -1044,7 +1060,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .book.locked .header-actions > *, .book.locked .menu-btn { opacity: 0.35; pointer-events: none; }
 .book.locked .book-footer { display: none; }   /* the cover carries its own links */
 @media (max-width: 640px) {
-  .cover-view { padding: 40px 18px 20px; min-height: 76vh; }
+  .cover-view { padding: 40px 18px 20px; }
   .cover-logo { width: 116px; height: 116px; border-radius: 24px; }
   .cover-view .vault-card { padding: 22px 20px 18px; }
 }
@@ -1132,7 +1148,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   padding: 40px 40px 28px;
   box-shadow: 0 1px 2px var(--shadow), 0 18px 48px -18px var(--shadow);
 }
-:is(.vault, .cover-view) .vault-card.page::before { content: none; }
+:is(.vault, .cover-view) .vault-card.page::before, :is(.vault, .cover-view) .vault-card.page::after { content: none; }
 :is(.vault, .cover-view) .vault-card input, :is(.vault, .cover-view) .vault-card button { font-family: inherit; }
 :is(.vault, .cover-view) .vault-card input[type="password"], :is(.vault, .cover-view) .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
 :is(.vault, .cover-view) .vault-card button { border-radius: 8px; }
@@ -1296,6 +1312,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
       8px 8px 0 1px var(--cover), 0 1px 2px var(--shadow), 10px 18px 36px -10px var(--shadow);
   }
   .page::before { width: 16px; }
+  .page { --spine: 9px; }   /* the slimmer book's cover sits 8px out */
   .book { --book-edge: 9px; }
   .book-header { border-radius: 12px; flex-wrap: wrap; position: relative; row-gap: 2px; }
   .book-header.menu-open { z-index: 25; }   /* only while its menu is open, so turning pages still pass over the header */
