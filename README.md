@@ -22,12 +22,12 @@ Shortcut: **Ctrl+Enter** does the same as **Finish & reflect**.
 Your journal is encrypted. Nothing you write can be read from the disk without your passphrase.
 
 - **First start:** you choose a passphrase (at least 8 characters; a short phrase works well). The app then shows a **recovery key** like `NW4Y-6D2B-A76F-EMNN-9PBZ-GSDZ`. **Write it down or save it in a password manager.** It's the only way back in if you forget your passphrase; nobody else can recover your journal. (If you had entries from before encryption, they're imported, checked, and the old unencrypted copies deleted at this point.)
-- **Unlocking:** each time you start the app, it opens on the lock screen. Enter your passphrase.
+- **Unlocking:** each time you start the app, it opens on the journal's **cover**: the header (its buttons grayed out until you unlock), then a page in your color theme's cover color with the logo, the app's name and a rounded passphrase box. Enter your passphrase (or use a passkey) and the cover turns away like a page.
 - **Locking:** click the **padlock** next to ⚙ to lock straight away. The journal also locks after a period without activity (*Settings → Lock the journal after*, 30 minutes by default) and whenever the app is closed. Locking clears everything from the page.
 - **Forgot your passphrase?** On the lock screen, click **Forgot your passphrase?**, enter your recovery key (capitals and dashes don't matter) and choose a new passphrase.
 - **Changing your passphrase, or getting a new recovery key:** *Settings → Passphrase*. A new recovery key replaces the old one.
 - After 10 wrong tries in a row, unlocking pauses for 15 minutes.
-- **Passkeys (fingerprint, face or device PIN):** *Settings → Security & Data → Passkeys → Add a passkey* (you confirm with your passphrase). From then on the lock screen offers **Unlock with passkey**. Add one per device, or one that syncs (Apple, Google or a password manager). Your passphrase and recovery key keep working; **Remove** stops a passkey unlocking the journal. It needs a browser and device that support the passkey *PRF* feature (recent Chrome, Edge, Safari or Firefox, and most phones); if one doesn't, the app says so and you carry on with the passphrase. Passkeys belong to the site's address, so they only work on that domain (welllived.app, inhissteps.app, or `localhost` for test copies).
+- **Passkeys (fingerprint, face or device PIN):** *Settings → Security & Data → Passkeys → Add a passkey* (you confirm with your passphrase). From then on, opening the journal on a device where you've added or used the passkey asks for it straight away (not right after you press the padlock, and not on devices that don't have it, which show an **Unlock with passkey** button instead). Cancel the prompt to type your passphrase. Add one per device, or one that syncs (Apple, Google or a password manager). Your passphrase and recovery key keep working; **Remove** stops a passkey unlocking the journal. It needs a browser and device that support the passkey *PRF* feature (recent Chrome, Edge, Safari or Firefox, and most phones); if one doesn't, the app says so and you carry on with the passphrase. Passkeys belong to the site's address, so they only work on that domain (welllived.app, inhissteps.app, or `localhost` for test copies).
 
 How it works, briefly: a random key encrypts every entry (AES-256-GCM); that key is itself stored only encrypted, once with your passphrase (via scrypt), once with your recovery key, and once for each passkey (with a secret only that passkey can produce, through the WebAuthn PRF extension; the server never stores the secret). So changing your passphrase is instant. On the web version, each person has their own key, locked by their own passphrase.
 
@@ -105,6 +105,8 @@ After editing an entry, the old reflection stays. Click **Reflect again** if you
 **Tuning the reflections:** edit `editions/philosophy/prompts/reflection.md` in Notepad. Changes apply to the next reflection; no restart is needed. The note shown when an entry suggests real distress is in `prompts/support_note.md`.
 
 **Cost:** each reflection costs roughly 2–5 cents of API credit at the default *Deep* setting. *Settings → Reflection depth* trades depth for speed and cost.
+
+Reflections come in two or three short paragraphs, in the same size as your entry (*Text size* in Settings → Theme). Quotations show in italics, and the books and writers a reflection draws on are bolded where they're named (e.g. **Philippians 4:6**, **Brother Lawrence**), matching the sources listed below it.
 
 ### Quotes and links
 
@@ -217,6 +219,7 @@ Your personal choices (name, journal name, day/evening, color, photo, draft savi
 | `api_retries` | Automatic retries when a Claude request fails | `2` |
 | `theme` | Day or evening: `day`, `evening` or `auto` | `day` |
 | `colour_theme` | `lake`, `walnut`, `sage`, `amber`, `claret`, `lavender`, `sea-glass` or `graphite` | `lake` |
+| `text_size` | Size of your entries and their reflections (Settings → Theme → *Text size*): `small`, `medium`, `large` or `xlarge` | `medium` |
 | `background_photo` | Background photo behind the journal (off: a deep shade of the color theme) | `true` |
 | `photo_blur` | Photo blur in pixels, 0–30 | `3` |
 | `photo_visibility` | How clearly the photo shows through, 0–100 (%) | `50` |

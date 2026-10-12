@@ -34,10 +34,6 @@
     "cite_html": "Psalm 139:23 <cite>(NIV)</cite>",
     "credit": "The verse on the welcome page is from the Holy Bible, New International Version® (NIV®), copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide."
   },
-  "passphrase_quote": {
-    "text": "“But when you pray, go into your inner room, shut your door, and pray to your Father, who is unseen. And your Father, who sees what is done in secret, will reward you.”",
-    "cite_html": "Jesus, in Matthew 6:6 <cite>(BSB)</cite>"
-  },
   "credit": {"one": "shekel", "many": "shekels"},
   "invite_line": "Invite a friend",
   "voices_label": "writers",

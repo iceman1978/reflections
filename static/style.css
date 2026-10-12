@@ -76,6 +76,7 @@
   --serif: "EB Garamond", Georgia, "Times New Roman", serif;
   --hand: "Homemade Apple", "Segoe Script", "Bradley Hand", cursive;
   --lh: 2rem;               /* one notebook line */
+  --text: 1.2rem;           /* entries and reflections (Settings → Theme → Text size) */
 }
 
 /* ---- Evening (chosen, or automatic when the computer is in dark mode) ----
@@ -402,7 +403,7 @@ textarea {
   resize: vertical;
   padding: 0;
   font: inherit;
-  font-size: 1.2rem;
+  font-size: var(--text);
   line-height: var(--lh);
   color: var(--ink);
   caret-color: var(--accent);
@@ -517,9 +518,12 @@ button.prompt-btn.nudge-glow {
   border: 1px solid var(--rule);
   border-radius: 4px;
 }
+html[data-text-size="small"] { --text: 1.05rem; --lh: 1.8rem; }
+html[data-text-size="large"] { --text: 1.35rem; --lh: 2.25rem; }
+html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .entry-text {
   white-space: pre-wrap;
-  font-size: 1.2rem;
+  font-size: var(--text);
   line-height: var(--lh);
   background-image: linear-gradient(transparent calc(var(--lh) - 1px), var(--line) calc(var(--lh) - 1px));
   background-size: 100% var(--lh);
@@ -534,11 +538,13 @@ button.prompt-btn.nudge-glow {
   border-left: 3px solid var(--accent);
   border-radius: 0 8px 8px 0;
   box-shadow: inset 8px 0 14px -10px rgba(0, 0, 0, 0.12);
-  font-size: 1.05rem;
+  font-size: var(--text);        /* the same size as the entry */
   line-height: 1.7;
   animation: fade-in 0.5s ease-out;
 }
-.insight p { margin: 0 0 12px; }
+.insight p { margin: 0 0 1em; }
+.insight em { font-style: italic; }                        /* quotations */
+.insight strong { font-weight: 600; }                      /* the works it draws on */
 /* Claude's closing question: the reflection's own font and size, in italic and the theme colour. */
 .question { margin: 18px 0 8px; font-family: var(--serif); font-style: italic; font-size: inherit; line-height: 1.6; color: var(--accent); }
 .question::before {
@@ -557,7 +563,18 @@ button.prompt-btn.nudge-glow {
 .citations li { margin: 2px 0; }
 .citations a { font-style: normal; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .reflection-footer { display: flex; justify-content: flex-end; margin-top: 6px; }
-.reflection-working { display: flex; align-items: center; gap: 12px; color: var(--muted); font-style: italic; }
+/* While Claude writes the reflection: the whole panel breathes, so it's
+   obvious something is happening, even after a long entry. */
+.reflection-working {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 8px;
+  color: var(--accent); font-style: italic; font-size: 1.02em;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); }
+  50% { opacity: 1; box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 14%, transparent); }
+}
 .reflection-missing p { margin: 0 0 12px; }
 .support-note {
   background: var(--field);
@@ -994,28 +1011,44 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .info-tabs a:hover { color: var(--ink); }
 .info-tabs a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
 @media (max-width: 640px) { .info-tabs a { padding: 6px 8px; font-size: 0.95rem; } }
-/* The quote above the passphrase card: like the welcome page's, in the theme's
-   blue, straight on the background. A soft paper-coloured halo keeps it
-   readable when a background photo is behind it. */
-/* Inside the white card, above "Secret Passphrase", so it's easy to read on any photo. */
-.vault-quote {
-  margin: 0 0 22px;
-  padding: 0 0 18px;
-  border-bottom: 1px solid var(--rule);
-  color: var(--accent);
+/* ---- The journal's cover (locked): a page in the theme's cover color ---- */
+.cover-view {
+  background-color: var(--cover);
+  color: hsl(var(--paper-hue) 30% 94%);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  min-height: min(82vh, 860px);
+  padding: 56px 32px 26px;
 }
-.vault-quote blockquote {
-  margin: 0;
-  padding-left: 16px;
-  border-left: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  font-family: var(--hand);
-  font-size: 1.3rem;
-  line-height: 1.45;
+.cover-logo { width: 150px; height: 150px; border-radius: 30px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); }
+.cover-name {
+  font-family: var(--hand); font-weight: 500; line-height: 1.1; word-spacing: 0.25em;
+  font-size: clamp(2.4rem, 6vw, 3.4rem); margin: 22px 0 0;
 }
-.vault-quote figcaption { margin: 6px 0 0 18px; font-size: 0.85rem; color: var(--muted); }
+.cover-name.long-name { font-size: clamp(2rem, 4.6vw, 2.6rem); }
+.cover-tagline {
+  margin: 12px 0 30px; font-family: var(--serif); font-size: 0.95rem;
+  letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.75;
+}
+.cover-slot { width: 100%; display: flex; justify-content: center; }
+.cover-view .vault-card {
+  max-width: 430px; text-align: left; color: var(--ink);
+  background: var(--page); background-image: none; border-radius: 16px;
+  padding: 26px 30px 22px; box-shadow: 0 12px 34px rgba(0, 0, 0, 0.32);
+}
+.cover-view .vault-card input[type="password"],
+.cover-view .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
+.cover-foot { margin-top: auto; padding-top: 34px; }
+.cover-view .vault-footer { color: inherit; opacity: 0.7; margin: 0; }
+.cover-view .vault-footer a { color: inherit; }
+/* While locked, the header's buttons are there but grayed out. */
+.book.locked .header-actions > *, .book.locked .menu-btn { opacity: 0.35; pointer-events: none; }
+.book.locked .book-footer { display: none; }   /* the cover carries its own links */
 @media (max-width: 640px) {
-  .vault-quote blockquote { font-size: 1.15rem; }
+  .cover-view { padding: 40px 18px 20px; min-height: 76vh; }
+  .cover-logo { width: 116px; height: 116px; border-radius: 24px; }
+  .cover-view .vault-card { padding: 22px 20px 18px; }
 }
+
 .vault-footer { margin: 18px 0 0; text-align: center; font-size: 0.85rem; }
 
 /* ---- Welcome page (signed out, web version): story left, sign-in right ---- */
@@ -1088,7 +1121,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .landing-quote figcaption { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
 /* The lock-screen card (welcome, passphrase, recovery): a plain, modern card
    in a sans-serif, not the notebook page. */
-.vault .vault-card.page {
+:is(.vault, .cover-view) .vault-card.page {
   --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Roboto, Arial, sans-serif;
   font-family: var(--sans);
   font-size: 1.05rem;
@@ -1099,11 +1132,11 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   padding: 40px 40px 28px;
   box-shadow: 0 1px 2px var(--shadow), 0 18px 48px -18px var(--shadow);
 }
-.vault .vault-card.page::before { content: none; }
-.vault .vault-card input, .vault .vault-card button { font-family: inherit; }
-.vault .vault-card input[type="password"], .vault .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
-.vault .vault-card button { border-radius: 8px; }
-.vault .vault-title {
+:is(.vault, .cover-view) .vault-card.page::before { content: none; }
+:is(.vault, .cover-view) .vault-card input, :is(.vault, .cover-view) .vault-card button { font-family: inherit; }
+:is(.vault, .cover-view) .vault-card input[type="password"], :is(.vault, .cover-view) .vault-card input[type="text"] { border-radius: 8px; padding: 10px 12px; }
+:is(.vault, .cover-view) .vault-card button { border-radius: 8px; }
+:is(.vault, .cover-view) .vault-title {
   font-family: var(--sans);
   font-weight: 600;
   font-size: 1.75rem;
@@ -1135,7 +1168,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .vault .vault-footer { font-size: 0.9rem; }
 
 @media (max-width: 640px) {
-  .vault .vault-card.page { padding: 28px 22px 20px; box-shadow: 0 10px 30px -14px var(--shadow); }
+  :is(.vault, .cover-view) .vault-card.page { padding: 28px 22px 20px; box-shadow: 0 10px 30px -14px var(--shadow); }
 }
 
 @media (max-width: 860px) {
@@ -1264,7 +1297,8 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   }
   .page::before { width: 16px; }
   .book { --book-edge: 9px; }
-  .book-header { border-radius: 12px; flex-wrap: wrap; position: relative; z-index: 25; row-gap: 2px; }   /* its menu opens over the page */
+  .book-header { border-radius: 12px; flex-wrap: wrap; position: relative; row-gap: 2px; }
+  .book-header.menu-open { z-index: 25; }   /* only while its menu is open, so turning pages still pass over the header */
   .stats { text-align: left; flex-basis: 100%; order: 3; }
   /* The buttons fold into a menu: logo and name, ☰ on the right; entries and streak below. */
   .menu-btn { display: inline-flex; align-items: center; padding: 6px; }

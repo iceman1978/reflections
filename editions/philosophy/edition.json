@@ -27,10 +27,6 @@
     "text": "“The unexamined life is not worth living.”",
     "cite_html": "Socrates, in Plato’s <cite>Apology</cite>"
   },
-  "passphrase_quote": {
-    "text": "“Thought and speech are the same thing, except that what we call thought is a silent dialogue of the soul with itself, taking place without the voice.”",
-    "cite_html": "The Eleatic Visitor, in Plato’s <cite>Sophist</cite>"
-  },
   "credit": {"one": "credit", "many": "credits"},
   "invite_line": "Invite a fellow thinker",
   "voices_label": "thinkers",

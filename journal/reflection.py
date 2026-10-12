@@ -133,8 +133,9 @@ def _schema():
             },
             "insight": {
                 "type": "string",
-                "description": "The insight, 120-250 words. Where a quote belongs, write its "
-                               "marker, e.g. [[q1]], instead of the quoted words.",
+                "description": "The insight, 120-250 words, in 2 or 3 short paragraphs separated by a "
+                               "blank line. Where a quote belongs, write its marker, e.g. [[q1]], instead "
+                               "of the quoted words.",
             },
             "question": {"type": "string", "description": "One thought-provoking question."},
             "quotes": {

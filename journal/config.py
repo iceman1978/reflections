@@ -54,7 +54,7 @@ PROMPTS_PER_DAY = int(os.environ.get("PROMPTS_PER_DAY", "10")) if HOSTED else 0
 
 # Each person's own choices (stored with their account). Everything else in
 # DEFAULTS is a setting for the whole app.
-PREF_KEYS = ("user_name", "journal_name", "theme", "colour_theme", "background_photo", "photo_blur",
+PREF_KEYS = ("user_name", "journal_name", "theme", "colour_theme", "text_size", "background_photo", "photo_blur",
              "photo_visibility", "lock_minutes", "draft_autosave_seconds")
 
 DEFAULTS = {
@@ -72,6 +72,7 @@ DEFAULTS = {
     "api_retries": 2,
     "theme": "day",
     "colour_theme": EDITION.get("default_colour_theme", "lake"),
+    "text_size": "medium",          # entries and reflections: small, medium, large, xlarge
     "background_photo": True,
     "photo_blur": 3,          # pixels
     "photo_visibility": 50,   # percent; lower = more veiled
@@ -193,6 +194,7 @@ VALIDATORS = {
     "api_retries": _int_in(0, 5),
     "theme": _choice("auto", "day", "evening"),
     "colour_theme": _choice(*[key for key, _ in COLOUR_THEMES]),
+    "text_size": _choice("small", "medium", "large", "xlarge"),
     "background_photo": bool,
     "photo_blur": _int_in(0, 30),
     "photo_visibility": _int_in(0, 100),

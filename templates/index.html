@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="{{ theme }}" data-palette="{{ colour_theme }}" data-photo="{{ 'on' if background_photo else 'off' }}"
+<html lang="en" data-theme="{{ theme }}" data-palette="{{ colour_theme }}" data-text-size="{{ text_size }}" data-photo="{{ 'on' if background_photo else 'off' }}"
       style="--photo-blur: {{ photo_blur | int }}px; --veil-strength: {{ (100 - photo_visibility | int) / 100 }}">
 <head>
   <meta charset="utf-8">
@@ -64,14 +64,9 @@
     {% endif %}
 
 
-    <div class="vault-card page">
-      <!-- On the Secret Passphrase screens, above the heading -->
-      {% if edition.passphrase_quote %}
-      <figure id="vault-quote" class="vault-quote" hidden>
-        <blockquote>{{ edition.passphrase_quote.text }}</blockquote>
-        <figcaption>{{ edition.passphrase_quote.cite_html | safe }}</figcaption>
-      </figure>
-      {% endif %}
+    <!-- The passphrase card: on the welcome page when signed out; moved onto the
+         journal's cover (#cover-view) for the passphrase screens. -->
+    <div id="vault-card" class="vault-card page">
       <h1 id="vault-title" class="vault-title">{{ app_name }}</h1>
 
       <p id="vault-offline" class="vault-error" hidden>{% if hosted %}Can't reach {{ app_name }} right now. Check your internet connection and reload the page.{% else %}Can't reach the journal app. Is the start.bat window open?{% endif %}</p>
@@ -147,7 +142,7 @@
         </div>
       </form>
 
-      <p class="vault-footer subtle"><a href="/sources">Sources</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a><br><span class="copyright">{{ copyright }}</span></p>
+      <p id="vault-footer" class="vault-footer subtle"><a href="/sources">Sources</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a><br><span class="copyright">{{ copyright }}</span></p>
     </div>
   </div>
 
@@ -207,6 +202,18 @@
     </aside>
 
     <!-- Writing a new entry -->
+    <!-- The journal's cover, shown while it's locked: logo, name, and the
+         passphrase card. Unlocking turns it away like a page. -->
+    <section id="cover-view" class="page cover-view" hidden>
+      <div class="cover-brand">
+        {% if logo_url %}<img class="cover-logo" src="{{ logo_url }}" alt="">{% endif %}
+        <p class="cover-name{% if app_name | length > 14 %} long-name{% endif %}">{{ app_name }}</p>
+        {% if edition.tagline %}<p class="cover-tagline">{{ edition.tagline }}</p>{% endif %}
+      </div>
+      <div id="cover-slot" class="cover-slot"></div>
+      <div id="cover-foot" class="cover-foot"></div>
+    </section>
+
     <section id="write-view" class="page">
       <nav class="entry-nav write-nav" aria-label="Browse entries">
         <button id="write-older-btn" type="button" class="nav-btn" title="Your latest entry (← key)">‹ Older</button>
@@ -381,6 +388,15 @@
               <option value="evening">Evening</option>
               <option value="auto">Automatic (follows your device)</option>
             </select>
+          </label>
+          <label>Text size
+            <select name="text_size">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="xlarge">Extra large</option>
+            </select>
+            <span class="hint">For your entries and their reflections.</span>
           </label>
           <fieldset class="colour-field">
             <legend>Color</legend>

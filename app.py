@@ -227,6 +227,7 @@ def index():
         timezone=settings["timezone"],
         theme=prefs["theme"],
         colour_theme=prefs["colour_theme"],
+        text_size=prefs["text_size"],
         colour_themes=config.COLOUR_THEMES,
         lock_choices=config.LOCK_MINUTE_CHOICES,
         background_photo=prefs["background_photo"],

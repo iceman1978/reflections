@@ -128,9 +128,10 @@
 
   // ---- Look: theme and today's photo ------------------------------------
 
-  function applyTheme(theme, palette) {
+  function applyTheme(theme, palette, textSize) {
     if (theme) document.documentElement.dataset.theme = theme;
     if (palette) document.documentElement.dataset.palette = palette;
+    if (textSize) document.documentElement.dataset.textSize = textSize;
   }
 
   // The look as last saved. Settings previews changes live, and Back without
@@ -138,6 +139,7 @@
   const savedLook = {
     theme: document.documentElement.dataset.theme,
     palette: document.documentElement.dataset.palette,
+    textSize: document.documentElement.dataset.textSize,
     blur: CFG.photoBlur,
     visibility: CFG.photoVisibility,
     photo: document.documentElement.dataset.photo,  // "on" / "off"
@@ -150,7 +152,7 @@
   }
 
   function restoreSavedLook() {
-    applyTheme(savedLook.theme, savedLook.palette);
+    applyTheme(savedLook.theme, savedLook.palette, savedLook.textSize);
     applyPhotoLook(savedLook.blur, savedLook.visibility);
     document.documentElement.dataset.photo = savedLook.photo;
     $("backdrop").style.visibility = "";  // the saved photo setting decides via loadBackground
@@ -170,7 +172,7 @@
   function previewLook() {
     const form = $("settings-form");
     const picked = form.querySelector('input[name="colour_theme"]:checked');
-    applyTheme(form.elements.theme.value, picked && picked.value);
+    applyTheme(form.elements.theme.value, picked && picked.value, form.elements.text_size.value);
     applyPhotoLook(Number(form.elements.photo_blur.value), Number(form.elements.photo_visibility.value));
     const photoOn = form.elements.background_photo.checked;
     $("backdrop").style.visibility = photoOn ? "" : "hidden";
@@ -286,7 +288,9 @@
     setTimeout(done, 1200);                                     // in case no animation runs
   }
 
-  function showEntry(entry) {
+  // keepScroll: stay where the reader is (after Finish & reflect, so a long
+  // entry doesn't jump to the top while the reflection is being written).
+  function showEntry(entry, { keepScroll = false } = {}) {
     const switching = !state.current || state.current.id !== entry.id;
     const from = !$("entry-view").hidden ? $("entry-view") : $("write-view");
     const ghost = state.turn ? oldPageCopy(from) : null;   // the page as it was, before it changes
@@ -308,7 +312,7 @@
     renderReflection(entry);
     updateNav();
     syncCalendarTo(entry);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!keepScroll) window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   // ---- Older / Newer ----------------------------------------------------
@@ -681,7 +685,7 @@
     }
     if (done) {
       $("insight").replaceChildren(...entry.insight.split(/\n\s*\n/).map((t) => {
-        const p = document.createElement("p"); p.textContent = t.trim(); return p;
+        const p = document.createElement("p"); p.append(formatInsight(t.trim(), entry)); return p;
       }));
       $("question").textContent = entry.question || "";
       const ul = $("citations");
@@ -716,6 +720,46 @@
       if (entry.support_note) note.innerHTML = renderSimpleMarkdown(entry.support_note);
     }
     if (entry.reflecting) pollWhileReflecting(entry.id);
+  }
+
+  // A reflection paragraph, easier to scan: quotations in italics, and the
+  // works it draws on (from its sources list) in bold where they're named,
+  // e.g. "Philippians 4:6" or "Brother Lawrence". Built as nodes, never HTML.
+  function formatInsight(text, entry) {
+    const names = new Set();
+    for (const c of [...(entry.quotes || []), ...(entry.references || [])]) {
+      if (c.author) names.add(c.author);
+      if (c.title) names.add(c.title);
+    }
+    const escaped = [...names].filter((n) => n.length > 2).sort((a, b) => b.length - a.length)
+      .map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    // A name, optionally followed by chapter and verse ("Psalm 139:23-24").
+    const nameRe = escaped.length
+      ? new RegExp(`(?<![\\p{L}])(?:${escaped.join("|")})(?:\\s\\d+(?::\\d+(?:[-–]\\d+)?)?)?(?![\\p{L}])`, "gu")
+      : null;
+    const frag = document.createDocumentFragment();
+    const plain = (s) => {
+      if (!nameRe || !s) { frag.append(document.createTextNode(s)); return; }
+      let at = 0;
+      for (const m of s.matchAll(nameRe)) {
+        frag.append(document.createTextNode(s.slice(at, m.index)));
+        const b = document.createElement("strong");
+        b.textContent = m[0];
+        frag.append(b);
+        at = m.index + m[0].length;
+      }
+      frag.append(document.createTextNode(s.slice(at)));
+    };
+    let at = 0;
+    for (const m of text.matchAll(/“[^”]+”|"[^"]+"/g)) {         // quotations
+      plain(text.slice(at, m.index));
+      const em = document.createElement("em");
+      em.textContent = m[0];
+      frag.append(em);
+      at = m.index + m[0].length;
+    }
+    plain(text.slice(at));
+    return frag;
   }
 
   // A link that opens the source page scrolled to the quote, with it
@@ -1347,10 +1391,18 @@
       localClear();
       state.clientError = null;
       renderBanner();
-      showEntry(res.entry);
+      showEntry(res.entry, { keepScroll: true });
       refreshList();
       checkMilestone(before, res.entry);
       requestReflection(res.entry.id);  // the entry is already safely saved
+      // Once the page has settled (after the turn), bring the "Reflecting…"
+      // panel into view if it isn't already, so a long entry still shows it.
+      setTimeout(() => {
+        const w = $("reflection-working");
+        if (w.hidden) return;
+        const r = w.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > innerHeight) w.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 1100);
       loadBackground();                 // a new entry brings the next photo
     } catch (err) {
       state.clientError = `Couldn't save the entry: ${sentence(err.message)} ` +
@@ -1520,6 +1572,7 @@
       CFG.autosaveSeconds = res.settings.draft_autosave_seconds;
       savedLook.theme = res.settings.theme;
       savedLook.palette = res.settings.colour_theme;
+      savedLook.textSize = res.settings.text_size;
       savedLook.blur = res.settings.photo_blur;
       savedLook.visibility = res.settings.photo_visibility;
       const photoWas = savedLook.photo;
@@ -1660,6 +1713,7 @@
   // On a phone, the header's buttons live in a menu behind ☰.
   function setHeaderMenu(open) {
     $("header-actions").classList.toggle("open", open);
+    document.querySelector(".book-header").classList.toggle("menu-open", open);   // above the page, for the menu
     $("menu-btn").setAttribute("aria-expanded", String(open));
   }
   $("menu-btn").addEventListener("click", (e) => {
@@ -1676,7 +1730,7 @@
     leaveSettings();
   });
   // Preview look changes live (sliders update while dragging).
-  const LOOK_FIELDS = ["theme", "colour_theme", "background_photo", "photo_blur", "photo_visibility"];
+  const LOOK_FIELDS = ["theme", "colour_theme", "text_size", "background_photo", "photo_blur", "photo_visibility"];
   for (const type of ["change", "input"]) {
     $("settings-form").addEventListener(type, (e) => {
       if (LOOK_FIELDS.includes(e.target.name)) previewLook();
@@ -2223,9 +2277,39 @@
     recover: "Forgot Your Passphrase?",
   };
 
+  // Signed in but locked (or setting up), the journal shows its cover: the
+  // header (its buttons disabled) above a page in the theme's cover color,
+  // with the passphrase card on it. Signed out, the card is on the welcome page.
+  function setCover(on) {
+    const card = $("vault-card"), foot = $("vault-footer");
+    if (on) {
+      $("cover-slot").append(card);
+      $("cover-foot").append(foot);
+    } else {
+      $("vault").append(card);
+      card.append(foot);
+    }
+    $("vault").hidden = on;
+    $("book").hidden = !on;
+    $("book").classList.toggle("locked", on);
+    $("cover-view").hidden = !on;
+    if (on) {
+      for (const v of ["write", "entry", "settings"]) $(`${v}-view`).hidden = true;
+      $("past").hidden = true;
+      $("stats").replaceChildren();
+    }
+    for (const b of document.querySelectorAll("#header-actions button, #menu-btn")) b.disabled = on;
+    const coin = $("credit-coin");
+    if (coin && on) {                          // shown, but blank: the count comes with the unlocked journal
+      coin.hidden = false;
+      coin.classList.add("empty");
+      coin.querySelector(".coin").textContent = "";
+      coin.title = "Unlock your journal first";
+    }
+  }
+
   function showVaultPanel(name) {
-    $("vault").hidden = false;
-    $("book").hidden = true;
+    setCover(name !== "signin");
     for (const p of ["signin", "setup", "recovery", "unlock", "recover"]) {
       if ($(`vault-${p}`)) $(`vault-${p}`).hidden = p !== name;
     }
@@ -2235,7 +2319,6 @@
     $("vault").classList.toggle("landing", welcome);
     if ($("landing")) $("landing").hidden = !welcome;
     $("vault-title").textContent = VAULT_TITLES[name] || CFG.appName;
-    $("vault-quote").hidden = name !== "unlock" && name !== "setup";   // on the Secret Passphrase screens
     for (const el of document.querySelectorAll(".vault-error")) el.hidden = true;
     const first = $(`vault-${name}`).querySelector("input");
     if (first) first.focus();
@@ -2308,6 +2391,7 @@
   });
   $("recovery-done").addEventListener("click", () => startJournal());
   $("lock-btn").addEventListener("click", async () => {
+    try { sessionStorage.setItem("journal.justLocked", "1"); } catch (_) {}   // no passkey prompt straight back
     try { await api("POST", "/api/vault/lock"); } catch (_) {}
     state.unlocked = false;
     location.reload();
@@ -2472,7 +2556,9 @@
     }
   });
 
-  $("passkey-unlock-btn").addEventListener("click", async () => {
+  // auto: started by itself on opening (see boot) rather than by the button.
+  // Then a cancelled or unavailable prompt just leaves the passphrase box ready.
+  async function passkeyUnlock({ auto = false } = {}) {
     const btn = $("passkey-unlock-btn");
     btn.disabled = true;
     $("unlock-error").hidden = true;
@@ -2492,11 +2578,16 @@
       try { localStorage.setItem("journal.passkey", "1"); } catch (_) {}
       startJournal();
     } catch (err) {
-      vaultError("unlock-error", passkeyError(err, "The passkey didn't unlock the journal"));
+      if (auto && err && (err.name === "NotAllowedError" || err.name === "AbortError")) {
+        $("unlock-pw").focus();                      // cancelled, or no passkey here: type instead
+      } else {
+        vaultError("unlock-error", passkeyError(err, "The passkey didn't unlock the journal"));
+      }
     } finally {
       btn.disabled = false;
     }
-  });
+  }
+  $("passkey-unlock-btn").addEventListener("click", () => passkeyUnlock());
 
   // ---- Starting up --------------------------------------------------------
 
@@ -2513,8 +2604,20 @@
   let started = false;
   function startJournal() {
     state.unlocked = true;
+    const fromCover = !$("cover-view").hidden;
+    const ghost = fromCover ? oldPageCopy($("cover-view")) : null;   // the cover, to turn away
     $("vault").hidden = true;
     $("book").hidden = false;
+    if (fromCover) {
+      $("vault").append($("vault-card"));                    // off the cover, out of sight
+      $("vault-card").append($("vault-footer"));
+      $("cover-view").hidden = true;
+      $("book").classList.remove("locked");
+      for (const b of document.querySelectorAll("#header-actions button, #menu-btn")) b.disabled = false;
+      if ($("credit-coin")) { $("credit-coin").classList.remove("empty"); $("credit-coin").title = ""; }
+      showView("write");
+      turnPage($("write-view"), 1, ghost);                   // the cover turns away like a page
+    }
     if (started) return;
     started = true;
     restartAutosave();
@@ -2578,6 +2681,16 @@
     if (v.passkeys && passkeysPossible()) {
       $("passkey-unlock").hidden = false;
       $("passkey-unlock-btn").focus();   // the quickest way in, when there is one
+      // Ask for the passkey straight away, but only in a browser where it has
+      // been added or used (elsewhere the device would offer an unhelpful
+      // "use another device" prompt), and not right after pressing the padlock.
+      let usedHere = false, justLocked = false;
+      try {
+        usedHere = localStorage.getItem("journal.passkey") === "1";
+        justLocked = sessionStorage.getItem("journal.justLocked") === "1";
+        sessionStorage.removeItem("journal.justLocked");
+      } catch (_) { /* storage blocked: leave it to the button */ }
+      if (usedHere && !justLocked) setTimeout(() => passkeyUnlock({ auto: true }), 350);
     }
   })();
 })();
