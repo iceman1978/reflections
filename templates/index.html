@@ -51,7 +51,7 @@
         <li>
           {{ point_icon(point.icon) }}
           <div><strong>{{ point.title }}</strong>
-            <span>{{ point.text | replace("{works}", works_count) }}{% if point.link %}
+            <span>{{ point.text | replace("{works}", works_count) | safe }}{% if point.link %}
               <a href="{{ point.link.url }}">{{ point.link.text }}&nbsp;→</a>{% endif %}</span></div>
         </li>
         {% endfor %}

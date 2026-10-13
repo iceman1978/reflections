@@ -18,17 +18,17 @@
   "description": "A private journal for your daily quiet time, with a reflection from Scripture after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",
-  "lead": "A quiet place for a few honest lines each day, drawing on Christian wisdom.",
+  "lead": "A quiet place for reflection, drawing on deep Christian wisdom.",
   "points": [
-    {"icon": "calendar", "title": "A few honest lines are enough",
-     "text": "One small, true thought counts; the benefit comes from reflecting each day. A prompt is there when the page feels blank."},
+    {"icon": "calendar", "title": "A few lines are enough",
+     "text": "The benefit of journaling comes from reflecting each day. A prompt is there when the page feels blank."},
     {"icon": "book", "title": "A well-stocked library of Christian wisdom",
-     "text": "Reflections draw only on selected books of Scripture and classic devotional writers, from Augustine to Spurgeon, and tell you exactly where to find each passage.",
+     "text": "Reflections draw <em>only</em> on selected books of Scripture and classic devotional writers, and tell you exactly where to find each passage.",
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "sandal", "title": "Grow in His Steps",
-     "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favorites close."},
+     "text": "Every reflection ends with an honest question to carry through your day. Easily find favorite entries and passages."},
     {"icon": "lock", "title": "Private, and never used to train AI",
-     "text": "Entries are encrypted with a passphrase only you know. Your entry only goes to Claude to write your daily reflection, and isn’t used to train it.",
+     "text": "Entries are encrypted with a passphrase <em>only you know</em>. Your entry is only used to write your daily reflection, and isn’t used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "welcome_quote": {
