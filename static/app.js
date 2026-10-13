@@ -2857,7 +2857,6 @@
       state.passkeyInfo = { ...info, passkeys: res.passkeys };
       renderPasskeys(res.passkeys);
       out.textContent = "Passkey added. Next time, choose “Unlock with passkey”.";
-      try { localStorage.setItem("journal.passkey", "1"); } catch (_) {}
     } catch (err) {
       out.textContent = sentence(passkeyError(err, "Couldn't add the passkey."));
     } finally {
@@ -2865,9 +2864,8 @@
     }
   });
 
-  // auto: started by itself on opening (see boot) rather than by the button.
-  // Then a cancelled or unavailable prompt just leaves the passphrase box ready.
-  async function passkeyUnlock({ auto = false } = {}) {
+  // Only ever started by the "Unlock with passkey" button.
+  async function passkeyUnlock() {
     const btn = $("passkey-unlock-btn");
     btn.disabled = true;
     $("unlock-error").hidden = true;
@@ -2884,14 +2882,9 @@
       const secret = prf && prf.results ? prf.results.first : null;
       if (!secret) throw new Error("This device's passkey can't unlock the journal. Use your passphrase instead");
       await api("POST", "/api/vault/unlock-passkey", { credential_id: toB64url(got.rawId), prf: toB64url(secret) });
-      try { localStorage.setItem("journal.passkey", "1"); } catch (_) {}
       startJournal();
     } catch (err) {
-      if (auto && err && (err.name === "NotAllowedError" || err.name === "AbortError")) {
-        $("unlock-pw").focus();                      // cancelled, or no passkey here: type instead
-      } else {
-        vaultError("unlock-error", passkeyError(err, "The passkey didn't unlock the journal"));
-      }
+      vaultError("unlock-error", passkeyError(err, "The passkey didn't unlock the journal"));
     } finally {
       btn.disabled = false;
     }
@@ -2992,13 +2985,7 @@
     showVaultPanel("unlock");
     if (v.passkeys && passkeysPossible()) {
       $("passkey-unlock").hidden = false;
-      $("passkey-unlock-btn").focus();   // the quickest way in, when there is one
-      // Ask for the passkey straight away, but only in a browser where it has
-      // been added or used (elsewhere the device would offer an unhelpful
-      // "use another device" prompt). Not after the padlock: that doesn't reload the page.
-      let usedHere = false;
-      try { usedHere = localStorage.getItem("journal.passkey") === "1"; } catch (_) { /* storage blocked: leave it to the button */ }
-      if (usedHere) setTimeout(() => passkeyUnlock({ auto: true }), 350);
+      $("passkey-unlock-btn").focus();   // the quickest way in, when there is one (never asked for by itself)
     }
   })();
 })();
