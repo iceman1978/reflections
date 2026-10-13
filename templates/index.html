@@ -51,7 +51,8 @@
         <li>
           {{ point_icon(point.icon) }}
           <div><strong>{{ point.title }}</strong>
-            <span>{{ point.text }}</span></div>
+            <span>{{ point.text | replace("{works}", works_count) }}{% if point.link %}
+              <a href="{{ point.link.url }}">{{ point.link.text }}&nbsp;→</a>{% endif %}</span></div>
         </li>
         {% endfor %}
       </ul>
@@ -155,17 +156,28 @@
         <div id="journal-name" class="journal-name">{{ journal_name }}</div>
       </div>
       <div id="stats" class="stats" aria-live="polite"></div>
-      <!-- On a phone these four fold into a menu behind the ☰ button. -->
+      {% if hosted %}
+      <!-- Credits (Shekels in In His Steps): always in the header, never in the ☰ menu.
+           Clicking the coin says how many are left and when they come back. -->
+      <div class="credit-wrap">
+        <button id="credit-coin" class="credit-coin" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="credit-pop" hidden>
+          <span class="coin" aria-hidden="true"></span>
+        </button>
+        <div id="credit-pop" class="credit-pop" role="dialog" aria-labelledby="credit-pop-title" hidden>
+          <strong id="credit-pop-title"></strong>
+          <p id="credit-pop-text"></p>
+        </div>
+      </div>
+      {% endif %}
+      <!-- On a phone these fold into a menu behind the ☰ button. -->
       <button id="menu-btn" class="icon-btn menu-btn" aria-label="Menu" aria-expanded="false" aria-controls="header-actions">
         <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div id="header-actions" class="header-actions">
-        {% if hosted %}
-        <span id="credit-coin" class="credit-coin" role="img" hidden>
-          <span class="coin" aria-hidden="true"></span>
-          <span class="menu-label"></span>
-        </span>
-        {% endif %}
+        <button id="kept-btn" class="icon-btn lock-btn" title="Kept passages" aria-label="Kept passages">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><polygon points="12,2.8 14.8,8.7 21.3,9.6 16.6,14.1 17.8,20.6 12,17.5 6.2,20.6 7.4,14.1 2.7,9.6 9.2,8.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span class="menu-label">Kept passages</span>
+        </button>
         {% if hosted %}
         <button id="invite-btn" class="icon-btn lock-btn" title="Invite someone" aria-label="Invite someone">
           <!-- A giving hand: "hand-heart" from Lucide (lucide.dev, ISC licence) -->
@@ -219,7 +231,7 @@
 
     <section id="write-view" class="page">
       <nav class="entry-nav write-nav" aria-label="Browse entries">
-        <button id="write-older-btn" type="button" class="nav-btn" title="Your latest entry (← key)">‹ Older</button>
+        <button id="write-older-btn" type="button" class="nav-btn" title="Your latest entry (← or j)">‹ Older</button>
       </nav>
       <div class="entry-meta">
         <span id="today" class="entry-date"></span>
@@ -251,10 +263,16 @@
 
     <!-- Reading / editing a saved entry -->
     <section id="entry-view" class="page" hidden>
+      <!-- The cloth bookmark hanging from the top of the page: an outline until this
+           entry is a favorite, then solid in the theme's color. -->
+      <button id="bookmark-btn" class="page-ribbon" type="button" aria-pressed="false"
+              title="Add to favorites" aria-label="Add to favorites">
+        <svg viewBox="0 0 26 42" aria-hidden="true"><path d="M1.5 0V40.5L13 32.5L24.5 40.5V0"/></svg>
+      </button>
       <nav class="entry-nav" aria-label="Browse entries">
-        <button id="prev-btn" type="button" class="nav-btn" title="Older entry (← key)">‹ Older</button>
+        <button id="prev-btn" type="button" class="nav-btn" title="Older entry (← or j)">‹ Older</button>
         <span id="nav-pos" class="subtle"></span>
-        <button id="next-btn" type="button" class="nav-btn" title="Newer entry (→ key)">Newer ›</button>
+        <button id="next-btn" type="button" class="nav-btn" title="Newer entry (→ or k)">Newer ›</button>
       </nav>
       <div class="entry-meta">
         <span id="entry-date"></span>
@@ -262,8 +280,6 @@
       </div>
       <div class="title-row">
         <h1 id="entry-title" class="entry-title"></h1>
-        <button id="star-btn" class="star-btn" type="button" aria-pressed="false"
-                title="Add to favorites" aria-label="Add to favorites">☆</button>
       </div>
       <div id="entry-when-edit" class="when-edit" hidden>
         <label>Date <input id="entry-date-input" type="date"></label>
@@ -286,7 +302,6 @@
       <!-- Claude's reflection, like a note in the margin -->
       <aside id="reflection" class="reflection" hidden>
         <div id="reflection-working" class="reflection-working" hidden>
-          <span class="dot-pulse" aria-hidden="true"></span>
           <span>Reflecting on your entry… this usually takes 20–40 seconds.</span>
         </div>
         <div id="reflection-missing" class="reflection-missing" hidden>
@@ -303,6 +318,16 @@
           </div>
         </div>
       </aside>
+    </section>
+
+    <!-- Kept passages: the quotations starred in reflections, by writer -->
+    <section id="kept-view" class="page" hidden>
+      <nav class="entry-nav write-nav" aria-label="Back">
+        <button id="kept-back-btn" type="button" class="nav-btn">‹ Back to your journal</button>
+      </nav>
+      <h1 class="prompt-heading">Kept passages</h1>
+      <p id="kept-intro" class="subtle kept-intro"></p>
+      <div id="kept-list" class="kept-list"></div>
     </section>
 
     <!-- Settings -->
@@ -524,7 +549,7 @@
         <h2>Past entries</h2>
         <div class="filter" role="group" aria-label="Show">
           <button id="filter-all" type="button" class="filter-btn" aria-pressed="true">All</button>
-          <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false">★ Favorites</button>
+          <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false"><span class="fav-mark" aria-hidden="true"></span>Favorites</button>
           <button id="calendar-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
                   aria-haspopup="dialog" aria-controls="calendar">Calendar</button>
           {% if themes_enabled %}<button id="themes-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"

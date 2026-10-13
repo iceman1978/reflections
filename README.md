@@ -44,8 +44,8 @@ Type a title above your entry if you like. If you leave it blank, Claude suggest
 ## Browsing past entries
 
 - **Older / Newer** at the top of an entry steps through your entries in date order. While reading, the **←** and **→** keys do the same, and on a phone or tablet you can **swipe**: right for Older, left for Newer. Going Older from your first entry gives a little bump (there's nothing before it); going Newer from your latest entry turns to a fresh writing page. From an empty writing page, **‹ Older** (or swiping right) turns back to your latest entry; once you've started writing, it won't turn away from your draft.
-- Above the list of past entries are three filters: **All**, **★ Favorites** and **Calendar**.
-  - **★ Favorites** shows only favorites (click it again to turn it off).
+- Above the list of past entries are three filters: **All**, **Favorites** and **Calendar**.
+  - **Favorites** shows only favorites (click it again to turn it off).
   - **Calendar** pops up a month view that shades the days you wrote. Use it to filter by date:
     - click the **month name** (or **Whole month**) for that whole month;
     - click a **day** for just that day, then click a **second day** to stretch it into a range (e.g. a week);
@@ -92,7 +92,15 @@ The two apps share most themes (work, family, grief & loss, gratitude…), each 
 
 ## Favorites
 
-While reading a past entry, click the **☆** next to its title to make it a favorite (★); click again to remove it. The star is hidden while you're editing. Above the list of past entries, choose **★ Favorites** to see only your favorites, or **All** to see everything; the app remembers your choice. Favorites are marked in the *Favorite* column of exports. Starring doesn't change an entry's *Last Updated* time.
+While reading a past entry, click the **cloth bookmark** hanging from the top right of its page to make it a favorite: the ribbon is an outline until then, and solid in your theme's color afterwards. Click again to remove it. The ribbon is hidden while you're editing. Favorites carry a small ribbon in Past entries and on the calendar; above the list, choose **Favorites** to see only those, or **All** to see everything; the app remembers your choice. Favorites are marked in the *Favorite* column of exports. Bookmarking doesn't change an entry's *Last Updated* time.
+
+## Kept passages
+
+When a reflection quotes a source word for word, a small **star** follows the quotation. Click it to keep the passage (the star turns gold); click again to let it go. Only checked, word-for-word quotations have a star: paraphrased ideas, and your own words quoted back to you, don't.
+
+The **star in the header** (left of the giving hand; *Kept passages* in the phone menu) opens the **Kept passages** page: everything you've kept, grouped by writer, the writers you've kept most from first. Books of the Bible come first under *Scripture*, a section per book. Each passage links to the source (*Read the passage*) and to every entry whose reflection quoted it (*Came up in…*), and each writer has a *More from…* link to their works on the Sources page. Clicking a passage's star there lets it go.
+
+Kept passages are stored as their own encrypted list (the `kept` table in `data/journal.db`, `journal/kept.py`), so a passage stays kept if an entry that quoted it is deleted. Wiping the journal removes them. They aren't in the CSV export.
 
 ## Reflections
 
@@ -323,7 +331,7 @@ Add (or remove) their address in **both** places: Google's *Test users*, and `AL
 
 ### Credits (Shekels)
 
-On the web, each reflection uses one **credit** (called **Shekels** in In His Steps: `"credit"` in each `edition.json`). Everyone gets `REFLECTIONS_PER_DAY` of them a day (3 by default), back to the full number each day. A small gold coin at the start of the header's buttons (coin · giving hand · feedback · settings · padlock) shows how many are left; hovering says *"2 reflections left"* (and at zero it turns gray). The coin says nothing about how credits come back, so it won't need to change when that does (daily now; a monthly allowance or top-ups later). Settings → Basic and the Terms page describe them too. Writing prompts have their own daily allowance (`PROMPTS_PER_DAY`, 10) and aren't counted in credits. Your own computer has no limits, so it shows no coin.
+On the web, each reflection uses one **credit** (called **Shekels** in In His Steps: `"credit"` in each `edition.json`). Everyone gets `REFLECTIONS_PER_DAY` of them a day (3 by default), back to the full number each day. A small gold coin in the header, a little apart from the buttons (giving hand · feedback · settings · padlock) and always shown (on a phone it stays beside the ☰ menu, not inside it), shows how many are left. Clicking it opens a small pop-up with the count and when they come back (midnight in the journal's time zone, shown in your own time); hovering says *"2 reflections left"* (and at zero it turns gray). The coin says nothing about how credits come back, so it won't need to change when that does (daily now; a monthly allowance or top-ups later). Settings → Basic and the Terms page describe them too. Writing prompts have their own daily allowance (`PROMPTS_PER_DAY`, 10) and aren't counted in credits. Your own computer has no limits, so it shows no coin.
 
 This is the groundwork for paying for reflections later (a small free monthly allowance, top-up credits, or a monthly subscription).
 

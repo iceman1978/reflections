@@ -257,7 +257,19 @@ a { color: var(--accent); }
 /* The header's buttons: in a row on wider screens; on a phone, a menu behind ☰ (see below). */
 .menu-btn { display: none; }
 /* Credits (Shekels in In His Steps): a gold coin with the number left today. */
-.credit-coin { display: inline-flex; align-items: center; padding: 4px; margin-right: 8px; cursor: default; }   /* a little apart: it's status, not a button */
+.credit-wrap { position: relative; display: inline-flex; margin-right: 8px; }   /* a little apart from the buttons */
+.credit-coin, .credit-coin:hover:not(:disabled) { display: inline-flex; align-items: center; padding: 4px; border: none; background: transparent; border-radius: 50%; }
+.credit-coin[hidden] { display: none; }
+.credit-coin:hover:not(:disabled) .coin { filter: brightness(1.08); }
+/* What the coin says when clicked: how many are left, and when they come back. */
+.credit-pop {
+  position: absolute; top: calc(100% + 10px); right: -6px; z-index: 30; width: min(280px, calc(100vw - 32px));
+  padding: 14px 16px; border-radius: 12px; background: var(--page); color: var(--ink); text-align: left;
+  box-shadow: 0 10px 28px var(--shadow), 0 0 0 1px var(--rule); animation: pop-in 0.15s ease-out;
+}
+.credit-pop strong { display: block; font-family: var(--serif); font-size: 1.05rem; }
+.credit-pop p { margin: 6px 0 0; font-size: 0.9rem; line-height: 1.5; color: var(--muted); }
+.book-header.coin-open { position: relative; z-index: 25; }   /* above the page while the pop-up is open */
 .credit-coin .coin {
   display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
   font-family: var(--serif); font-weight: 700; font-size: 0.8rem; line-height: 1; color: #6b4a12;
@@ -511,16 +523,25 @@ button.prompt-btn.nudge-glow {
 .entry-title { flex: 1; font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--ink); margin: 0 0 10px; line-height: 1.3; }
 .entry-title.untitled { color: var(--muted); font-weight: 400; }
 .entry-title.plain-title { font-family: var(--serif); font-size: 1.8rem; line-height: 1.25; }   /* titles with all-capital words */
-.star-btn {
-  border: none;
-  background: transparent;
-  font-size: 1.7rem;
-  line-height: 1;
-  padding: 2px 4px;
-  color: var(--muted);
+/* Favorite entries: a cloth bookmark hanging from the top of the page. An
+   outline until the entry is a favorite, then solid in the theme's color. */
+.page-ribbon, .page-ribbon:hover:not(:disabled) {
+  position: absolute; top: 0; right: 22px; z-index: 1;
+  padding: 0 7px 8px; border: none; border-radius: 0; background: transparent; line-height: 0;
 }
-.star-btn:hover:not(:disabled) { color: var(--gold); background: transparent; transform: scale(1.12); }
-.star-btn[aria-pressed="true"] { color: var(--gold); }
+.page-ribbon svg { width: 26px; height: 42px; display: block; overflow: visible; transition: transform 0.15s ease-out; transform-origin: top center; }
+.page-ribbon path { fill: transparent; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; opacity: 0.55; transition: fill 0.15s, opacity 0.15s; }
+.page-ribbon:hover:not(:disabled) svg { transform: scaleY(1.07); }
+.page-ribbon:hover:not(:disabled) path { opacity: 0.9; }
+.page-ribbon[aria-pressed="true"] path { fill: var(--accent); opacity: 1; }
+.page-ribbon[aria-pressed="true"] svg { filter: drop-shadow(1px 2px 2px var(--shadow)); }
+#entry-view .entry-nav { margin-right: 36px; }   /* Newer › stops short of the ribbon */
+/* The same ribbon, small: favorites in Past entries, the Favorites button, the calendar. */
+.fav-mark {
+  display: inline-block; width: 0.55em; height: 0.85em; margin-right: 0.4em; vertical-align: -0.08em;
+  background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%);
+}
+.filter-btn .fav-mark { background: currentColor; }
 .when-edit { display: flex; gap: 18px; flex-wrap: wrap; margin: 2px 0 12px; color: var(--muted); font-size: 0.95rem; }
 .when-edit input {
   margin-left: 6px;
@@ -558,6 +579,17 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .insight p { margin: 0 0 1em; }
 .insight em { font-style: italic; }                        /* quotations */
 .insight strong { font-weight: 600; }                      /* the works it draws on */
+/* A star after each word-for-word quotation: click to keep the passage. */
+.quote-star, .quote-star:hover:not(:disabled) {
+  display: inline-flex; vertical-align: baseline; padding: 0 3px; margin: 0 0 0 2px; border: none; background: transparent;
+  color: var(--muted); border-radius: 4px; line-height: 0;
+}
+.quote-star svg { width: 0.95em; height: 0.95em; position: relative; top: 0.12em; overflow: visible; }
+.quote-star polygon { fill: transparent; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; transition: fill 0.15s; }
+.quote-star:hover:not(:disabled) { color: var(--gold); }
+.quote-star[aria-pressed="true"] { color: var(--gold); }
+.quote-star[aria-pressed="true"] polygon { fill: var(--gold); }
+.quote-star.pop svg { animation: coin-pop 0.4s ease-out; }
 /* Claude's closing question: the reflection's own font and size, in italic and the theme colour. */
 .question { margin: 18px 0 8px; font-family: var(--serif); font-style: italic; font-size: inherit; line-height: 1.6; color: var(--accent); }
 .question::before {
@@ -595,12 +627,6 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
   border-radius: 6px;
   padding: 12px 16px;
   margin-bottom: 16px;
-}
-.dot-pulse {
-  flex: none;
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 1.4s ease-in-out infinite;
 }
 
 /* ---- Settings ---- */
@@ -712,7 +738,6 @@ button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(
 #entry-list .title { display: block; color: var(--ink); font-size: 1.1rem; font-weight: 500; }
 #entry-list .title.untitled { color: var(--muted); font-style: italic; font-weight: 400; }
 #entry-list .snippet { display: block; color: var(--muted); font-size: 0.9rem; }
-#entry-list .fav-mark { color: var(--gold); margin-right: 4px; }
 .badge {
   font-size: 0.72rem;
   color: var(--muted);
@@ -793,7 +818,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .cal-day:hover:not(:disabled) { opacity: 1; background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .cal-day.has-entry { color: var(--ink); opacity: 1; background: var(--day-fill); }
 .cal-day.has-entry:hover:not(:disabled) { background: var(--day-fill-hover); }
-.cal-day.has-fav::after { content: "★"; position: absolute; top: -3px; right: -1px; font-size: 0.6rem; color: var(--gold); }
+.cal-day.has-fav::after { content: ""; position: absolute; top: 0; right: 2px; width: 5px; height: 8px; background: var(--accent); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%); }
 .cal-day.today { box-shadow: inset 0 0 0 1px var(--accent); }
 /* The chosen dates: a soft band, with solid ends. */
 .cal-day.in-range { opacity: 1; border-radius: 0; background: color-mix(in srgb, var(--accent) 22%, var(--page)); color: var(--ink); }
@@ -842,6 +867,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .source-list { list-style: none; padding: 0; margin: 0 0 8px; }
 .source-list li { padding: 7px 0; border-bottom: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; }
 .source-list li .subtle { font-size: 0.92rem; }
+.source-list li:target { background: color-mix(in srgb, var(--accent) 10%, transparent); scroll-margin-top: 90px; }   /* "More from …" on Kept passages lands here */
 .passkey-unlock { display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
 .passkey-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; font-size: 1.05rem; }
 .passkey-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; flex: none; }
@@ -1080,7 +1106,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .cover-view .vault-footer { color: inherit; opacity: 0.7; margin: 0; }
 .cover-view .vault-footer a, .cover-view .copyright { color: inherit; }   /* readable on the dark cover */
 /* While locked, the header's buttons are there but grayed out. */
-.book.locked .header-actions > *, .book.locked .menu-btn { opacity: 0.35; pointer-events: none; }
+.book.locked .header-actions > *, .book.locked .menu-btn, .book.locked .credit-coin { opacity: 0.35; pointer-events: none; }
 .book.locked .book-footer { display: none; }   /* the cover carries its own links */
 @media (max-width: 640px) {
   .cover-view { padding: 40px 18px 20px; outline-offset: -8px; }
@@ -1156,6 +1182,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 }
 .landing-points strong { display: block; font-weight: 600; font-size: 1.05rem; line-height: 1.35; }
 .landing-points span { display: block; font-size: 0.92rem; line-height: 1.5; opacity: 0.78; }
+.landing-points a { color: inherit; white-space: nowrap; text-underline-offset: 2px; }
 .landing-quote { margin: 6px 0 0; padding-left: 16px; border-left: 2px solid hsl(var(--hue) calc(var(--sat) + 20%) 78% / 0.6); max-width: 560px; }
 .landing-quote blockquote { margin: 0; font-family: var(--hand); font-size: 2rem; line-height: 1.35; }
 .landing-quote figcaption { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
@@ -1357,9 +1384,12 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .header-actions.open .menu-label { display: inline; font-family: var(--serif); }
   .header-actions.open svg { width: 20px; height: 20px; flex: none; }
   .header-actions.open .menu-glyph { width: 20px; text-align: center; font-size: 1.2rem; }
-  .header-actions.open .credit-coin { gap: 12px; width: 100%; padding: 10px 12px; margin: 0 0 4px; color: var(--ink); border-bottom: 1px solid var(--rule); border-radius: 0; }
+  .credit-wrap { margin-right: 2px; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
+  #entry-view .entry-nav { margin-right: 30px; }
+  .page-ribbon, .page-ribbon:hover:not(:disabled) { right: 8px; }
+  .page-ribbon svg { width: 22px; height: 36px; }
   .past { padding: 12px 16px 6px; }
 }
 
@@ -1370,3 +1400,20 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   #vault-unlock .vault-buttons { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
   #vault-unlock #show-recover { align-self: flex-start; }
 }
+
+/* ---- Kept passages: the quotations starred in reflections, by writer ---- */
+.kept-intro { margin: -8px 0 8px; font-size: 0.95rem; }
+.kept-group { margin-top: 30px; }
+.kept-group > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+.kept-group h2 { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 1.35rem; color: var(--ink); }
+.kept-group .kept-count { color: var(--muted); font-size: 0.85rem; }
+.kept-group .kept-more { margin-left: auto; font-size: 0.88rem; text-underline-offset: 2px; }
+.kept-group h3 { margin: 18px 0 2px; font-family: var(--serif); font-weight: 500; font-style: italic; font-size: 1.02rem; color: var(--muted); }
+.kept-passage { margin: 12px 0 0; padding: 2px 0 2px 16px; border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+.kept-passage blockquote { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.08em; line-height: var(--lh, 1.6); color: var(--ink); }
+.kept-passage .kept-where { margin: 4px 0 0; font-size: 0.88rem; color: var(--muted); }
+.kept-passage .kept-where a { text-underline-offset: 2px; }
+.kept-passage .kept-entries { margin: 3px 0 0; font-size: 0.85rem; color: var(--muted); }
+.kept-passage .kept-entries button { padding: 0; border: none; background: none; border-radius: 0; font-size: inherit; color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+.kept-passage .kept-entries button:hover { background: none; }
+.kept-empty { margin: 26px 0 12px; color: var(--muted); }

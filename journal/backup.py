@@ -97,8 +97,9 @@ def forget_user(user_id):
         tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
         if _has_owner_column(con):
             out = [("DELETE FROM entries WHERE user_id = ?", (user_id,))]
-            if "drafts" in tables:
-                out.append(("DELETE FROM drafts WHERE user_id = ?", (user_id,)))
+            for table in ("drafts", "kept"):
+                if table in tables:
+                    out.append((f"DELETE FROM {table} WHERE user_id = ?", (user_id,)))
             return out
         # A backup from before accounts: everything in it was the local journal's.
         if user_id != db.LOCAL_USER:

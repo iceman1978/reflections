@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, migrate, passkeys, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, migrate, passkeys, reflection, stats, store, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -158,6 +158,9 @@ def _need_user():
     return None
 
 
+app.jinja_env.filters["slug"] = kept.slug
+
+
 @app.context_processor
 def _static_versions():
     # ?v=<file time> makes the browser fetch fresh CSS/JS after every change.
@@ -234,6 +237,7 @@ def index():
         text_size=prefs["text_size"],
         colour_themes=config.COLOUR_THEMES,
         lock_choices=config.LOCK_MINUTE_CHOICES,
+        works_count=len(sources.load_map()["works"]),      # "{works}" in the welcome page's points
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
         photo_visibility=prefs["photo_visibility"],
@@ -669,6 +673,9 @@ def _for_page(entry, reflecting=None):
     if reflecting is None:
         reflecting = entry["id"] in _reflecting
     out = dict(entry, reflecting=reflecting)
+    if entry.get("quotes"):                    # which of its quotations are kept (the stars in the reflection)
+        starred = kept.keys()
+        out["quotes"] = [dict(q, key=kept.key_of(q), kept=kept.key_of(q) in starred) for q in entry["quotes"]]
     if entry.get("wellbeing_concern"):
         out["support_note"] = reflection.support_note()
     return out
@@ -789,6 +796,30 @@ def favourite_entry(entry_id):
     except KeyError:
         return jsonify(error="Entry not found."), 404
     return jsonify(entry=_for_page(entry))
+
+
+# ---- Kept passages (quotations starred in reflections) ----------------------
+
+@app.get("/api/kept")
+def kept_list():
+    return jsonify(groups=kept.grouped(kept.passages(), store.visible_entries(), list(sources.load_map()["works"])))
+
+
+@app.post("/api/kept")
+def kept_set():
+    """Keep or release a passage. To keep one, name the entry and which of its
+    verified quotations (so only real, checked quotes can be kept); to release
+    one, its key is enough."""
+    data = request.get_json(silent=True) or {}
+    if not data.get("keep"):
+        kept.release(str(data.get("key") or ""))
+        return jsonify(key=data.get("key"), kept=False)
+    try:
+        entry = _visible(str(data.get("entry_id") or ""))
+        citation = (entry.get("quotes") or [])[int(data.get("index"))]
+    except (KeyError, IndexError, TypeError, ValueError):
+        return jsonify(error="That quotation wasn't found."), 404
+    return jsonify(key=kept.keep(citation, store.now().isoformat()), kept=True)
 
 
 @app.post("/api/entries/<entry_id>/hide")

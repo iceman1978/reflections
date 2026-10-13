@@ -15,13 +15,19 @@
 
       {% if edition.sources_intro %}<p>{{ edition.sources_intro }}</p>{% endif %}
       <p>Here are all {{ work_count }} of them, with links to the full texts.</p>
+      {% if edition.translation_note %}
+      <h2>{{ edition.translation_note.title }}</h2>
+      <p>{{ edition.translation_note.text }}</p>
+      {% endif %}
 
+      {# Each writer's first work carries an anchor, for "More from …" on the Kept passages page. #}
+      {% set seen = namespace(writers=[]) %}
       {% for group in groups %}
       <h2>{{ group.name }}</h2>
       {% if group.about %}<p class="subtle">{{ group.about }}</p>{% endif %}
       <ul class="source-list">
         {% for item in group["items"] %}
-        <li>
+        <li{% if item.author and item.author not in seen.writers %} id="{{ item.author | slug }}"{% set seen.writers = seen.writers + [item.author] %}{% endif %}>
           <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{% if item.author %}{{ item.author }}, {% endif %}<cite>{{ item.title }}</cite></a>
           <span class="subtle">{{ item.translation }}{% if item.site %} · {{ item.site }}{% endif %}</span>
         </li>

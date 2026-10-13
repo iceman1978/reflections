@@ -18,21 +18,26 @@
   "description": "A private journal for your daily quiet time, with a reflection from Scripture after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",
-  "lead": "A quiet place to reflect each day and draw on Christian wisdom.",
+  "lead": "A quiet place for a few honest lines each day, drawing on Christian wisdom.",
   "points": [
-    {"icon": "calendar", "title": "Build a daily habit of quiet time",
-     "text": "A few minutes of honest writing each day. Your streak keeps count, and a prompt is there when the page feels blank."},
-    {"icon": "book", "title": "Rooted in Scripture and the great devotional writers",
-     "text": "Reflections draw from the Gospels, Paul’s letters, and the Psalms, alongside classic voices like Augustine, Luther, Calvin, Bunyan, Edwards, and Spurgeon, with links to the original texts."},
+    {"icon": "calendar", "title": "A few honest lines are enough",
+     "text": "One small, true thought counts; the benefit comes from reflecting each day. A prompt is there when the page feels blank."},
+    {"icon": "book", "title": "A well-stocked library of Christian wisdom",
+     "text": "Reflections draw only on selected books of Scripture and classic devotional writers, from Augustine to Spurgeon, and tell you exactly where to find each passage.",
+     "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "sandal", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry through your day. Browse back by date, or keep favorites close."},
-    {"icon": "lock", "title": "A fully private, encrypted journal",
-     "text": "Entries are locked with a passphrase only you know. Download your whole journal at any time."}
+    {"icon": "lock", "title": "Private, and never used to train AI",
+     "text": "Entries are encrypted with a passphrase only you know. Your entry only goes to Claude to write your daily reflection, and isn’t used to train it.",
+     "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "welcome_quote": {
-    "text": "“Search me, God, and know my heart; test me and know my anxious thoughts.”",
-    "cite_html": "Psalm 139:23 <cite>(NIV)</cite>",
-    "credit": "The verse on the welcome page is from the Holy Bible, New International Version® (NIV®), copyright © 1973, 1978, 1984, 2011 by Biblica, Inc.™ Used by permission. All rights reserved worldwide."
+    "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
+    "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"
+  },
+  "translation_note": {
+    "title": "Why the Berean Standard Bible?",
+    "text": "Two reasons. It reads easily: the BSB is a modern translation from the Hebrew, Aramaic and Greek, in plain, natural English that stays close to the original wording. And it is free to quote: its publishers dedicated it to the public domain in 2023, so this journal can quote any verse, check every quotation against the complete text, and link you to the passage, without the permissions and limits that copyrighted translations such as the NIV or ESV carry. If you read another translation, the wording here may differ a little from what you know."
   },
   "credit": {"one": "shekel", "many": "shekels"},
   "invite_line": "Invite a friend",

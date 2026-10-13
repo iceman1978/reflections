@@ -204,7 +204,7 @@ def visible_entries():
 
 
 def wipe_all_entries():
-    """Delete all of the current person's entries and draft (and from backups).
+    """Delete all of the current person's entries, draft and kept passages (and from backups).
     Returns (how many entries, backups that couldn't be cleaned)."""
     s = vault.current()
     with _lock, db.write_lock:
@@ -214,6 +214,7 @@ def wipe_all_entries():
             with con:
                 con.execute("DELETE FROM entries WHERE user_id = ?", (s.user_id,))
                 con.execute("DELETE FROM drafts WHERE user_id = ?", (s.user_id,))
+                con.execute("DELETE FROM kept WHERE user_id = ?", (s.user_id,))
             db.checkpoint(con)
             con.execute("VACUUM")  # rebuild the file without the old pages
         finally:

@@ -127,11 +127,12 @@
     el.classList.add(cls);
   }
 
+  const VIEWS = ["write", "entry", "settings", "kept"];   // the pages of the book
   function showView(name) {
     const el = $(`${name}-view`);
     const changed = el.hidden;
-    for (const v of ["write", "entry", "settings"]) $(`${v}-view`).hidden = v !== name;
-    $("past").hidden = name === "settings";
+    for (const v of VIEWS) $(`${v}-view`).hidden = v !== name;
+    $("past").hidden = name === "settings" || name === "kept";
     if (changed) animatePage(el, "view-in");
   }
 
@@ -353,9 +354,9 @@
     state.olderId = older && older.id;
     state.newerId = newer && newer.id;
     $("prev-btn").classList.toggle("at-end", !older);
-    $("prev-btn").title = older ? "Older entry (← key)" : "This is your first entry";
+    $("prev-btn").title = older ? "Older entry (← or j)" : "This is your first entry";
     $("next-btn").textContent = newer ? "Newer ›" : "New entry ›";
-    $("next-btn").title = newer ? "Newer entry (→ key)" : "Start a new entry (→ key)";
+    $("next-btn").title = newer ? "Newer entry (→ or k)" : "Start a new entry (→ or k)";
     const i = list.findIndex((e) => e.id === state.current.id);
     const what = filterDescription();
     $("nav-pos").textContent = i >= 0 ? `${i + 1} of ${list.length}${what ? ` ${what}` : ""}` : "";
@@ -615,20 +616,65 @@
   const newBestStreak = (s) => s.previous_best >= 2 && s.current_streak > s.previous_best;
 
   // On the web version: the coin in the header shows the credits left (Shekels
-  // in In His Steps), one per reflection. It says nothing about how they come
-  // back (daily now; monthly allowances or top-ups later), so it needn't change.
+  // in In His Steps), one per reflection. Clicking it opens a small pop-up with
+  // the count and when they come back (the place for top-ups later).
+  const creditName = (n) => (n === 1 ? CFG.credit.one : CFG.credit.many);
+  const capital = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+
+  // Credits come back at midnight in the journal's time zone: that moment, in
+  // the reader's own time ("midnight", or "9:00 pm" from further west).
+  function creditReset() {
+    const now = Object.fromEntries(new Intl.DateTimeFormat("en-CA", {
+      timeZone: CFG.timezone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+    }).formatToParts(new Date()).map((p) => [p.type, Number(p.value)]));
+    const ms = (24 * 3600 - (now.hour * 3600 + now.minute * 60 + now.second)) * 1000;
+    const at = new Date(Date.now() + ms);
+    const local = at.getHours() === 0 && at.getMinutes() === 0 ? "midnight"
+      : at.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }).replace(/\b(AM|PM)\b/, (m) => m.toLowerCase());
+    const mins = Math.max(1, Math.round(ms / 60000));
+    const away = mins < 60 ? `in ${plural(mins, "minute")}` : `in about ${plural(Math.round(mins / 60), "hour")}`;
+    return { local, away };
+  }
+
+  function renderCreditPop() {
+    const s = state.lastStats;
+    if (!s || s.reflections_left == null) return;
+    const left = s.reflections_left, all = s.reflections_per_day;
+    const { local, away } = creditReset();
+    $("credit-pop-title").textContent = left === 0 ? `No ${CFG.credit.many} left today` : `${left} ${creditName(left)} left today`;
+    $("credit-pop-text").textContent = `Each reflection uses one ${CFG.credit.one}. `
+      + (left === all ? `You get ${all} every day; they're topped back up at ${local} (${away}).`
+        : `You'll have ${all} again at ${local} (${away}).`)
+      + (left === 0 ? " Your entries are still saved, and can be reflected on then." : "");
+  }
+
+  function toggleCreditPop(open = $("credit-pop").hidden) {
+    if (open) renderCreditPop();
+    $("credit-pop").hidden = !open;
+    $("credit-coin").setAttribute("aria-expanded", String(open));
+    document.querySelector(".book-header").classList.toggle("coin-open", open);
+  }
+  if ($("credit-coin")) {
+    $("credit-coin").addEventListener("click", () => toggleCreditPop());
+    document.addEventListener("mousedown", (e) => {
+      if (!$("credit-pop").hidden && !e.target.closest(".credit-wrap")) toggleCreditPop(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$("credit-pop").hidden) { toggleCreditPop(false); $("credit-coin").focus(); }
+    });
+  }
+
   function renderLimits(s) {
     const coin = $("credit-coin");
     if (!coin || s.reflections_left == null) return;
     const left = s.reflections_left;
-    const name = (n) => (n === 1 ? CFG.credit.one : CFG.credit.many);
     const text = left === 0 ? "No reflections left" : `${plural(left, "reflection")} left`;
     const was = coin.dataset.left;
     coin.hidden = false;
     coin.querySelector(".coin").textContent = left;
-    coin.querySelector(".menu-label").textContent = text;
     coin.title = text;
-    coin.setAttribute("aria-label", `${left} ${name(left)} left: ${text.toLowerCase()}`);
+    coin.setAttribute("aria-label", `${left} ${creditName(left)} left: ${text.toLowerCase()}`);
+    if (!$("credit-pop").hidden) renderCreditPop();
     coin.classList.toggle("empty", left === 0);
     if (was !== undefined && Number(was) !== left) {          // a credit used, or a new day: a little flip
       coin.classList.remove("pop"); void coin.offsetWidth; coin.classList.add("pop");
@@ -636,8 +682,7 @@
     coin.dataset.left = left;
     const note = $("limits-note");
     if (note) {
-      const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
-      note.textContent = `${cap(CFG.credit.many)}: ${left} of ${s.reflections_per_day} left today. Each reflection `
+      note.textContent = `${capital(CFG.credit.many)}: ${left} of ${s.reflections_per_day} left today. Each reflection `
         + `uses one, and you get ${s.reflections_per_day} new ${CFG.credit.many} every day. Entries are always saved, `
         + "and an entry without a reflection can be reflected on another day.";
     }
@@ -731,6 +776,156 @@
     if (entry.reflecting) pollWhileReflecting(entry.id);
   }
 
+  // ---- Kept passages -------------------------------------------------------
+  // A star after a quotation keeps it; the star in the header opens the page
+  // that gathers them by writer.
+  const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2.8 14.8,8.7 21.3,9.6 16.6,14.1 17.8,20.6 12,17.5 6.2,20.6 7.4,14.1 2.7,9.6 9.2,8.7"/></svg>';
+
+  function paintStar(btn, on) {
+    btn.setAttribute("aria-pressed", String(on));
+    btn.title = on ? "Kept. Click to let it go" : "Keep this passage";
+    btn.setAttribute("aria-label", btn.title);
+  }
+
+  function quoteStar(entry, index) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quote-star";
+    btn.innerHTML = STAR_SVG;
+    paintStar(btn, !!entry.quotes[index].kept);
+    btn.addEventListener("click", async () => {
+      const q = entry.quotes[index], want = !q.kept;
+      q.kept = want;
+      paintStar(btn, want);            // straight away; undone if saving fails
+      if (want) { btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop"); }
+      try {
+        await api("POST", "/api/kept", want ? { keep: true, entry_id: entry.id, index } : { keep: false, key: q.key });
+        if (want && !recall("journal.keptHint")) {
+          remember("journal.keptHint", 1);
+          showNotice("Kept. You'll find your kept passages under the star at the top.", 6000);
+        }
+      } catch (err) {
+        q.kept = !want;
+        paintStar(btn, !want);
+        state.clientError = `Couldn't ${want ? "keep" : "release"} that passage: ${err.message}`;
+        renderBanner();
+      }
+    });
+    return btn;
+  }
+
+  async function showKept() {
+    showView("kept");
+    window.scrollTo({ top: 0 });
+    let groups;
+    try {
+      groups = (await api("GET", "/api/kept")).groups;
+    } catch (err) {
+      $("kept-intro").textContent = `Couldn't load your kept passages: ${err.message}`;
+      return;
+    }
+    renderKept(groups);
+  }
+
+  function renderKept(groups) {
+    const total = groups.reduce((n, g) => n + g.count, 0);
+    $("kept-intro").textContent = total
+      ? `${plural(total, "passage")} you've starred in your reflections. The writers you return to most come first.`
+      : "";
+    const list = $("kept-list");
+    list.replaceChildren();
+    if (!total) {
+      const p = document.createElement("p");
+      p.className = "kept-empty";
+      p.textContent = "Nothing kept yet. When a reflection quotes something worth holding on to, click the star after the quotation and it will be gathered here.";
+      list.append(p);
+      return;
+    }
+    for (const g of groups) {
+      const box = document.createElement("section");
+      box.className = "kept-group";
+      const head = document.createElement("header");
+      const h = document.createElement("h2");
+      h.textContent = g.name;
+      const count = document.createElement("span");
+      count.className = "kept-count";
+      count.textContent = plural(g.count, "passage");
+      head.append(h, count);
+      if (g.anchor) {
+        const more = document.createElement("a");
+        more.className = "kept-more";
+        more.href = `/sources#${g.anchor}`;
+        more.textContent = `More from ${g.name} →`;
+        more.title = "The works this journal draws on, with links to read them in full";
+        head.append(more);
+      }
+      box.append(head);
+      for (const s of g.sections) {
+        const h3 = document.createElement("h3");
+        h3.textContent = s.name;
+        box.append(h3);
+        for (const p of s.passages) box.append(keptPassage(p, g));
+      }
+      list.append(box);
+    }
+  }
+
+  function keptPassage(p, group) {
+    const fig = document.createElement("figure");
+    fig.className = "kept-passage";
+    const quote = document.createElement("blockquote");
+    quote.textContent = `“${p.quote}”`;
+    const star = document.createElement("button");
+    star.type = "button";
+    star.className = "quote-star";
+    star.innerHTML = STAR_SVG;
+    paintStar(star, true);
+    star.addEventListener("click", async () => {
+      star.disabled = true;
+      try {
+        await api("POST", "/api/kept", { keep: false, key: p.key });
+        if (state.current) for (const q of state.current.quotes || []) if (q.key === p.key) q.kept = false;
+        showKept();
+        showNotice("No longer kept.");
+      } catch (err) {
+        star.disabled = false;
+        state.clientError = `Couldn't release that passage: ${err.message}`;
+        renderBanner();
+      }
+    });
+    quote.append(star);
+    const where = document.createElement("p");
+    where.className = "kept-where";
+    // Scripture: "— Romans 8:28". A writer's work is already the heading above, so just the place in it.
+    const place = group.scripture ? `— ${p.title}${p.location ? ` ${p.location}` : ""} ` : p.location ? `— ${p.location} ` : "";
+    where.append(document.createTextNode(place));
+    if (typeof p.url === "string" && p.url.startsWith("https://")) {
+      const a = document.createElement("a");
+      a.href = passageUrl(p.url, p.quote);
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = "Read the passage ↗";
+      where.append(a);
+    }
+    fig.append(quote, where);
+    if (p.entries.length) {
+      const from = document.createElement("p");
+      from.className = "kept-entries";
+      from.append(document.createTextNode("Came up in "));
+      p.entries.forEach((e, i) => {
+        if (i) from.append(document.createTextNode(" · "));
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = `${fmtDate(e.created_at, { month: "short", day: "numeric", year: "numeric" })}${e.title ? `, ${e.title}` : ""}`;
+        b.title = "Turn to this entry";
+        b.addEventListener("click", () => openEntry(e.id));
+        from.append(b);
+      });
+      fig.append(from);
+    }
+    return fig;
+  }
+
   // A reflection paragraph, easier to scan: quotations in italics, and the
   // works it draws on (from its sources list) in bold where they're named,
   // e.g. "Philippians 4:6" or "Brother Lawrence". Built as nodes, never HTML.
@@ -765,6 +960,9 @@
       const em = document.createElement("em");
       em.textContent = m[0];
       frag.append(em);
+      // A word-for-word quotation (one the app checked) can be kept: its star follows it.
+      const index = (entry.quotes || []).findIndex((q) => q.key && `“${q.quote}”` === m[0]);
+      if (index >= 0) frag.append(quoteStar(entry, index));
       at = m.index + m[0].length;
     }
     plain(text.slice(at));
@@ -857,14 +1055,13 @@
     // The handwriting's capitals are ornate, so all-capital words (AI, CEO, NYC)
     // are hard to read in it: such titles use the book font instead.
     h.classList.toggle("plain-title", /(^|[^\p{L}])\p{Lu}{2,}(?![\p{L}])/u.test(entry.title || ""));
-    renderStar(!!entry.favourite);
+    renderBookmark(!!entry.favourite);
   }
 
-  // ---- Favorites -------------------------------------------------------
+  // ---- Favorites: the cloth bookmark at the top of an entry's page ------
 
-  function renderStar(on) {
-    const b = $("star-btn");
-    b.textContent = on ? "★" : "☆";
+  function renderBookmark(on) {
+    const b = $("bookmark-btn");
     b.setAttribute("aria-pressed", String(on));
     const label = on ? "Remove from favorites" : "Add to favorites";
     b.title = label;
@@ -876,14 +1073,14 @@
     if (!entry) return;
     const want = !entry.favourite;
     entry.favourite = want;
-    renderStar(want);  // show it straight away; undo if saving fails
+    renderBookmark(want);  // show it straight away; undo if saving fails
     try {
       const res = await api("POST", `/api/entries/${entry.id}/favourite`, { favourite: want });
       if (state.current && state.current.id === entry.id) state.current.favourite = res.entry.favourite;
       refreshList();
     } catch (err) {
       entry.favourite = !want;
-      if (state.current && state.current.id === entry.id) renderStar(!want);
+      if (state.current && state.current.id === entry.id) renderBookmark(!want);
       state.clientError = `Couldn't update favorites: ${err.message}`;
       renderBanner();
     }
@@ -928,7 +1125,7 @@
     $("entry-text").hidden = on;
     $("entry-editor").hidden = !on;
     $("entry-title").hidden = on;
-    $("star-btn").hidden = on;  // starring is for reading, not editing
+    $("bookmark-btn").hidden = on;  // bookmarking is for reading, not editing
     $("entry-title-input").hidden = !on;
     $("entry-when-edit").hidden = !on;
     if (on) {
@@ -974,6 +1171,14 @@
     renderList();
   }
 
+  // The small ribbon beside a favorite entry's title.
+  function favMark() {
+    const mark = document.createElement("span");
+    mark.className = "fav-mark";
+    mark.title = "Favorite";
+    return mark;
+  }
+
   function renderList() {
     const all = state.allEntries;
     if (!all) return;
@@ -997,11 +1202,7 @@
         title.className = e.title ? "title" : "title untitled";
         title.textContent = e.title || "No Title";
         if (e.favourite) {
-          const star = document.createElement("span");
-          star.className = "fav-mark";
-          star.textContent = "★";
-          star.title = "Favorite";
-          title.prepend(star);
+          title.prepend(favMark());
         }
         const snippet = document.createElement("span");
         snippet.className = "snippet";
@@ -1052,7 +1253,7 @@
         li.className = "subtle";
         li.textContent = !all.length ? "No entries yet."
           : state.range ? `No ${state.favOnly ? "favorites" : "entries"} ${state.range.prep} ${state.range.label}. Click All to see everything.`
-          : "No favorites yet. Open an entry and click ☆ to add it here.";
+          : "No favorites yet. Open an entry and click the ribbon at the top of its page to add it here.";
         ul.append(li);
       }
     }
@@ -1220,11 +1421,7 @@
       title.className = e.title ? "title" : "title untitled";
       title.append(e.title ? highlighted(e.title, r.title_marks) : document.createTextNode("No Title"));
       if (e.favourite) {
-        const star = document.createElement("span");
-        star.className = "fav-mark";
-        star.textContent = "★";
-        star.title = "Favorite";
-        title.prepend(star);
+        title.prepend(favMark());
       }
       const snippet = document.createElement("span");
       snippet.className = "snippet";
@@ -1784,7 +1981,7 @@
     feature: "What would you like it to do, and how would it help?",
   };
   const feedbackKind = () => document.querySelector('input[name="feedback-kind"]:checked').value;
-  const currentScreen = () => ["write", "entry", "settings"].find((n) => !$(`${n}-view`).hidden) || "";
+  const currentScreen = () => VIEWS.find((n) => !$(`${n}-view`).hidden) || "";
 
   function openFeedback() {
     $("feedback-error").hidden = true;
@@ -2195,7 +2392,9 @@
   $("today").textContent = longDate(new Date().toISOString());
   $("editor").addEventListener("input", onType);
   $("title-input").addEventListener("input", onType);
-  $("star-btn").addEventListener("click", toggleFavourite);
+  $("bookmark-btn").addEventListener("click", toggleFavourite);
+  $("kept-btn").addEventListener("click", showKept);
+  $("kept-back-btn").addEventListener("click", leaveSettings);
   $("prompt-btn").addEventListener("click", getPrompt);
   $("another-prompt-btn").addEventListener("click", getPrompt);
   $("dismiss-prompt-btn").addEventListener("click", dismissPrompt);
@@ -2254,12 +2453,14 @@
   });
   document.addEventListener("keydown", (e) => {
     // ← / → page through entries while reading (not while typing or in a dialog).
-    if ($("dialog").open || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+    // So do j / k, as in Gmail: j = older (down the list), k = newer.
+    if (document.querySelector("dialog[open]") || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    if (!$("write-view").hidden && e.key === "ArrowLeft") { e.preventDefault(); olderFromWritingPage(); return; }
+    const back = e.key === "ArrowLeft" || e.key === "j", on = e.key === "ArrowRight" || e.key === "k";
+    if (!$("write-view").hidden && back) { e.preventDefault(); olderFromWritingPage(); return; }
     if ($("entry-view").hidden || !$("entry-editor").hidden) return;
-    if (e.key === "ArrowLeft") { e.preventDefault(); goOlder(); }
-    if (e.key === "ArrowRight") { e.preventDefault(); goNewer(); }
+    if (back) { e.preventDefault(); goOlder(); }
+    if (on) { e.preventDefault(); goNewer(); }
   });
   $("title-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); $("editor").focus(); }
@@ -2298,6 +2499,7 @@
   // Signed in but locked (or setting up), the journal shows its cover: the
   // header (its buttons disabled) above a page in the theme's cover color,
   // with the passphrase card on it. Signed out, the card is on the welcome page.
+  const HEADER_BUTTONS = "#header-actions button, #menu-btn, #credit-coin";
   function setCover(on) {
     const card = $("vault-card"), foot = $("vault-footer");
     if (on) {
@@ -2312,14 +2514,15 @@
     $("book").classList.toggle("locked", on);
     $("cover-view").hidden = !on;
     if (on) {
-      for (const v of ["write", "entry", "settings"]) $(`${v}-view`).hidden = true;
+      for (const v of VIEWS) $(`${v}-view`).hidden = true;
       $("past").hidden = true;
       $("stats").replaceChildren();
       matchCoverToPage();
     }
-    for (const b of document.querySelectorAll("#header-actions button, #menu-btn")) b.disabled = on;
+    for (const b of document.querySelectorAll(HEADER_BUTTONS)) b.disabled = on;
     const coin = $("credit-coin");
     if (coin && on) {                          // shown, but blank: the count comes with the unlocked journal
+      toggleCreditPop(false);
       coin.hidden = false;
       coin.classList.add("empty");
       coin.querySelector(".coin").textContent = "";
@@ -2438,6 +2641,7 @@
     "draft-state", "filter-note", "themes-status", "limits-note", "nudge-text", "new-recovery-key",
     "new-recovery-result", "password-result", "passkey-result", "import-result", "test-key-result", "usage-since",
     "wipe-count", "wipe-number", "wipe-error", "feedback-error", "invite-error", "settings-state",
+    "credit-pop-title", "credit-pop-text", "kept-list", "kept-intro",
   ];
   function forgetJournal() {
     lockGen++;                                    // answers still on their way are dropped (see api)
@@ -2477,7 +2681,7 @@
   }
 
   $("lock-btn").addEventListener("click", async () => {
-    const from = ["entry", "settings", "write"].map((v) => $(`${v}-view`)).find((el) => !el.hidden);
+    const from = VIEWS.map((v) => $(`${v}-view`)).find((el) => !el.hidden);
     if (state.draftDirty) await saveDraftToServer();          // what's being written is kept, encrypted
     if (!state.draftDirty) localClear();                      // ...so this browser's readable copy can go
     const ghost = from ? oldPageCopy(from) : null;            // the page as it was, for the cover to land on
@@ -2718,7 +2922,7 @@
       $("vault-card").append($("vault-footer"));
       $("cover-view").hidden = true;
       $("book").classList.remove("locked");
-      for (const b of document.querySelectorAll("#header-actions button, #menu-btn")) b.disabled = false;
+      for (const b of document.querySelectorAll(HEADER_BUTTONS)) b.disabled = false;
       if ($("credit-coin")) { $("credit-coin").classList.remove("empty"); $("credit-coin").title = ""; }
       showView("write");
       turnPage($("write-view"), 1, ghost);                   // the cover turns away like a page
