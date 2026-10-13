@@ -1564,6 +1564,14 @@
     refreshFeedbackList();
   }
 
+  // The cover carries the journal's own name if it has one, without the app's tagline.
+  function showCoverName(custom) {
+    const name = custom || CFG.appName;
+    $("cover-name").textContent = name;
+    $("cover-name").classList.toggle("long-name", name.length > 14);
+    if ($("cover-tagline")) $("cover-tagline").hidden = name !== CFG.appName;
+  }
+
   async function saveSettings(ev) {
     ev.preventDefault();
     const out = {};
@@ -1578,6 +1586,7 @@
       const res = await api("PUT", "/api/settings", out);
       CFG.userName = res.settings.user_name;
       $("journal-name").textContent = res.settings.journal_name || CFG.appName;
+      showCoverName(res.settings.journal_name);
       CFG.autosaveSeconds = res.settings.draft_autosave_seconds;
       savedLook.theme = res.settings.theme;
       savedLook.palette = res.settings.colour_theme;

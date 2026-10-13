@@ -1063,8 +1063,9 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   background: linear-gradient(to right, hsl(0 0% 0% / 0.28), hsl(0 0% 0% / 0.08) 55%, hsl(0 0% 0% / 0.3) 78%, hsl(0 0% 100% / 0.1) 86%, transparent);
 }
 .cover-name.long-name { font-size: clamp(2rem, 4.6vw, 2.6rem); }
+.cover-brand { margin-bottom: 30px; }   /* the same gap above the card with or without the tagline */
 .cover-tagline {
-  margin: 12px 0 30px; font-family: var(--serif); font-size: 0.95rem;
+  margin: 12px 0 0; font-family: var(--serif); font-size: 0.95rem;
   letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.75;
 }
 .cover-slot { width: 100%; display: flex; justify-content: center; }

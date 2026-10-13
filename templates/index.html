@@ -209,8 +209,9 @@
       <div class="cover-brand">
         {% if logo_mask_url %}<span class="cover-logo themed" style="--logo-mask: url('{{ logo_mask_url }}')" aria-hidden="true"></span>
         {% elif logo_url %}<img class="cover-logo" src="{{ logo_url }}" alt="">{% endif %}
-        <p class="cover-name{% if app_name | length > 14 %} long-name{% endif %}">{{ app_name }}</p>
-        {% if edition.tagline %}<p class="cover-tagline">{{ edition.tagline }}</p>{% endif %}
+        {# The journal's own name (Settings → Journal name), if it has one; the tagline belongs to the app's name only. #}
+        <p id="cover-name" class="cover-name{% if journal_name | length > 14 %} long-name{% endif %}">{{ journal_name }}</p>
+        {% if edition.tagline %}<p id="cover-tagline" class="cover-tagline"{% if journal_name != app_name %} hidden{% endif %}>{{ edition.tagline }}</p>{% endif %}
       </div>
       <div id="cover-slot" class="cover-slot"></div>
       <div id="cover-foot" class="cover-foot"></div>
