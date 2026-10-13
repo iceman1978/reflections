@@ -114,10 +114,10 @@
         <p><button type="button" id="copy-recovery">Copy</button></p>
         <p id="recovery-import-note" class="vault-note"></p>
         <label class="checkbox"><input id="recovery-saved" type="checkbox"> I've saved my recovery key somewhere safe</label>
-        <button type="button" id="recovery-done" class="primary" disabled>Open my journal</button>
+        <button type="button" id="recovery-done" class="primary recovery-done" disabled>Open my journal</button>
       </div>
 
-      <form id="vault-unlock" hidden novalidate>
+      <form id="vault-unlock" class="unlock-form" hidden novalidate>
         <div id="passkey-unlock" class="passkey-unlock" hidden>
           <button type="button" id="passkey-unlock-btn" class="primary passkey-btn">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2.5 20c.6-3.6 3.2-6 6.5-6 1.5 0 2.9.5 4 1.4"/><circle cx="17.5" cy="15" r="2.5"/><path d="M19.3 16.8l2.7 2.7M21 18.5l-1 1"/></svg>
@@ -127,7 +127,7 @@
         <label><span class="sr-only">Passphrase</span><input id="unlock-pw" type="password" autocomplete="current-password"></label>
         <p id="unlock-error" class="vault-error" hidden></p>
         <div class="vault-buttons">
-          <button type="button" id="show-recover" class="quiet">Forgot your passphrase?</button>
+          <button type="button" id="show-recover" class="quiet forgot-link">Forgot your passphrase?</button>
           <button type="submit" class="primary">Unlock</button>
         </div>
       </form>
@@ -262,7 +262,7 @@
     </section>
 
     <!-- Reading / editing a saved entry -->
-    <section id="entry-view" class="page" hidden>
+    <section id="entry-view" class="page entry-page" hidden>
       <!-- The cloth bookmark hanging from the top of the page: an outline until this
            entry is a favorite, then solid in the theme's color. -->
       <button id="bookmark-btn" class="page-ribbon" type="button" aria-pressed="false"
@@ -275,8 +275,8 @@
         <button id="next-btn" type="button" class="nav-btn" title="Newer entry (→ or k)">Newer ›</button>
       </nav>
       <div class="entry-meta">
-        <span id="entry-date"></span>
-        <span id="entry-words" class="subtle"></span>
+        <span id="entry-date" class="entry-date"></span>
+        <span id="entry-words" class="entry-words subtle"></span>
       </div>
       <div class="title-row">
         <h1 id="entry-title" class="entry-title"></h1>
@@ -331,7 +331,7 @@
     </section>
 
     <!-- Settings -->
-    <section id="settings-view" class="page" hidden>
+    <section id="settings-view" class="page settings-page" hidden>
       <h1 class="prompt-heading">Settings</h1>
       <div class="settings-tabs" role="tablist" aria-label="Settings">
         <button type="button" role="tab" id="tab-basic" aria-controls="panel-basic" aria-selected="true">Basic</button>

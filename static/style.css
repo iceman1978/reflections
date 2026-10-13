@@ -296,7 +296,8 @@ a { color: var(--accent); }
   transition: background-color 1.2s ease, border-color 1.2s ease;
 }
 .longest-tag { color: #a87a12; font-style: italic; white-space: nowrap; }
-#entry-words { white-space: nowrap; flex: none; padding-left: 12px; }
+/* Pages are styled by class, never by id: the copy of a page that plays a page turn has its ids removed. */
+.entry-words { white-space: nowrap; flex: none; padding-left: 12px; }
 html[data-theme="evening"] .longest-tag { color: #e3b65c; }
 @media (prefers-color-scheme: dark) { html[data-theme="auto"] .longest-tag { color: #e3b65c; } }
 /* A milestone (3 days, a week, every week after) turns the badge gold: bright
@@ -517,7 +518,7 @@ button.prompt-btn.nudge-glow {
 .nav-btn:not(:disabled):hover { color: var(--accent); background: transparent; }
 
 .entry-meta { display: flex; justify-content: space-between; align-items: baseline; color: var(--muted); margin-bottom: 4px; }
-#entry-date, .entry-date { font-family: var(--hand); font-size: 1.3rem; color: var(--muted); }  /* past entries and today's page alike */
+.entry-date { font-family: var(--hand); font-size: 1.3rem; color: var(--muted); }  /* past entries and today's page alike */
 .title-row { display: flex; align-items: flex-start; gap: 12px; }
 /* An entry's title is handwritten, like the "what's on your mind?" greeting. */
 .entry-title { flex: 1; font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--ink); margin: 0 0 10px; line-height: 1.3; }
@@ -535,7 +536,7 @@ button.prompt-btn.nudge-glow {
 .page-ribbon:hover:not(:disabled) path { opacity: 0.9; }
 .page-ribbon[aria-pressed="true"] path { fill: var(--accent); opacity: 1; }
 .page-ribbon[aria-pressed="true"] svg { filter: drop-shadow(1px 2px 2px var(--shadow)); }
-#entry-view .entry-nav { margin-right: 36px; }   /* Newer › stops short of the ribbon */
+.entry-page .entry-nav { margin-right: 36px; }   /* Newer › stops short of the ribbon. By class, not id: the copy of the page that plays a page turn has no id */
 /* The same ribbon, small: favorites in Past entries, the Favorites button, the calendar. */
 .fav-mark {
   display: inline-block; width: 0.55em; height: 0.85em; margin-right: 0.4em; vertical-align: -0.08em;
@@ -651,7 +652,7 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .settings-form .checkbox { display: flex; align-items: center; gap: 8px; }
 .settings-form input[type="checkbox"] { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; }
 .settings-form .hint { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-#settings-view h2 { font-weight: 500; font-size: 1.05rem; color: var(--muted); margin: 28px 0 12px; }
+.settings-page h2 { font-weight: 500; font-size: 1.05rem; color: var(--muted); margin: 28px 0 12px; }
 .data-actions { display: flex; flex-direction: column; gap: 14px; }
 .data-actions > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .data-actions .hint { font-size: 0.85rem; color: var(--muted); }
@@ -861,7 +862,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 /* Text-style buttons (Forgot your passphrase?, Back) line up with the box above. */
 .vault-buttons button.quiet { padding-left: 0; padding-right: 0; border: none; background: none; }
 .vault-buttons button.quiet:hover { color: var(--accent); text-decoration: underline; }
-#vault-unlock #show-recover { font-size: 0.85rem; }   /* the same size as "or type your passphrase" */
+.unlock-form .forgot-link { font-size: 0.85rem; }   /* the same size as "or type your passphrase" */
 
 /* Passkeys: the quick way in on the passphrase screen, and the list in Settings. */
 .source-list { list-style: none; padding: 0; margin: 0 0 8px; }
@@ -878,7 +879,7 @@ button.cal-label:hover:not(:disabled) { color: var(--accent); background: color-
 .passkey-list li button.quiet { margin-left: auto; }
 /* Read by screen readers, not shown. */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.vault-card form > button.primary, #recovery-done { display: block; margin-left: auto; }
+.vault-card form > button.primary, .recovery-done { display: block; margin-left: auto; }
 .vault-error { color: var(--danger); margin: 0 0 12px; }
 .vault-note { color: var(--accent); }
 .recovery-key {
@@ -1387,7 +1388,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .credit-wrap { margin-right: 2px; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
-  #entry-view .entry-nav { margin-right: 30px; }
+  .entry-page .entry-nav { margin-right: 30px; }
   .page-ribbon, .page-ribbon:hover:not(:disabled) { right: 8px; }
   .page-ribbon svg { width: 22px; height: 36px; }
   .past { padding: 12px 16px 6px; }
@@ -1397,8 +1398,8 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
    first (full width) with "Forgot your passphrase?" under it, at the left. */
 @media (max-width: 640px) {
   :is(.vault, .cover-view) .vault-title { font-size: 1.4rem; }
-  #vault-unlock .vault-buttons { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
-  #vault-unlock #show-recover { align-self: flex-start; }
+  .unlock-form .vault-buttons { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
+  .unlock-form .forgot-link { align-self: flex-start; }
 }
 
 /* ---- Kept passages: the quotations starred in reflections, by writer ---- */
