@@ -580,7 +580,7 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .insight p { margin: 0 0 1em; }
 /* The main theme's pencil drawing, at the top of the reflection, in the theme's color. */
 .reflection-vignette {
-  width: 100%; max-width: 460px; aspect-ratio: 5 / 2; margin: 0 auto 16px;   /* a wide strip across the reflection */
+  width: 100%; max-width: 400px; aspect-ratio: 2 / 1; margin: 0 auto 16px;   /* a wide strip across the reflection */
   background: var(--accent); opacity: 0.85;
   -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
 }
@@ -1397,7 +1397,6 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .entry-page .entry-nav { margin-right: 30px; }
-  #entry-list .list-time { display: none; }   /* Past entries on a phone: date, words and themes fit on one line */
   .page-ribbon, .page-ribbon:hover:not(:disabled) { right: 8px; }
   .page-ribbon svg { width: 22px; height: 36px; }
   .past { padding: 12px 16px 6px; }

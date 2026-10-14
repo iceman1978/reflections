@@ -314,7 +314,7 @@
     } else if (switching) {
       animatePage($("entry-view"), "view-in");
     }
-    $("entry-date").textContent = `${longDate(entry.created_at)} · ${timeOf(entry.created_at)}`;
+    $("entry-date").textContent = longDate(entry.created_at);   // the date only: the time is clutter here
     showEntryWords(entry);
     $("entry-text").textContent = entry.text;
     renderEntryThemes(entry);
@@ -931,7 +931,9 @@
 
   // The drawing for an entry's main theme (its first), if there is one: a pencil
   // sketch painted in the theme's color through a cut-out (see tools/make_vignettes.py).
-  const themeSlug = (name) => name.toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  // "Grief & loss" -> "grief-and-loss", "God's presence" -> "gods-presence" (the same rule as tools/make_vignettes.py)
+  const themeSlug = (name) => name.toLowerCase().replace(/['’]/g, "").replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   function renderVignette(entry) {
     const box = $("reflection-vignette");
     const main = (entry.themes || [])[0];
@@ -1186,13 +1188,9 @@
     renderList();
   }
 
-  // "Thu, Oct 8, 2026 · 9:25 am · 60 words" (the time is left out on a phone, to keep the line short).
+  // "Thu, Oct 8, 2026 · 60 words" (no time: it only adds clutter).
   function listDate(line, entry) {
-    const time = document.createElement("span");
-    time.className = "list-time";
-    time.textContent = ` · ${timeOf(entry.created_at)}`;
-    line.append(document.createTextNode(shortDate(entry.created_at)), time,
-      document.createTextNode(` · ${plural(entry.word_count, "word")}`));
+    line.append(document.createTextNode(`${shortDate(entry.created_at)} · ${plural(entry.word_count, "word")}`));
   }
 
   // An entry's themes, quietly, at the end of its date line in Past entries ("· Work, Rest").

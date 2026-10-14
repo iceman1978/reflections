@@ -2,9 +2,12 @@
 
     uv run --with pillow python tools/make_vignettes.py
 
+(If Windows blocks that, install Pillow into the project once with `uv pip install pillow`
+and run `.venv/Scripts/python tools/make_vignettes.py` instead.)
+
 Reads every drawing in brand-source/vignettes/ (dark pencil on white, named after
 its theme: "family.png", "grief-and-loss.jpg") and writes a web-ready copy to
-static/vignettes/<theme>.png: cropped to the drawing, padded to the same wide 5:2
+static/vignettes/<theme>.png: cropped to the drawing, padded to the same wide 2:1
 shape, and turned into a cut-out (white becomes transparent, pencil stays), so
 the page can paint it in the reader's theme color, the way it does the logo.
 
@@ -18,7 +21,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "brand-source" / "vignettes"
 OUT = ROOT / "static" / "vignettes"
-WIDTH, HEIGHT = 1000, 400         # 5:2, a wide strip: the full width of the reflection (up to about 460 x 184 px)
+WIDTH, HEIGHT = 1000, 500         # 2:1, a wide strip: the full width of the reflection (up to about 400 x 200 px)
 MARGIN = 0.03                     # white space kept around the drawing, as a share of its size
 INK = 236                         # brightness below which a pixel counts as part of the drawing
 
@@ -32,7 +35,7 @@ def vignette(path):
     pad = int(max(right - left, bottom - top) * MARGIN)
     drawing = gray.crop((max(0, left - pad), max(0, top - pad),
                          min(gray.width, right + pad), min(gray.height, bottom + pad)))
-    # Fit it into the 5:2 frame, centered, keeping its proportions.
+    # Fit it into the 2:1 frame, centered, keeping its proportions.
     scale = min(WIDTH / drawing.width, HEIGHT / drawing.height)
     drawing = drawing.resize((max(1, round(drawing.width * scale)), max(1, round(drawing.height * scale))), Image.LANCZOS)
     frame = Image.new("L", (WIDTH, HEIGHT), 255)
@@ -58,7 +61,7 @@ def vignette(path):
 def slug(name):
     """'Grief & loss' -> 'grief-and-loss' (the same rule the page uses)."""
     import re
-    return re.sub(r"[^a-z0-9]+", "-", name.lower().replace("&", " and ")).strip("-")
+    return re.sub(r"[^a-z0-9]+", "-", re.sub(r"['’]", "", name.lower()).replace("&", " and ")).strip("-")
 
 
 def main():

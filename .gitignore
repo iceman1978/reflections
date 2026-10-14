@@ -11,3 +11,9 @@ config/settings.json
 .venv/
 __pycache__/
 *.pyc
+
+# Theme drawing originals (large; kept on this computer). The converted copies in static/vignettes/ are what the app uses.
+brand-source/vignettes/*.jpg
+brand-source/vignettes/*.jpeg
+brand-source/vignettes/*.png
+brand-source/vignettes/*.webp
