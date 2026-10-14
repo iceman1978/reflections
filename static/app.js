@@ -929,18 +929,22 @@
     return fig;
   }
 
-  // The drawing for an entry's main theme (its first), if there is one: a pencil
-  // sketch painted in the theme's color through a cut-out (see tools/make_vignettes.py).
+  // A drawing for the entry's themes, if there is one: a pencil sketch painted in the
+  // theme's color through a cut-out (see tools/make_vignettes.py).
   // "Grief & loss" -> "grief-and-loss", "God's presence" -> "gods-presence" (the same rule as tools/make_vignettes.py)
   const themeSlug = (name) => name.toLowerCase().replace(/['’]/g, "").replace(/&/g, " and ")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  // For variety it's one of the entry's top two themes, chosen from the entry's id, so
+  // the same entry always shows the same drawing.
   function renderVignette(entry) {
     const box = $("reflection-vignette");
-    const main = (entry.themes || [])[0];
-    const url = main && (CFG.vignettes || {})[themeSlug(main)];
+    const drawn = (entry.themes || []).slice(0, 2).filter((name) => (CFG.vignettes || {})[themeSlug(name)]);
+    const seed = [...String(entry.id || "")].reduce((n, ch) => (n * 31 + ch.charCodeAt(0)) % 9973, 0);
+    const theme = drawn[seed % Math.max(1, drawn.length)];
+    const url = theme && CFG.vignettes[themeSlug(theme)];
     box.hidden = !url;
     box.style.setProperty("--vignette", url ? `url("${url}")` : "none");
-    box.title = url ? main : "";
+    box.title = url ? theme : "";
   }
 
   // A reflection paragraph, easier to scan: quotations in italics, and the
