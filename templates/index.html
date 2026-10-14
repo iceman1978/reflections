@@ -309,6 +309,8 @@
           <button id="reflect-btn" class="primary">Try reflection again</button>
         </div>
         <div id="reflection-body" hidden>
+          <!-- A small pencil drawing for the entry's main theme, in the theme's color -->
+          <div id="reflection-vignette" class="reflection-vignette" aria-hidden="true" hidden></div>
           <div id="support-note" class="support-note" hidden></div>
           <div id="insight" class="insight"></div>
           <ul id="citations" class="citations"></ul>   <!-- the reflection's sources, right under its text -->
@@ -710,6 +712,7 @@
     appName: {{ app_name | tojson }},
     inviteLine: {{ edition.invite_line | tojson }},
     themes: {{ themes_enabled | tojson }},
+    vignettes: {{ vignettes | default({}) | tojson }},
     credit: {{ edition.credit | default({"one": "credit", "many": "credits"}) | tojson }},
     userName: {{ user_name | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},

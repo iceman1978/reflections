@@ -51,7 +51,8 @@ def needs_tagging(entry):
 
 
 SCHEMA_DESCRIPTION = ("The 1 to 3 themes from the list that best describe what this entry is about: the "
-                      "writer's own life and concerns, not the reflection's ideas. Fewer is fine.")
+                      "writer's own life and concerns, not the reflection's ideas. Put the most central theme first. "
+                      "Fewer is fine.")
 
 
 def schema_property():
@@ -82,7 +83,8 @@ def tag_batch(entries):
             system=("You sort private journal entries into themes, choosing only from this list:\n"
                     + "\n".join(THEMES)
                     + "\n\nFor each entry, give the 1 to 3 themes that best describe what it's about (the "
-                      "writer's own life and concerns). Fewer is fine when an entry is about one thing."),
+                      "writer's own life and concerns), the most central first. Fewer is fine when an entry is about "
+                      "one thing."),
             messages=[{"role": "user", "content": listing}],
             output_config={"format": {"type": "json_schema", "schema": schema}},
         )

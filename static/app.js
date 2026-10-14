@@ -28,6 +28,8 @@
     return new Date(iso).toLocaleString(undefined, { timeZone: CFG.timezone, ...opts });
   }
   const longDate = (iso) => fmtDate(iso, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  // "Thu, Oct 8, 2026": Past entries, where the line also carries the word count and themes.
+  const shortDate = (iso) => fmtDate(iso, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
   // "9:30 am" rather than "9:30 AM": capitals look odd in the handwriting and text.
   const timeOf = (iso) => fmtDate(iso, { hour: "numeric", minute: "2-digit" }).replace(/\b(AM|PM)\b/, (m) => m.toLowerCase());
 
@@ -738,6 +740,7 @@
       $("reflect-btn").textContent = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
     }
     if (done) {
+      renderVignette(entry);
       $("insight").replaceChildren(...entry.insight.split(/\n\s*\n/).map((t) => {
         const p = document.createElement("p"); p.append(formatInsight(t.trim(), entry)); return p;
       }));
@@ -924,6 +927,18 @@
       fig.append(from);
     }
     return fig;
+  }
+
+  // The drawing for an entry's main theme (its first), if there is one: a pencil
+  // sketch painted in the theme's color through a cut-out (see tools/make_vignettes.py).
+  const themeSlug = (name) => name.toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  function renderVignette(entry) {
+    const box = $("reflection-vignette");
+    const main = (entry.themes || [])[0];
+    const url = main && (CFG.vignettes || {})[themeSlug(main)];
+    box.hidden = !url;
+    box.style.setProperty("--vignette", url ? `url("${url}")` : "none");
+    box.title = url ? main : "";
   }
 
   // A reflection paragraph, easier to scan: quotations in italics, and the
@@ -1171,6 +1186,33 @@
     renderList();
   }
 
+  // "Thu, Oct 8, 2026 · 9:25 am · 60 words" (the time is left out on a phone, to keep the line short).
+  function listDate(line, entry) {
+    const time = document.createElement("span");
+    time.className = "list-time";
+    time.textContent = ` · ${timeOf(entry.created_at)}`;
+    line.append(document.createTextNode(shortDate(entry.created_at)), time,
+      document.createTextNode(` · ${plural(entry.word_count, "word")}`));
+  }
+
+  // An entry's themes, quietly, at the end of its date line in Past entries ("· Work, Rest").
+  // The theme being filtered on, if any, stands out in the accent color.
+  function listThemes(line, entry) {
+    const names = (CFG.themes && entry.themes) || [];
+    if (!names.length) return;
+    const box = document.createElement("span");
+    box.className = "list-themes";
+    box.append(document.createTextNode(" · "));
+    names.forEach((name, i) => {
+      if (i) box.append(document.createTextNode(", "));
+      const t = document.createElement("span");
+      t.textContent = name;
+      if (name === state.theme) t.className = "current";
+      box.append(t);
+    });
+    line.append(box);
+  }
+
   // The small ribbon beside a favorite entry's title.
   function favMark() {
     const mark = document.createElement("span");
@@ -1197,7 +1239,8 @@
         const li = document.createElement("li");
         const when = document.createElement("span");
         when.className = "when";
-        when.textContent = `${longDate(e.created_at)} · ${timeOf(e.created_at)} · ${plural(e.word_count, "word")}`;
+        listDate(when, e);
+        listThemes(when, e);
         const title = document.createElement("span");
         title.className = e.title ? "title" : "title untitled";
         title.textContent = e.title || "No Title";
@@ -1410,7 +1453,8 @@
       const li = document.createElement("li");
       const when = document.createElement("span");
       when.className = "when";
-      when.textContent = `${longDate(e.created_at)} · ${timeOf(e.created_at)} · ${plural(e.word_count, "word")}`;
+      listDate(when, e);
+        listThemes(when, e);
       if (r.field === "reflection" || r.field === "question") {
         const where = document.createElement("span");
         where.className = "found-in";

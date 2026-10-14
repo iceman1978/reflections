@@ -578,6 +578,12 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
   animation: fade-in 0.5s ease-out;
 }
 .insight p { margin: 0 0 1em; }
+/* The main theme's pencil drawing, at the top of the reflection, in the theme's color. */
+.reflection-vignette {
+  width: min(210px, 62%); aspect-ratio: 3 / 2; margin: 2px auto 14px;
+  background: var(--accent); opacity: 0.8;
+  -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
+}
 .insight em { font-style: italic; }                        /* quotations */
 .insight strong { font-weight: 600; }                      /* the works it draws on */
 /* A star after each word-for-word quotation: click to keep the passage. */
@@ -736,6 +742,8 @@ button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(
 #entry-list li:last-child { border-bottom: none; }
 #entry-list li:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
 #entry-list .when { color: var(--muted); font-size: 0.82rem; display: block; }
+#entry-list .list-themes { font-style: italic; }                       /* "· Work, Rest": quiet, on the date line */
+#entry-list .list-themes .current { color: var(--accent); font-style: normal; font-weight: 600; }   /* the theme being filtered on */
 #entry-list .title { display: block; color: var(--ink); font-size: 1.1rem; font-weight: 500; }
 #entry-list .title.untitled { color: var(--muted); font-style: italic; font-weight: 400; }
 #entry-list .snippet { display: block; color: var(--muted); font-size: 0.9rem; }
@@ -1389,6 +1397,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .reflection { margin-left: -6px; margin-right: -6px; padding: 18px 18px 10px; }
   .entry-nav { margin: -8px -8px 10px; }
   .entry-page .entry-nav { margin-right: 30px; }
+  #entry-list .list-time { display: none; }   /* Past entries on a phone: date, words and themes fit on one line */
   .page-ribbon, .page-ribbon:hover:not(:disabled) { right: 8px; }
   .page-ribbon svg { width: 22px; height: 36px; }
   .past { padding: 12px 16px 6px; }

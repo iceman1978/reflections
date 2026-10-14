@@ -220,6 +220,16 @@ def _on_error(err):
 
 # ---- Pages ------------------------------------------------------------------
 
+VIGNETTES_DIR = ROOT / "static" / "vignettes"     # theme drawings (tools/make_vignettes.py)
+
+
+def _vignettes():
+    """{theme slug: link} for every theme drawing there is ("family": "/static/vignettes/family.png?v=…")."""
+    if not VIGNETTES_DIR.exists():
+        return {}
+    return {p.stem: f"/static/vignettes/{p.name}?v={int(p.stat().st_mtime)}" for p in sorted(VIGNETTES_DIR.glob("*.png"))}
+
+
 @app.get("/")
 def index():
     uid = g.user_id
@@ -239,6 +249,7 @@ def index():
         lock_choices=config.LOCK_MINUTE_CHOICES,
         works_count=len(sources.load_map()["works"]),      # "{works}" in the welcome page's points
         library_eras=library.for_settings(prefs["writers"]),  # Settings → Library
+        vignettes=_vignettes(),                               # a drawing for the reflection's main theme
         min_writers=library.MIN_WRITERS,
         has_scripture=any(not w["author"] for w in sources.works().values()),
         background_photo=prefs["background_photo"],
