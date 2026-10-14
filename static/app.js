@@ -739,6 +739,7 @@
         reasons[status] || "This entry doesn't have a reflection yet.";
       $("reflect-btn").textContent = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
     }
+    $("reflect-again-btn").hidden = busy || !entry.can_reflect_again;   // one reflection per entry, unless it's been rewritten
     if (done) {
       renderVignette(entry);
       $("insight").replaceChildren(...entry.insight.split(/\n\s*\n/).map((t) => {
@@ -1026,7 +1027,7 @@
       if (err.status === 409) { pollWhileReflecting(id); return; }
       entry = err.data && err.data.entry;
       if (entry && entry.reflection_status === "Done") {
-        // Reflect again failed; the earlier reflection is still shown.
+        // A new reflection after an edit failed; the earlier one is still shown.
         state.clientError = `Couldn't get a new reflection: ${err.message}`;
         renderBanner();
       }
@@ -1682,8 +1683,8 @@
       state.clientError = null;
       renderBanner();
       showEntry(res.entry);
-      if (res.entry.reflection_status === "Done") {
-        $("entry-status").textContent = "Saved. The reflection below is from before your edit; use Reflect again to update it.";
+      if (res.entry.can_reflect_again) {
+        $("entry-status").textContent = "Saved. The reflection below is from before your changes; you can ask for one on the edited entry below it.";
       }
       refreshList();
     } catch (err) {

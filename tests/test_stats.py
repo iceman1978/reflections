@@ -65,3 +65,26 @@ class StreakTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MaterialEditTests(unittest.TestCase):
+    """One reflection per entry, unless its text has changed materially since."""
+    TEXT = ("I had a hard conversation with my brother today about our father's care. We both want what is best "
+            "but we keep talking past each other, and I left feeling unheard and a little ashamed of my tone.")
+
+    def test_fixing_typos_or_punctuation_is_not_material(self):
+        from journal.store import materially_changed
+        self.assertFalse(materially_changed(self.TEXT, self.TEXT.replace("today", "today,").replace("unheard", "unhaerd")))
+        self.assertFalse(materially_changed(self.TEXT, self.TEXT.upper()))
+        self.assertFalse(materially_changed(self.TEXT, self.TEXT))
+
+    def test_adding_a_new_thought_is_material(self):
+        from journal.store import materially_changed
+        more = self.TEXT + (" Later he called back and apologised, and we agreed to visit Dad together on Sunday "
+                            "and to ask the nurse our questions side by side.")
+        self.assertTrue(materially_changed(self.TEXT, more))
+
+    def test_rewriting_much_of_a_short_entry_is_material(self):
+        from journal.store import materially_changed
+        self.assertTrue(materially_changed("Tired today. Work was long.", "Tired today. Slept badly and argued with Sam."))
+        self.assertFalse(materially_changed("Tired today. Work was long.", "Tired today. Work was so long."))

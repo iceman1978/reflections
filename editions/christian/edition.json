@@ -43,6 +43,12 @@
   "invite_line": "Invite a friend",
   "voices_label": "writers",
   "voice_singular": "writer",
+  "recurring_scripture": {
+    "about": "Every couple of reflections, a nudge toward the words of Jesus (journal/reflection.py)",
+    "works": ["matthew", "mark", "luke", "john"],
+    "every": 2,
+    "note": "Neither of this person's last two reflections quoted the words of Jesus. If a saying of Jesus in the Gospels genuinely meets this entry, quote it this time, word for word, introduced as His words. If none truly fits, don't force one."
+  },
   "examples": {
     "paraphrase": "Paul told the Philippians not to be anxious about anything, but to bring every request to God with thanksgiving.",
     "reference": "Brother Lawrence, in his Fourth Conversation, described…",

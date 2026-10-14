@@ -272,6 +272,24 @@ def _variety_note(entry, voices=None):
     return note
 
 
+# An edition can ask for one part of Scripture to come back regularly (In His Steps: the
+# words of Jesus, about every second reflection): a nudge when it hasn't been quoted lately.
+RECURRING = EDITION.get("recurring_scripture")
+
+
+def recurring_note(entry, entries):
+    """The edition's nudge, if none of the last few reflections (before this entry) quoted those works."""
+    if not RECURRING:
+        return None
+    works = set(RECURRING["works"])
+    reflected = [e for e in entries
+                 if e["id"] != entry["id"] and e.get("reflection_status") == store.DONE and e.get("insight")]
+    recent = reflected[-int(RECURRING.get("every", 2)):]
+    if any(q.get("work") in works for e in recent for q in e.get("quotes") or []):
+        return None
+    return RECURRING["note"]
+
+
 def _user_message(entry, voices=None):
     when = datetime.fromisoformat(entry["created_at"]).astimezone(TZ)
     clock = when.strftime("%I:%M %p").lstrip("0")
@@ -283,6 +301,8 @@ def _user_message(entry, voices=None):
     parts.append("<entry>\n" + entry["text"] + "\n</entry>")
     if (variety := _variety_note(entry, voices)):
         parts.append(variety)
+    if (recurring := recurring_note(entry, store.all_entries())):
+        parts.append(recurring)
     return "\n\n".join(parts)
 
 

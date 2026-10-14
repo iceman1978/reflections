@@ -106,3 +106,30 @@ class ChoiceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RecurringScriptureTests(unittest.TestCase):
+    """In His Steps: the words of Jesus come back about every second reflection."""
+
+    def setUp(self):
+        self.saved = reflection.RECURRING
+        reflection.RECURRING = {"works": ["matthew", "john"], "every": 2, "note": "Quote Jesus."}
+
+    def tearDown(self):
+        reflection.RECURRING = self.saved
+
+    @staticmethod
+    def done(id, *works):
+        return {"id": id, "reflection_status": "Done", "insight": "…", "quotes": [{"work": w} for w in works]}
+
+    def test_nudged_when_neither_of_the_last_two_quoted_the_gospels(self):
+        entries = [self.done("a", "john"), self.done("b", "psalms"), self.done("c", "romans"), {"id": "new"}]
+        self.assertEqual(reflection.recurring_note({"id": "new"}, entries), "Quote Jesus.")
+
+    def test_quiet_when_one_of_the_last_two_did(self):
+        entries = [self.done("a", "psalms"), self.done("b", "matthew"), self.done("c", "romans"), {"id": "new"}]
+        self.assertIsNone(reflection.recurring_note({"id": "new"}, entries))
+
+    def test_an_edition_without_it_never_nudges(self):
+        reflection.RECURRING = None
+        self.assertIsNone(reflection.recurring_note({"id": "new"}, [self.done("a", "psalms")]))

@@ -684,11 +684,25 @@ def _visible(entry_id):
     return entry
 
 
+def _has_reflection(entry):
+    return entry.get("reflection_status") == store.DONE and bool(entry.get("insight"))
+
+
+def _can_reflect_again(entry):
+    """A new reflection on an entry that has one only after a material edit of its text."""
+    if not _has_reflection(entry):
+        return False
+    before = entry.get("reflected_text")
+    return before is not None and store.materially_changed(before, entry.get("text"))
+
+
 def _for_page(entry, reflecting=None):
     """The entry plus what the page needs to show its reflection state."""
     if reflecting is None:
         reflecting = entry["id"] in _reflecting
     out = dict(entry, reflecting=reflecting)
+    out.pop("reflected_text", None)            # the text as it was when reflected on: only the server needs it
+    out["can_reflect_again"] = _can_reflect_again(entry)
     if entry.get("quotes"):                    # which of its quotations are kept (the stars in the reflection)
         starred = kept.keys()
         out["quotes"] = [dict(q, key=kept.key_of(q), kept=kept.key_of(q) in starred) for q in entry["quotes"]]
@@ -791,6 +805,8 @@ def edit_entry(entry_id):
         fields["created_at"] = when.isoformat()
     try:
         old = _visible(entry_id)
+        if _has_reflection(old) and old.get("reflected_text") is None:
+            fields["reflected_text"] = old.get("text")   # reflected on before the text was kept: as it is now
         if "title" in data:
             title = store.clean_title(data.get("title"))
             if title != old.get("title"):
@@ -884,7 +900,12 @@ def reflect_entry(entry_id):
         if entry_id in _reflecting:
             return jsonify(error="Already reflecting on this entry.", entry=_for_page(entry)), 409
         _reflecting.add(entry_id)
-    had_reflection = entry.get("reflection_status") == store.DONE and entry.get("insight")
+    had_reflection = _has_reflection(entry)
+    if had_reflection and not _can_reflect_again(entry):
+        with _reflecting_lock:
+            _reflecting.discard(entry_id)
+        return jsonify(error="This entry already has its reflection. A new one is possible after you change "
+                             "what the entry says.", entry=_for_page(entry, reflecting=False)), 400
     try:
         try:
             usage.check(g.user_id, "reflection")
@@ -897,7 +918,7 @@ def reflect_entry(entry_id):
         try:
             fields = reflection.reflect(entry, users.prefs(g.user_id)["writers"])
         except reflection.ReflectionError as e:
-            # "Reflect again" failing keeps the earlier reflection.
+            # A new reflection after an edit failing keeps the earlier one.
             status = store.DONE if had_reflection else store.FAILED
             entry = store.update_entry(entry_id, reflection_status=status, reflection_error=str(e))
             return jsonify(error=str(e), entry=_for_page(entry, reflecting=False)), 502
@@ -906,7 +927,8 @@ def reflect_entry(entry_id):
         current = store.get_entry(entry_id)  # may have been renamed while Claude was thinking
         if suggested and not current.get("title"):
             fields.update(title=suggested, title_source="generated")
-        entry = store.update_entry(entry_id, reflection_status=store.DONE, reflection_error=None, **fields)
+        entry = store.update_entry(entry_id, reflection_status=store.DONE, reflection_error=None,
+                                   reflected_text=entry.get("text"), **fields)
         return jsonify(entry=_for_page(entry, reflecting=False), **_limits(g.user_id))
     finally:
         with _reflecting_lock:

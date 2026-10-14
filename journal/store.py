@@ -40,6 +40,23 @@ def word_count(text):
     return len(re.findall(r"\S+", text or ""))
 
 
+# An entry gets one reflection. It can have a new one only once its text has
+# changed materially since then: more than a few words fixed, not just its date.
+MATERIAL_WORDS = 15       # words added, removed or rewritten…
+MATERIAL_SHARE = 0.25     # …or this share of a short entry's words
+
+
+def materially_changed(before, after):
+    """Has the text changed enough since the reflection to deserve a new one?
+    Fixing typos, punctuation or capitals doesn't count."""
+    import difflib
+    words = lambda t: re.findall(r"[a-z0-9']+", (t or "").lower())   # noqa: E731
+    a, b = words(before), words(after)
+    changed = sum(max(i2 - i1, j2 - j1) for tag, i1, i2, j1, j2
+                  in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if tag != "equal")
+    return changed >= MATERIAL_WORDS or changed >= MATERIAL_SHARE * max(len(a), 1)
+
+
 def new_id():
     """Random, so an ID says nothing about when an entry was written."""
     return secrets.token_hex(8)

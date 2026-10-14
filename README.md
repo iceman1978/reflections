@@ -118,7 +118,7 @@ When you click **Finish & reflect**, the entry is saved first, and only then is 
 
 If it fails (no internet, an API problem, Claude busy), your entry is still saved. You'll see the reason and a **Try reflection again** button. Entries without a reflection are marked *no reflection yet* in the list, and can be retried any time. In exports, the *Reflection Status* column shows *Done*, *Failed*, *Pending* or *Not requested*.
 
-After editing an entry, the old reflection stays. Click **Reflect again** if you want a new one. If that fails, the earlier reflection is kept.
+Each entry gets one reflection. After an edit, the old reflection stays; only if you've changed what the entry says (about 15 words added, removed or rewritten, or a quarter of a short entry; not fixed typos, a new title or a changed date) does a **Reflect on your edited entry** button appear under it. A new reflection uses a credit like any other; if it fails, the earlier reflection is kept. The app keeps the entry's text as it was when reflected on (encrypted, inside the entry) to compare against.
 
 **Tuning the reflections:** edit `editions/philosophy/prompts/reflection.md` in Notepad. Changes apply to the next reflection; no restart is needed. The note shown when an entry suggests real distress is in `prompts/support_note.md`.
 
