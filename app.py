@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, library, migrate, passkeys, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, library, migrate, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -1102,6 +1102,7 @@ def usage_stats():
         return resp
     stats = activity.summary()
     stats["invited"] = len(config.ALLOWED_EMAILS) if HOSTED else None
+    stats["tokens"] = tokens.summary()                 # average tokens per call to Claude, last 30 days
     return jsonify(stats)
 
 

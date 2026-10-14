@@ -20,7 +20,13 @@ Where texts come from (the 'pages' field of each work):
     {"ccel": "author/book"}    the Christian Classics Ethereal Library's XML
                                edition, one page per chapter, linked to CCEL
     {"gutenberg": 25141, "split": "h2" or "split_text": regex}
-                               a Project Gutenberg book, split at each heading
+                               a Project Gutenberg book, split at each heading.
+                               Optional: "split" may list several tags (["h1", "h2"]);
+                               "group": regex for headings that only group the ones
+                               after them (BOOK I), which then start each label and
+                               location; "drop": regex for paragraphs to leave out
+                               (an editor's notes); "skip": regex for headings to skip;
+                               "unlabelled": true for a work that is a single page
 """
 import json
 import re
@@ -86,7 +92,7 @@ class Paragraphs(HTMLParser):
     """
     SKIP_TAGS = {"style", "script", "sup"}
     SKIP_CLASSES = ("wst-header", "ws-noexport", "mw-references", "reference", "noprint",
-                    "sidenote", "wst-rh", "running-header", "pagenum")
+                    "sidenote", "wst-rh", "running-header", "pagenum", "fnanchor", "footnote")
     BLOCKS = {"p", "div", "li", "dd", "dt", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6",
               "td", "th", "center", "table", "tr", "ul", "ol", "dl", "pre"}
     VOID = {"br", "img", "hr", "meta", "link", "input", "wbr", "col", "area", "source"}
@@ -135,7 +141,7 @@ class Paragraphs(HTMLParser):
 
 
 ROMAN_HEADING = re.compile(r"^([IVXLC]+)\.$")
-NUMBERED = re.compile(r"^(\d+)\.\s")
+NUMBERED = re.compile(r"^(\d+)\.(?:\s|—)")      # "3. Text", or "3.—Text" (La Rochefoucauld)
 NUMBER_ALONE = re.compile(r"^(\d+[a-z]?)\.?$")   # "146." or just "146" on its own line (Pascal)
 
 
@@ -156,6 +162,7 @@ def assign_sections(paras, style):
             m = NUMBERED.match(p)
             if m:
                 section = m.group(1)
+                p = re.sub(r"^(\d+)\.—", r"\1. ", p)   # "3.—Text" -> "3. Text", so the number stays apart from the words
             elif section is None:
                 section = "1"  # first passage of a book is often unnumbered
             out.append({"section": section, "text": p})
@@ -225,12 +232,27 @@ SKIP_TITLES = re.compile(r"^(title page|contents|table of contents|indexes|index
                          r"publisher|foreword|footnotes|notes\.?$|appendix to (the )?electronic)", re.I)
 
 
+ROMAN_WORD = re.compile(r"^(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$")
+
+
+def title_case(text):
+    """'ON LOVE TO ONE'S OFFSPRING' -> 'On Love To One's Offspring'; 'BOOK VI' -> 'Book VI'."""
+    words = []
+    for word in text.split():
+        core = word.strip(".,;:")
+        if core and ROMAN_WORD.match(core):
+            words.append(word)                                  # a Roman numeral stays in capitals
+        else:
+            words.append(re.sub(r"(?<=[A-Za-z])'S\b", "'s", word.title().replace("’S", "’s")))
+    return " ".join(words)
+
+
 def short_label(div):
     """How a chapter is named in a citation: 'Book 1', 'Chapter IV', 'Third Letter',
     'Morning, January 1', 'IV. The Fight'."""
     kind, n, title = div.get("type") or "", div.get("n") or "", " ".join((div.get("title") or "").split())
     if title.isupper():
-        title = title.title()
+        title = title_case(title)
     if kind.lower() in ("book", "part", "chapter") and sources.key_part(n).isdigit():
         return f"{kind.title()} {sources.key_part(n)}"
     first = re.match(r"^(.{1,28}?)\.\s", title + " ")
@@ -355,21 +377,31 @@ def gutenberg_pages(work):
     parser = BlockParser()
     parser.feed(html[start:end])
     parser.close()
-    split_tag = spec.get("split")
+    split_tags = spec.get("split") or []
+    split_tags = {split_tags} if isinstance(split_tags, str) else set(split_tags)
     split_text = re.compile(spec["split_text"]) if spec.get("split_text") else None
+    group = re.compile(spec["group"]) if spec.get("group") else None
+    drop = re.compile(spec["drop"]) if spec.get("drop") else None
+    parent = ""
     skip = re.compile(spec["skip"], re.I) if spec.get("skip") else SKIP_TITLES
     pages, current, before = [], None, ""
     for tag, anchor, text in parser.blocks:
-        if (split_tag and tag == split_tag) or (split_text and split_text.match(text)):
+        if tag in split_tags or (split_text and split_text.match(text)):
+            if group and group.match(text):                # "BOOK I": names the pages that follow
+                parent, current, before = (title_case(text) if text.isupper() else text).rstrip("."), None, text
+                continue
+            text = re.sub(r"(?<=[A-Za-z])\.?\d+$", "", text)                    # a footnote number stuck to the heading
             label = re.sub(r"^([IVXLC]+)\.?\s+", r"\1. ", text.rstrip("."))   # "I  Following" -> "I. Following"
             if re.fullmatch(r"[IVXLC]+\.?", before):        # the chapter's numeral, on the line above
                 label = f"{before.rstrip('.')}. {label}"
+            location = "" if spec.get("unlabelled") else short_label({"title": label})   # a one-page work has no place to name
             current = None if skip.match(label) else {
                 "key": anchor or label, "title": f"{url}#{anchor}" if anchor else url,
-                "label": label, "location": short_label({"title": label}), "texts": []}
+                "label": f"{parent} / {label}" if parent else label,
+                "location": f"{parent}, {location}" if parent else location, "texts": []}
             if current:
                 pages.append(current)
-        elif current and not re.fullmatch(r"[IVXLC]+\.?", text):
+        elif current and not re.fullmatch(r"[IVXLC]+\.?", text) and not (drop and drop.match(text)):
             current["texts"].append(text)
         before = text
     for page in pages:
@@ -409,7 +441,9 @@ def download_work(work_id, work, page_list):
         parser = Paragraphs()
         parser.feed(fetch(f"{RENDER}?{q}"))
         parser.close()
-        paras = assign_sections(parser.paras, work.get("sections"))
+        # Some transcriptions mark italics with underscores (_is_): show the plain words.
+        plain = [re.sub(r"(?<![A-Za-z0-9])_([^_]+)_(?![A-Za-z0-9])", r"\1", p) for p in parser.paras]
+        paras = assign_sections(plain, work.get("sections"))
         pages.append({"key": key, "title": title, "paragraphs": paras})
         print(f"    {title}  ({sum(len(p['text'].split()) for p in paras)} words)")
     save_text(work_id, work, pages)

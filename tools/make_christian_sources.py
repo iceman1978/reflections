@@ -1,5 +1,5 @@
 """Writes editions/christian/sources.json (the Bible books are listed here once,
-rather than typed out 21 times). Run it again after changing the lists below:
+rather than typed out for each one). Run it again after changing the lists below:
 
     uv run python tools/make_christian_sources.py
 
@@ -16,6 +16,34 @@ PHILOSOPHY = json.loads((ROOT / "editions" / "philosophy" / "sources.json").read
 
 # (id, name in the BSB file, Bible Hub slug, how it's cited, guidance for Claude)
 BIBLE = [
+    ("genesis", "Genesis", "genesis", "Genesis",
+     "Beginnings, and the family of promise: made in God's image (1-2), the fall and hiding from God (3), "
+     "Abraham called to go without knowing where (12), waiting on a promise (15, 18, 21), Jacob wrestling (32), "
+     "Joseph betrayed, forgotten, raised up, and forgiving his brothers (37, 39-45, 50:20). Stay with these "
+     "stories; leave the genealogies and the darker episodes alone."),
+    ("exodus", "Exodus", "exodus", "Exodus",
+     "God hears the oppressed: Moses' call and his excuses (3-4), deliverance at the sea (14), daily bread and "
+     "grumbling in the wilderness (16), rest and the commandments (20), Moses' intercession and the LORD's "
+     "name, compassionate and gracious (32-34). Not the case laws or the tabernacle instructions."),
+    ("deuteronomy", "Deuteronomy", "deuteronomy", "Deuteronomy",
+     "Remembering and choosing: love the LORD with all your heart (6), not by bread alone, and the danger of "
+     "forgetting God in prosperity (8), what the LORD requires (10:12-13), choose life (30), be strong and "
+     "courageous (31). Not the legal codes or the curses."),
+    ("ruth", "Ruth", "ruth", "Ruth",
+     "Loyalty and quiet providence in ordinary life: Ruth's pledge to Naomi (1), kindness in the fields (2), "
+     "bitterness turned to fullness (4)."),
+    ("1_samuel", "1 Samuel", "1_samuel", "1 Samuel",
+     "Hannah's prayer out of anguish (1-2), the boy Samuel listening (3), the LORD looks at the heart (16), "
+     "David and Goliath (17), David and Jonathan's friendship (18, 20), David sparing Saul (24, 26). Not the "
+     "battle accounts."),
+    ("2_samuel", "2 Samuel", "2_samuel", "2 Samuel",
+     "David the king as a fellow sinner: his sin, Nathan's rebuke and his repentance (11-12), his grief for "
+     "Absalom (18), his song of deliverance (22). Not the wars and court intrigue."),
+    ("job", "Job", "job", "Job",
+     "Honest suffering: loss and worship (1-2), Job's lament (3), his protest and his longing for a mediator "
+     "(9, 19:25-27, 23), where wisdom is found (28), the LORD answering out of the whirlwind (38-42). Take care "
+     "with the friends' speeches (Eliphaz, Bildad, Zophar in 4-25, and Elihu in 32-37): they sound wise, but "
+     "the book itself rebukes them, so never quote them as counsel."),
     ("psalms", "Psalm", "psalms", "Psalm",
      "Prayer in every mood: lament, confession (32, 51), trust (23, 27, 46, 62, 91), longing (42, 63, 84), "
      "searching the heart (139), praise. Give the speaker's honest feelings their due before turning to hope."),
@@ -27,6 +55,22 @@ BIBLE = [
      "'the Teacher of Ecclesiastes' on first mention, then just 'the Teacher' or 'he'."),
     ("isaiah", "Isaiah", "isaiah", "Isaiah",
      "Comfort and calling: the vision of holiness (6), comfort for the weary (40), the Servant (42, 53), invitation (55)."),
+    ("jeremiah", "Jeremiah", "jeremiah", "Jeremiah",
+     "A reluctant, weeping prophet: his call (1), broken cisterns (2), the one who trusts like a tree by water, "
+     "and the deceitful heart (17), the potter (18), his complaint (20), plans for welfare and seeking with all "
+     "your heart (29), the new covenant (31). Not the oracles of judgment on the nations."),
+    ("lamentations", "Lamentations", "lamentations", "Lamentations",
+     "Grief given words, without hurry (1-2); and at its center, hope: the LORD's mercies new every morning, "
+     "waiting quietly (3:19-33)."),
+    ("jonah", "Jonah", "jonah", "Jonah",
+     "Running from a call (1), prayer from the depths (2), God's mercy on people we would rather He judged, and "
+     "Jonah's anger about it (3-4)."),
+    ("micah", "Micah", "micah", "Micah",
+     "What the LORD requires: to act justly, to love mercy and to walk humbly (6:8); waiting for God in a dark "
+     "time, and His delight in mercy (7)."),
+    ("habakkuk", "Habakkuk", "habakkuk", "Habakkuk",
+     "Honest questions put to God (1), the righteous living by faith (2:4), rejoicing though the fig tree does "
+     "not blossom (3:17-19)."),
     ("matthew", "Matthew", "matthew", "Matthew",
      "The Sermon on the Mount (5-7): the Beatitudes, anger, lust, enemies, giving and prayer in secret, treasure, "
      "worry, judging, the narrow gate. Parables (13, 18, 20, 25). The weary invited to rest (11:28-30)."),
@@ -38,6 +82,11 @@ BIBLE = [
     ("john", "John", "john", "John",
      "The Word made flesh (1), new birth (3), living water (4), the 'I am' sayings, washing feet (13), "
      "abiding in the vine (15), the high-priestly prayer (17), Peter restored (21)."),
+    ("acts", "Acts", "acts", "Acts",
+     "The first Christians: life together (2:42-47), boldness and prayer (4), Stephen (7), Saul's conversion "
+     "(9), Peter and Cornelius (10), Paul and Silas singing in prison (16), Paul in Athens (17), 'more blessed "
+     "to give' (20). Draw on the people and their choices; don't treat what happened to them as a promise to "
+     "the reader."),
     ("romans", "Romans", "romans", "Romans",
      "Paul's fullest gospel: all have sinned (3), justified by faith (5), dead to sin (6), the divided self (7), "
      "no condemnation and life in the Spirit (8), living sacrifices and transformed minds (12)."),
@@ -52,12 +101,16 @@ BIBLE = [
      "Saved by grace through faith (2), rooted in love (3), the old self and the new (4), speech and anger (4), "
      "walking as children of light (5), the armor of God (6)."),
     ("philippians", "Philippians", "philippians", "Philippians",
-     "The mind of Christ and his humility (2), counting all as loss (3), pressing on (3), anxiety and peace, "
+     "The mind of Christ and His humility (2), counting all as loss (3), pressing on (3), anxiety and peace, "
      "whatever is true, contentment in all circumstances (4)."),
     ("colossians", "Colossians", "colossians", "Colossians",
      "Setting your mind on things above, putting off and putting on (3), work done as for the Lord (3)."),
     ("1_thessalonians", "1 Thessalonians", "1_thessalonians", "1 Thessalonians",
      "A quiet life (4), grief with hope (4), rejoice always, pray without ceasing, give thanks (5)."),
+    ("1_timothy", "1 Timothy", "1_timothy", "1 Timothy",
+     "Paul to a young worker: the foremost of sinners shown mercy (1), prayer for everyone (2:1-4), training in "
+     "godliness (4), contentment and the love of money, fighting the good fight (6). Not the instructions on "
+     "church order and offices (2:8-3:13, 5)."),
     ("2_timothy", "2 Timothy", "2_timothy", "2 Timothy",
      "Not a spirit of fear (1), endurance (2), Scripture (3), finishing the race (4)."),
     ("hebrews", "Hebrews", "hebrews", "Hebrews",
@@ -66,7 +119,10 @@ BIBLE = [
      "Trials and wisdom (1), doers of the word (1), favoritism (2), faith and works (2), the tongue (3), "
      "humility and planning (4), patience (5)."),
     ("1_peter", "1 Peter", "1_peter", "1 Peter",
-     "Living hope (1), suffering for doing good (2-4), casting your anxieties on him (5:7), humility (5)."),
+     "Living hope (1), suffering for doing good (2-4), casting your anxieties on Him (5:7), humility (5)."),
+    ("2_peter", "2 Peter", "2_peter", "2 Peter",
+     "Growing in grace: adding to faith virtue, knowledge and self-control (1:3-11), the Lord's patience "
+     "(3:8-9), growing in the grace and knowledge of Christ (3:18). Not the denunciations of chapter 2."),
     ("1_john", "1 John", "1_john", "1 John",
      "Walking in the light, confession and forgiveness (1), love for one another, God is love (4), assurance (5)."),
 ]
@@ -187,6 +243,58 @@ WRITERS = {
                 "earth-bound heart.",
         "work_page": "https://ccel.org/ccel/baxter/saints_rest",
         "pages": {"ccel": "baxter/saints_rest"}, "sections": None},
+    "wesley_sermons": {
+        "author": "John Wesley", "title": "Sermons on Several Occasions",
+        "translation": "original English (1746-1760 and later)",
+        "location_format": "the sermon's title, e.g. The Almost Christian",
+        "note": "Plain sermons on the way of salvation and holiness of heart and life: Salvation by Faith, The Almost "
+                "Christian, The Circumcision of the Heart, The Means of Grace, the discourses on the Sermon on the "
+                "Mount, Catholic Spirit, The Use of Money, On Patience. Grace goes before, forgives and changes.",
+        "work_page": "https://ccel.org/ccel/wesley/sermons",
+        "pages": {"ccel": "wesley/sermons", "only": r"\."}, "sections": None},   # the sermons, not the indexes
+    "wesley_perfection": {
+        "author": "John Wesley", "title": "A Plain Account of Christian Perfection",
+        "translation": "original English (1777)",
+        "location_format": "leave empty",
+        "note": "Wesley's account of perfect love: loving God with all the heart and one's neighbor as oneself, purity "
+                "of intention, growing in grace. He means love made complete, not freedom from mistakes or temptation.",
+        "work_page": "https://ccel.org/ccel/wesley/perfection",
+        "pages": {"ccel": "wesley/perfection"}, "sections": None},
+    "smith_secret": {
+        "author": "Hannah Whitall Smith", "title": "The Christian's Secret of a Happy Life",
+        "translation": "original English (1875)",
+        "location_format": "chapter, e.g. Chapter 8",
+        "note": "Trust as rest: handing the burden over and leaving it there; faith as a choice of the will rather than "
+                "a feeling; God in everything; what to do after failure; doubts.",
+        "work_page": "https://ccel.org/ccel/smith_hw/secret",
+        "pages": {"ccel": "smith_hw/secret"}, "sections": None},
+    "macdonald_unspoken": {
+        "author": "George MacDonald", "title": "Unspoken Sermons",
+        "translation": "original English (1867-1889)",
+        "location_format": "the sermon's title, e.g. The Consuming Fire",
+        "note": "The Father's love as a consuming fire that will have us wholly good; childlikeness (The Child in the "
+                "Midst); obedience as the door to knowing God (The Way, The Truth); honest prayer and honest doubt "
+                "(The Word of Jesus on Prayer, The Voice of Job).",
+        "work_page": "https://www.gutenberg.org/ebooks/9057",
+        "pages": {"gutenberg": 9057, "split": ["h1", "h2"], "skip": r"^(unspoken sermons|contents)"}, "sections": None},
+    "bounds_power": {
+        "author": "E. M. Bounds", "title": "Power Through Prayer",
+        "translation": "original English (1907)",
+        "location_format": "chapter, e.g. Chapter 9",
+        "note": "Written to preachers, but its heart is for anyone: prayer as the real work, much time alone with God, "
+                "beginning the day with prayer, the heart before the head. Use the passages on prayer itself, not "
+                "those on preaching.",
+        "work_page": "https://ccel.org/ccel/bounds/power",
+        "pages": {"ccel": "bounds/power"}, "sections": None},
+    "chesterton_orthodoxy": {
+        "author": "G. K. Chesterton", "title": "Orthodoxy",
+        "translation": "original English (1908)",
+        "location_format": "chapter, e.g. Chapter IV",
+        "note": "Wonder and gratitude as the right response to existing at all (The Ethics of Elfland); humility put in "
+                "the wrong place, doubting truth instead of ourselves (The Suicide of Thought); loving the world "
+                "enough to want it changed (The Flag of the World); joy as 'the gigantic secret of the Christian'.",
+        "work_page": "https://www.gutenberg.org/ebooks/130",
+        "pages": {"gutenberg": 130, "split": "h3", "skip": r"^(orthodoxy|contents|preface)"}, "sections": None},
     "kempis_imitation": {
         "author": "Thomas à Kempis", "title": "The Imitation of Christ",
         "translation": "Aloysius Croft and Harold Bolton (1940)",
@@ -222,8 +330,9 @@ def main():
             "Scripture is the Berean Standard Bible (public domain since 2023), linked to Bible Hub.",
             "Writers come from the Christian Classics Ethereal Library (CCEL), Project Gutenberg, or",
             "Wikisource (Augustine and Aquinas, shared with Reflections). Writers still in copyright",
-            "(C. S. Lewis, Bonhoeffer, Dallas Willard, Tim Keller, Oswald Chambers) are not listed:",
-            "Claude may paraphrase and name them, but never quote them.",
+            "(C. S. Lewis, Bonhoeffer and others) and a few older ones with no checked text here",
+            "(John Newton, Burroughs, Sibbes) are not listed: Claude may paraphrase and name them, but",
+            "never quote them. They are in edition.json under writers.",
             "See editions/philosophy/sources.json for what each field means.",
         ],
         "site": PHILOSOPHY["site"],

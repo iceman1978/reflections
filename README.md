@@ -104,7 +104,7 @@ Kept passages are stored as their own encrypted list (the `kept` table in `data/
 
 ## Your library: choosing your writers
 
-*Settings → Library* lists every writer the edition draws on, grouped by era, each with a line on what they bring and the works used. Switch off anyone you'd rather not hear from, or switch on a writer who starts off (in In His Steps, Leonard Ravenhill and Derek Prince start off). Your reflections and writing prompts then draw only on the writers left on; in In His Steps, Scripture is always included. At least 3 writers must stay on. The choice applies to new reflections; earlier ones, and passages you've kept, don't change.
+*Settings → Library* lists every writer the edition draws on, grouped by era, each with a line on what they bring and the works used. Switch off anyone you'd rather not hear from, or switch on a writer who starts off (a few stronger or more contested voices do: Thomas Aquinas, John Owen, Hannah Whitall Smith, George MacDonald, Leonard Ravenhill and Derek Prince in In His Steps; Anselm, Aquinas, Locke, La Rochefoucauld, Schopenhauer, Nietzsche and Camus in A Life Well Lived). Your reflections and writing prompts then draw only on the writers left on; in In His Steps, Scripture is always included. At least 3 writers must stay on. The choice applies to new reflections; earlier ones, and passages you've kept, don't change.
 
 How it works: a writer who is off is never mentioned to Claude. Their notes, their works and their name are left out of the instructions and of the list of works it may quote or refer to, the instructions say plainly who is not in this reader's library, and anything attributed to a work outside it is dropped. Your choices are saved with your other preferences (only where they differ from the edition's defaults), not inside the encrypted journal.
 
@@ -128,7 +128,7 @@ Reflections come in two or three short paragraphs, in the same size as your entr
 
 Reflections draw on the whole Western tradition: Socrates and Plato, Aristotle, Epicurus, Cicero, the Stoics, Augustine, Boethius, Anselm, Aquinas and Dante, Descartes, Pascal, Spinoza, Locke and Hume, Kant, Kierkegaard, and Mill. Claude picks whichever thinker best fits each entry; to change that emphasis, edit `editions/philosophy/prompts/reflection.md`.
 
-Claude may quote only the 34 works listed in `editions/philosophy/sources.json`, each in a specific public-domain translation (or original English edition) on Wikisource. Claude never writes links. For each quote, the app:
+Claude may quote only the works listed in `editions/philosophy/sources.json` (53 of them), each in a specific public-domain translation (or original English edition) on Wikisource or Project Gutenberg. Claude never writes links. For each quote, the app:
 
 1. searches its local copy of that translation (`sources/texts/`) for the words,
 2. if found, shows the **source's exact wording**, cites where it actually appears (correcting the book or chapter if Claude got it wrong), and links to that page (**Read the passage**),
@@ -155,17 +155,19 @@ uv run python tools/recheck_quotes.py --apply
 
 The **Sources** page (footer, between the version number and *Privacy*; also at `/sources`) lists every quotable work of the edition, grouped by tradition, with its translation and a link to the full text. Its groups, introduction and (for In His Steps) the writers who are only ever paraphrased live in `editions/<edition>/edition.json` (`sources_intro`, `source_groups`, `paraphrase_only`). A test checks that every work in `sources.json` appears in exactly one group. Its *Send feedback about the sources* link opens the feedback form once the journal is unlocked.
 
-All texts are public domain and come from [Wikisource](https://en.wikisource.org).
+All texts are public domain and come from [Wikisource](https://en.wikisource.org) or, where marked PG, [Project Gutenberg](https://www.gutenberg.org).
 
 | Thinker | Works (translation) |
 |---|---|
-| Socrates & Plato | *Apology*, *Crito*, *Phaedo*, *Symposium* (Jowett, 1892); *Republic* (Jowett, 1901) |
+| Socrates & Plato | *Apology*, *Crito*, *Phaedo*, *Symposium*, *Gorgias*, *Meno* (Jowett, 1892); *Republic* (Jowett, 1901) |
 | Aristotle | *Nicomachean Ethics* (Chase, 1847) |
 | Epicurus | *Letters* and *Principal Doctrines*, in Diogenes Laërtius' *Lives*, Book X (Hicks, 1925) |
 | Cicero | *On Old Age* (Peabody, 1884); *Tusculan Disputations* (Yonge, 1888) |
 | Marcus Aurelius | *Meditations* (Long, 1862) |
 | Epictetus | *Enchiridion*, *Discourses* (Long, 1877) |
-| Seneca | *Letters to Lucilius* (Gummere, 1917–25); *On the Shortness of Life* (Basore, 1932); *On Anger* (Stewart, 1900) |
+| Seneca | *Letters to Lucilius* (Gummere, 1917–25); *On the Shortness of Life* (Basore, 1932); *On Anger*, *On the Happy Life*, *On Tranquility of Mind* (Stewart, 1900) |
+| Lucretius | *On the Nature of Things* (Leonard, 1916; PG) |
+| Plutarch | *Morals*: the ethical essays (Shilleto, 1898; PG) |
 | Augustine | *Confessions* (Pilkington, 1886) |
 | Boethius | *The Consolation of Philosophy* (James, 1897) |
 | Anselm of Canterbury | *Proslogium* (Deane, 1903) |
@@ -179,6 +181,18 @@ All texts are public domain and come from [Wikisource](https://en.wikisource.org
 | Kant | *Groundwork of the Metaphysics of Morals*, *Critique of Practical Reason* (Abbott, 1873) |
 | Kierkegaard | *Selections from the Writings of Kierkegaard* (Hollander, 1923) |
 | John Stuart Mill | *On Liberty* (1859); *Utilitarianism* (1863), original English editions |
+| Montaigne | *Essays* (Cotton, revised by Hazlitt, 1877) |
+| Francis Bacon | *Essays* (1625; Scott's edition, 1908) |
+| La Rochefoucauld | *Maxims* (Bund and Friswell, 1871; PG). Off unless switched on |
+| Adam Smith | *The Theory of Moral Sentiments* (1759) |
+| Rousseau | *Confessions* (Aldus Society translation, 1903) |
+| Schopenhauer | *The Wisdom of Life*, *Counsels and Maxims* (Saunders, 1890). Off unless switched on |
+| Emerson | *Essays: First Series* (1841) |
+| Thoreau | *Walden* (1854) |
+| Nietzsche | *Beyond Good and Evil* (Zimmern, 1906). Off unless switched on |
+| William James | *The Varieties of Religious Experience* (1902); *Pragmatism* (1907; PG); *Talks to Teachers and to Students* (1899; PG) |
+
+Viktor Frankl, Albert Camus and Hannah Arendt are still in copyright: reflections may draw on their ideas and name the book, but never quote them.
 
 ## Where your data lives
 
@@ -372,6 +386,7 @@ You see the requests in **Settings → Invitation requests** (admins only), with
 **Settings → Usage** (only for addresses in `ADMIN_EMAILS`; on your own computer, you always see it) shows how Reflections is being used:
 
 - **Tiles:** people (signed up / set up / invited), active today, this week, this month, how many are *coming back* (used it on 2 or more different days in the last 30), average days active, and entries and reflections in the last 30 days.
+- **Tokens:** for each kind of call to Claude (reflections, writing prompts, theme tagging), the average tokens in and out over the last 30 days, which is what drives cost and time. Each call is also logged in `logs/journal.log` ("Tokens for reflection: … in, … out"). Counts only, kept per day in the `token_usage` table (`journal/tokens.py`); never anything anyone wrote.
 - **Chart:** how many people used it each day for the last 30 days.
 - **Table:** one row per person: last visit (*today*, *3 days ago*…), days active in the last 30, entries (last 30 days and all time), reflections, and when they joined.
 

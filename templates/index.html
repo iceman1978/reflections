@@ -470,7 +470,7 @@
                 <input type="checkbox" data-writer="{{ w.name }}" data-default="{{ 1 if w.default else 0 }}"{% if w.on %} checked{% endif %}>
                 <span>
                   <strong>{{ w.label }}</strong>{% if w.works %}
-                  <span class="library-works">{{ w.works }}{% if not w.quotable %} (in copyright: drawn on, never quoted){% endif %}</span>{% endif %}
+                  <span class="library-works">{{ w.works }}{% if not w.quotable %} ({{ w.unquoted }}: drawn on, never quoted){% endif %}</span>{% endif %}
                   <span class="hint">{{ w.about }}</span>
                 </span>
               </label>

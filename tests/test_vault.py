@@ -414,7 +414,7 @@ class VarietyTests(unittest.TestCase):
         self.assertEqual(counts, {"Plato": 3, "Aristotle": 2})
         note = reflection._variety_note(current)
         self.assertIn("Plato (3), Aristotle (2)", note)
-        self.assertIn("Not used recently: Socrates, Epicurus, Cicero, Marcus Aurelius", note)
+        self.assertIn("Not used recently: Socrates, Epicurus, Cicero, Seneca", note)
         self.assertIn(note, reflection._user_message(current))
 
     def test_no_note_for_a_first_reflection(self):

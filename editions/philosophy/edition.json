@@ -17,7 +17,7 @@
     {"icon": "calendar", "title": "A few lines are enough",
      "text": "The benefit of journaling comes from reflecting each day. A prompt is there when the page feels blank."},
     {"icon": "columns", "title": "A well-stocked library of traditional wisdom",
-     "text": "Reflections draw <em>only</em> on {works} chosen works, from Plato and the Stoics to Kierkegaard, and tell you exactly where to find each passage.",
+     "text": "Reflections draw <em>only</em> on {works} chosen works, from Plato and the Stoics to William James, and tell you exactly where to find each passage.",
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "question", "title": "Easily explore past entries",
      "text": "Every reflection ends with a question to carry forward. Browse your favorites, search, or explore a theme."},
@@ -32,10 +32,14 @@
   "credit": {"one": "credit", "many": "credits"},
   "invite_line": "Invite a fellow thinker",
   "voices_label": "thinkers",
-  "voices": ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Marcus Aurelius", "Epictetus", "Seneca",
-             "Augustine", "Boethius", "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri",
-             "René Descartes", "Blaise Pascal", "Baruch Spinoza", "John Locke", "David Hume", "Immanuel Kant",
-             "Søren Kierkegaard", "John Stuart Mill"],
+  "voices": ["Socrates", "Plato", "Aristotle", "Epicurus", "Cicero", "Seneca", "Epictetus",
+             "Marcus Aurelius", "Lucretius", "Plutarch", "Augustine", "Boethius",
+             "Anselm of Canterbury", "Thomas Aquinas", "Dante Alighieri", "Michel de Montaigne",
+             "Francis Bacon", "René Descartes", "Blaise Pascal", "François de La Rochefoucauld",
+             "Baruch Spinoza", "John Locke", "David Hume", "Adam Smith", "Jean-Jacques Rousseau",
+             "Immanuel Kant", "Arthur Schopenhauer", "Søren Kierkegaard", "Ralph Waldo Emerson",
+             "Henry David Thoreau", "John Stuart Mill", "Friedrich Nietzsche", "William James",
+             "Viktor Frankl", "Albert Camus", "Hannah Arendt"],
   "writers": [
     {"name": "Plato", "era": "Classical Greece", "label": "Socrates and Plato", "voices": ["Socrates", "Plato"], "guide": "the examined life; knowing that you don't know; questioning what a word like \"fair\" or \"success\" really means; the harmony of reason, spirit and appetite in the soul; the cave, and mistaking shadows for reality; love as a longing that can lead upward."},
     {"name": "Aristotle", "era": "Classical Greece", "guide": "virtue as a mean between extremes; character formed by habit (\"we become just by doing just acts\"); eudaimonia as flourishing activity, not a feeling; practical wisdom; friendship and its kinds."},
@@ -44,21 +48,36 @@
     {"name": "Seneca", "era": "Rome and the Stoics", "guide": "time as the one thing truly ours, and how much of it we give away; premeditatio malorum, rehearsing what might go wrong; anger as a short madness."},
     {"name": "Epictetus", "era": "Rome and the Stoics", "guide": "the dichotomy of control, what is up to us and what isn't; judgments versus events, being disturbed not by things but by our view of them."},
     {"name": "Marcus Aurelius", "era": "Rome and the Stoics", "guide": "the view from above; amor fati, welcoming what happens as part of the whole; doing the work in front of you without complaint or applause."},
+    {"name": "Lucretius", "era": "Rome and the Stoics", "guide": "freedom from fear through understanding nature; death as nothing to be afraid of; the restlessness of people fleeing themselves; watching the storm from the shore."},
+    {"name": "Plutarch", "era": "Rome and the Stoics", "guide": "practical ethics: contentedness of mind, restraining anger, telling a flatterer from a friend, noticing your own progress, curiosity and talkativeness."},
     {"name": "Augustine", "era": "Late antiquity and the Middle Ages", "guide": "the restless heart; disordered loves, wanting good things in the wrong order; memory and the self; the will divided against itself."},
     {"name": "Boethius", "era": "Late antiquity and the Middle Ages", "guide": "consolation in loss; Fortune's wheel, and how anything Fortune gives she can take back; false goods (wealth, fame, power, pleasure) against true happiness; whether misfortune teaches more than good luck; freedom and providence."},
-    {"name": "Anselm of Canterbury", "era": "Late antiquity and the Middle Ages", "guide": "\"faith seeking understanding\", and \"I believe in order to understand\", as a stance toward any commitment you can't fully prove; longing and searching as part of finding; the idea of that than which nothing greater can be conceived."},
-    {"name": "Thomas Aquinas", "era": "Late antiquity and the Middle Ages", "guide": "virtues as stable dispositions built by practice; the passions as raw material that reason can shape."},
+    {"name": "Anselm of Canterbury", "era": "Late antiquity and the Middle Ages", "default": false, "guide": "\"faith seeking understanding\", and \"I believe in order to understand\", as a stance toward any commitment you can't fully prove; longing and searching as part of finding; the idea of that than which nothing greater can be conceived."},
+    {"name": "Thomas Aquinas", "era": "Late antiquity and the Middle Ages", "default": false, "guide": "virtues as stable dispositions built by practice; the passions as raw material that reason can shape."},
     {"name": "Dante Alighieri", "era": "Late antiquity and the Middle Ages", "guide": "being lost \"midway upon the journey of our life\"; sins that become their own punishment; change as a slow climb rather than a single decision; love as the root of every virtue and every fault, when it is misdirected, too weak or excessive; contentment in accepting one's place."},
+    {"name": "Michel de Montaigne", "era": "Early modern philosophy", "guide": "studying yourself honestly, contradictions included; \"What do I know?\"; how much of what we call reason is custom; friendship; solitude and keeping a room of one's own in the mind; making peace with death, the body and an ordinary life."},
+    {"name": "Francis Bacon", "era": "Early modern philosophy", "guide": "short, dense counsel on conduct: what studies are for; revenge and letting it go; envy; friendship as the halving of griefs; adversity as the test of virtue."},
     {"name": "René Descartes", "era": "Early modern philosophy", "guide": "radical doubt, rebuilding from what you can be sure of; provisional rules for acting while uncertain."},
     {"name": "Blaise Pascal", "era": "Early modern philosophy", "guide": "diversion, and our inability to sit quietly alone in a room; the restlessness behind busyness; the grandeur and wretchedness of being human; vanity and self-love; the wager, choosing how to live without certainty."},
+    {"name": "François de La Rochefoucauld", "era": "Early modern philosophy", "default": false, "guide": "self-love behind our virtues; vanity; the ways we deceive ourselves and call it something better.", "caution": "Use one maxim to test a motive, never to conclude that every motive is false."},
     {"name": "Baruch Spinoza", "era": "Early modern philosophy", "guide": "emotions as confused ideas; freedom as understanding their causes; bondage to the passions."},
-    {"name": "John Locke", "era": "Early modern philosophy", "guide": "personal identity and consciousness: what makes you the same person over time."},
+    {"name": "John Locke", "era": "Early modern philosophy", "default": false, "guide": "personal identity and consciousness: what makes you the same person over time."},
     {"name": "David Hume", "era": "Early modern philosophy", "guide": "reason as \"the slave of the passions\"; habit and custom; the self as a bundle of perceptions."},
+    {"name": "Adam Smith", "era": "Early modern philosophy", "guide": "sympathy as the root of moral judgment; the impartial spectator within, by whose eyes we judge our own conduct; wanting to be praiseworthy and not merely praised; how admiring wealth and rank misleads us."},
+    {"name": "Jean-Jacques Rousseau", "era": "Early modern philosophy", "guide": "telling the truth about yourself, shame included; the gap between how we are and how we wish to appear; living in other people's eyes; solitude and nature.", "caution": "For honesty about oneself, not as a model of conduct."},
     {"name": "Immanuel Kant", "era": "Modern philosophy", "guide": "acting from duty rather than inclination; treating people (yourself included) as ends, never merely as means; whether you could will your maxim as a universal law; autonomy as self-legislation."},
+    {"name": "Arthur Schopenhauer", "era": "Modern philosophy", "default": false, "guide": "what we are matters more to happiness than what we have or how we seem; aiming at freedom from pain rather than at pleasure; self-sufficiency and solitude; the restless wanting of the will.", "caution": "His practical counsel only; never press his pessimism on someone who is struggling."},
     {"name": "Søren Kierkegaard", "era": "Modern philosophy", "guide": "choosing yourself, and the leap you can't reason your way into; the aesthetic life of moods and pleasures against the ethical life of commitment; anxiety and despair as signs of a self not yet chosen; Abraham and faith beyond what can be explained; becoming a single individual instead of hiding in \"the crowd\"."},
-    {"name": "John Stuart Mill", "era": "Modern philosophy", "guide": "happiness as the measure of right action, and higher pleasures over lower ones (\"better to be Socrates dissatisfied than a fool satisfied\"); liberty, and the harm principle; individuality and \"experiments of living\"; the danger of conformity and custom; truth emerging from honest disagreement."}
+    {"name": "Ralph Waldo Emerson", "era": "Modern philosophy", "guide": "trusting your own thought against conformity; compensation, every gain having its price; character over reputation; friendship; circles, every end a beginning."},
+    {"name": "Henry David Thoreau", "era": "Modern philosophy", "guide": "living deliberately; the real cost of a thing as the amount of life exchanged for it; simplicity; solitude; stepping to the music you hear."},
+    {"name": "John Stuart Mill", "era": "Modern philosophy", "guide": "happiness as the measure of right action, and higher pleasures over lower ones (\"better to be Socrates dissatisfied than a fool satisfied\"); liberty, and the harm principle; individuality and \"experiments of living\"; the danger of conformity and custom; truth emerging from honest disagreement."},
+    {"name": "Friedrich Nietzsche", "era": "Modern philosophy", "default": false, "guide": "asking where your values come from and what they serve; self-overcoming; saying yes to your own life; suspicion of resentment dressed up as virtue.", "caution": "Use him to unsettle a comfortable assumption, never to excuse contempt for others or to belittle compassion or faith."},
+    {"name": "William James", "era": "Modern philosophy", "guide": "habit as the flywheel of character, and how new habits are made; choosing to believe where evidence cannot decide; the divided self and its healing; what makes a life significant; our blindness to other people's inner lives."},
+    {"name": "Viktor Frankl", "era": "The twentieth century", "works": "Man's Search for Meaning, The Doctor and the Soul", "guide": "meaning as the deepest human need; the last freedom, choosing one's attitude in any circumstances; meaning found in work, in love and in how unavoidable suffering is borne."},
+    {"name": "Albert Camus", "era": "The twentieth century", "default": false, "works": "The Myth of Sisyphus, The Plague, The Rebel", "guide": "the absurd, the gap between our need for meaning and the world's silence; revolt, living fully and lucidly without appeal; decency and solidarity in the face of suffering.", "caution": "The Myth of Sisyphus opens with the question of suicide: never bring that theme to someone who is struggling."},
+    {"name": "Hannah Arendt", "era": "The twentieth century", "works": "The Human Condition, Eichmann in Jerusalem, The Life of the Mind", "guide": "thinking as a silent dialogue with yourself; wrong done through thoughtlessness rather than malice; labor, work and action; the capacity to begin something new; forgiving and promising as remedies for what can't be undone or foreseen."}
   ],
-  "sources_intro": "Reflections quote only the works below, each in a public-domain translation (or original English edition) on Wikisource. Every quotation is checked word for word against that text before you see it, and links to the passage it came from.",
+  "sources_intro": "Reflections quote only the works below, each in a public-domain translation (or original English edition) on Wikisource or Project Gutenberg. Every quotation is checked word for word against that text before you see it, and links to the passage it came from.",
   "source_groups": [
     {
       "name": "Classical Greece",
@@ -69,6 +88,8 @@
         "phaedo",
         "symposium",
         "republic",
+        "gorgias",
+        "meno",
         "nicomachean_ethics",
         "epicurus"
       ]
@@ -79,11 +100,15 @@
       "works": [
         "on_old_age",
         "tusculan_disputations",
+        "lucretius_nature",
         "letters",
         "shortness_of_life",
         "on_anger",
+        "happy_life",
+        "tranquility_of_mind",
         "enchiridion",
         "discourses",
+        "plutarch_morals",
         "meditations"
       ]
     },
@@ -104,13 +129,18 @@
       "name": "Early modern philosophy",
       "about": "The 17th and 18th centuries: doubt, reason, the passions and the self.",
       "works": [
+        "montaigne_essays",
+        "bacon_essays",
         "descartes_meditations",
         "discourse_on_method",
         "pensees",
+        "la_rochefoucauld_maxims",
         "ethics_spinoza",
         "locke_essay",
         "hume_enquiry",
-        "hume_treatise"
+        "hume_treatise",
+        "smith_moral_sentiments",
+        "rousseau_confessions"
       ]
     },
     {
@@ -119,10 +149,21 @@
       "works": [
         "kant_groundwork",
         "kant_practical_reason",
+        "schopenhauer_wisdom",
+        "schopenhauer_counsels",
         "kierkegaard_selections",
+        "emerson_essays",
+        "walden",
         "utilitarianism",
-        "on_liberty"
+        "on_liberty",
+        "nietzsche_beyond",
+        "james_varieties",
+        "james_pragmatism",
+        "james_talks"
       ]
     }
-  ]
+  ],
+  "paraphrase_only": {
+    "about": "These writers are still in copyright, so reflections may draw on their ideas in their own words, naming the writer and book, but never quote them, and there are no links."
+  }
 }

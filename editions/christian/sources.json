@@ -7,12 +7,118 @@
     "Scripture is the Berean Standard Bible (public domain since 2023), linked to Bible Hub.",
     "Writers come from the Christian Classics Ethereal Library (CCEL), Project Gutenberg, or",
     "Wikisource (Augustine and Aquinas, shared with Reflections). Writers still in copyright",
-    "(C. S. Lewis, Bonhoeffer, Dallas Willard, Tim Keller, Oswald Chambers) are not listed:",
-    "Claude may paraphrase and name them, but never quote them.",
+    "(C. S. Lewis, Bonhoeffer and others) and a few older ones with no checked text here",
+    "(John Newton, Burroughs, Sibbes) are not listed: Claude may paraphrase and name them, but",
+    "never quote them. They are in edition.json under writers.",
     "See editions/philosophy/sources.json for what each field means."
   ],
   "site": "https://en.wikisource.org/wiki/",
   "works": {
+    "genesis": {
+      "author": "",
+      "title": "Genesis",
+      "cite_title": "Genesis",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Beginnings, and the family of promise: made in God's image (1-2), the fall and hiding from God (3), Abraham called to go without knowing where (12), waiting on a promise (15, 18, 21), Jacob wrestling (32), Joseph betrayed, forgotten, raised up, and forgiving his brothers (37, 39-45, 50:20). Stay with these stories; leave the genealogies and the darker episodes alone.",
+      "work_page": "https://biblehub.com/bsb/genesis/1.htm",
+      "pages": {
+        "bible": "Genesis",
+        "slug": "genesis"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "exodus": {
+      "author": "",
+      "title": "Exodus",
+      "cite_title": "Exodus",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "God hears the oppressed: Moses' call and his excuses (3-4), deliverance at the sea (14), daily bread and grumbling in the wilderness (16), rest and the commandments (20), Moses' intercession and the LORD's name, compassionate and gracious (32-34). Not the case laws or the tabernacle instructions.",
+      "work_page": "https://biblehub.com/bsb/exodus/1.htm",
+      "pages": {
+        "bible": "Exodus",
+        "slug": "exodus"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "deuteronomy": {
+      "author": "",
+      "title": "Deuteronomy",
+      "cite_title": "Deuteronomy",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Remembering and choosing: love the LORD with all your heart (6), not by bread alone, and the danger of forgetting God in prosperity (8), what the LORD requires (10:12-13), choose life (30), be strong and courageous (31). Not the legal codes or the curses.",
+      "work_page": "https://biblehub.com/bsb/deuteronomy/1.htm",
+      "pages": {
+        "bible": "Deuteronomy",
+        "slug": "deuteronomy"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "ruth": {
+      "author": "",
+      "title": "Ruth",
+      "cite_title": "Ruth",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Loyalty and quiet providence in ordinary life: Ruth's pledge to Naomi (1), kindness in the fields (2), bitterness turned to fullness (4).",
+      "work_page": "https://biblehub.com/bsb/ruth/1.htm",
+      "pages": {
+        "bible": "Ruth",
+        "slug": "ruth"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_samuel": {
+      "author": "",
+      "title": "1 Samuel",
+      "cite_title": "1 Samuel",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Hannah's prayer out of anguish (1-2), the boy Samuel listening (3), the LORD looks at the heart (16), David and Goliath (17), David and Jonathan's friendship (18, 20), David sparing Saul (24, 26). Not the battle accounts.",
+      "work_page": "https://biblehub.com/bsb/1_samuel/1.htm",
+      "pages": {
+        "bible": "1 Samuel",
+        "slug": "1_samuel"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "2_samuel": {
+      "author": "",
+      "title": "2 Samuel",
+      "cite_title": "2 Samuel",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "David the king as a fellow sinner: his sin, Nathan's rebuke and his repentance (11-12), his grief for Absalom (18), his song of deliverance (22). Not the wars and court intrigue.",
+      "work_page": "https://biblehub.com/bsb/2_samuel/1.htm",
+      "pages": {
+        "bible": "2 Samuel",
+        "slug": "2_samuel"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "job": {
+      "author": "",
+      "title": "Job",
+      "cite_title": "Job",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Honest suffering: loss and worship (1-2), Job's lament (3), his protest and his longing for a mediator (9, 19:25-27, 23), where wisdom is found (28), the LORD answering out of the whirlwind (38-42). Take care with the friends' speeches (Eliphaz, Bildad, Zophar in 4-25, and Elihu in 32-37): they sound wise, but the book itself rebukes them, so never quote them as counsel.",
+      "work_page": "https://biblehub.com/bsb/job/1.htm",
+      "pages": {
+        "bible": "Job",
+        "slug": "job"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
     "psalms": {
       "author": "",
       "title": "Psalms",
@@ -73,6 +179,81 @@
       "sections": "verses",
       "location_separator": ":"
     },
+    "jeremiah": {
+      "author": "",
+      "title": "Jeremiah",
+      "cite_title": "Jeremiah",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "A reluctant, weeping prophet: his call (1), broken cisterns (2), the one who trusts like a tree by water, and the deceitful heart (17), the potter (18), his complaint (20), plans for welfare and seeking with all your heart (29), the new covenant (31). Not the oracles of judgment on the nations.",
+      "work_page": "https://biblehub.com/bsb/jeremiah/1.htm",
+      "pages": {
+        "bible": "Jeremiah",
+        "slug": "jeremiah"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "lamentations": {
+      "author": "",
+      "title": "Lamentations",
+      "cite_title": "Lamentations",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Grief given words, without hurry (1-2); and at its center, hope: the LORD's mercies new every morning, waiting quietly (3:19-33).",
+      "work_page": "https://biblehub.com/bsb/lamentations/1.htm",
+      "pages": {
+        "bible": "Lamentations",
+        "slug": "lamentations"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "jonah": {
+      "author": "",
+      "title": "Jonah",
+      "cite_title": "Jonah",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Running from a call (1), prayer from the depths (2), God's mercy on people we would rather He judged, and Jonah's anger about it (3-4).",
+      "work_page": "https://biblehub.com/bsb/jonah/1.htm",
+      "pages": {
+        "bible": "Jonah",
+        "slug": "jonah"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "micah": {
+      "author": "",
+      "title": "Micah",
+      "cite_title": "Micah",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "What the LORD requires: to act justly, to love mercy and to walk humbly (6:8); waiting for God in a dark time, and His delight in mercy (7).",
+      "work_page": "https://biblehub.com/bsb/micah/1.htm",
+      "pages": {
+        "bible": "Micah",
+        "slug": "micah"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "habakkuk": {
+      "author": "",
+      "title": "Habakkuk",
+      "cite_title": "Habakkuk",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Honest questions put to God (1), the righteous living by faith (2:4), rejoicing though the fig tree does not blossom (3:17-19).",
+      "work_page": "https://biblehub.com/bsb/habakkuk/1.htm",
+      "pages": {
+        "bible": "Habakkuk",
+        "slug": "habakkuk"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
     "matthew": {
       "author": "",
       "title": "Matthew",
@@ -129,6 +310,21 @@
       "pages": {
         "bible": "John",
         "slug": "john"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "acts": {
+      "author": "",
+      "title": "Acts",
+      "cite_title": "Acts",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "The first Christians: life together (2:42-47), boldness and prayer (4), Stephen (7), Saul's conversion (9), Peter and Cornelius (10), Paul and Silas singing in prison (16), Paul in Athens (17), 'more blessed to give' (20). Draw on the people and their choices; don't treat what happened to them as a promise to the reader.",
+      "work_page": "https://biblehub.com/bsb/acts/1.htm",
+      "pages": {
+        "bible": "Acts",
+        "slug": "acts"
       },
       "sections": "verses",
       "location_separator": ":"
@@ -214,7 +410,7 @@
       "cite_title": "Philippians",
       "translation": "Berean Standard Bible",
       "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
-      "note": "The mind of Christ and his humility (2), counting all as loss (3), pressing on (3), anxiety and peace, whatever is true, contentment in all circumstances (4).",
+      "note": "The mind of Christ and His humility (2), counting all as loss (3), pressing on (3), anxiety and peace, whatever is true, contentment in all circumstances (4).",
       "work_page": "https://biblehub.com/bsb/philippians/1.htm",
       "pages": {
         "bible": "Philippians",
@@ -249,6 +445,21 @@
       "pages": {
         "bible": "1 Thessalonians",
         "slug": "1_thessalonians"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "1_timothy": {
+      "author": "",
+      "title": "1 Timothy",
+      "cite_title": "1 Timothy",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Paul to a young worker: the foremost of sinners shown mercy (1), prayer for everyone (2:1-4), training in godliness (4), contentment and the love of money, fighting the good fight (6). Not the instructions on church order and offices (2:8-3:13, 5).",
+      "work_page": "https://biblehub.com/bsb/1_timothy/1.htm",
+      "pages": {
+        "bible": "1 Timothy",
+        "slug": "1_timothy"
       },
       "sections": "verses",
       "location_separator": ":"
@@ -304,11 +515,26 @@
       "cite_title": "1 Peter",
       "translation": "Berean Standard Bible",
       "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
-      "note": "Living hope (1), suffering for doing good (2-4), casting your anxieties on him (5:7), humility (5).",
+      "note": "Living hope (1), suffering for doing good (2-4), casting your anxieties on Him (5:7), humility (5).",
       "work_page": "https://biblehub.com/bsb/1_peter/1.htm",
       "pages": {
         "bible": "1 Peter",
         "slug": "1_peter"
+      },
+      "sections": "verses",
+      "location_separator": ":"
+    },
+    "2_peter": {
+      "author": "",
+      "title": "2 Peter",
+      "cite_title": "2 Peter",
+      "translation": "Berean Standard Bible",
+      "location_format": "chapter:verse, e.g. 3:16 (or chapter:verse-verse for a short run, e.g. 3:16-17)",
+      "note": "Growing in grace: adding to faith virtue, knowledge and self-control (1:3-11), the Lord's patience (3:8-9), growing in the grace and knowledge of Christ (3:18). Not the denunciations of chapter 2.",
+      "work_page": "https://biblehub.com/bsb/2_peter/1.htm",
+      "pages": {
+        "bible": "2 Peter",
+        "slug": "2_peter"
       },
       "sections": "verses",
       "location_separator": ":"
@@ -519,6 +745,86 @@
       "work_page": "https://ccel.org/ccel/baxter/saints_rest",
       "pages": {
         "ccel": "baxter/saints_rest"
+      },
+      "sections": null
+    },
+    "wesley_sermons": {
+      "author": "John Wesley",
+      "title": "Sermons on Several Occasions",
+      "translation": "original English (1746-1760 and later)",
+      "location_format": "the sermon's title, e.g. The Almost Christian",
+      "note": "Plain sermons on the way of salvation and holiness of heart and life: Salvation by Faith, The Almost Christian, The Circumcision of the Heart, The Means of Grace, the discourses on the Sermon on the Mount, Catholic Spirit, The Use of Money, On Patience. Grace goes before, forgives and changes.",
+      "work_page": "https://ccel.org/ccel/wesley/sermons",
+      "pages": {
+        "ccel": "wesley/sermons",
+        "only": "\\."
+      },
+      "sections": null
+    },
+    "wesley_perfection": {
+      "author": "John Wesley",
+      "title": "A Plain Account of Christian Perfection",
+      "translation": "original English (1777)",
+      "location_format": "leave empty",
+      "note": "Wesley's account of perfect love: loving God with all the heart and one's neighbor as oneself, purity of intention, growing in grace. He means love made complete, not freedom from mistakes or temptation.",
+      "work_page": "https://ccel.org/ccel/wesley/perfection",
+      "pages": {
+        "ccel": "wesley/perfection"
+      },
+      "sections": null
+    },
+    "smith_secret": {
+      "author": "Hannah Whitall Smith",
+      "title": "The Christian's Secret of a Happy Life",
+      "translation": "original English (1875)",
+      "location_format": "chapter, e.g. Chapter 8",
+      "note": "Trust as rest: handing the burden over and leaving it there; faith as a choice of the will rather than a feeling; God in everything; what to do after failure; doubts.",
+      "work_page": "https://ccel.org/ccel/smith_hw/secret",
+      "pages": {
+        "ccel": "smith_hw/secret"
+      },
+      "sections": null
+    },
+    "macdonald_unspoken": {
+      "author": "George MacDonald",
+      "title": "Unspoken Sermons",
+      "translation": "original English (1867-1889)",
+      "location_format": "the sermon's title, e.g. The Consuming Fire",
+      "note": "The Father's love as a consuming fire that will have us wholly good; childlikeness (The Child in the Midst); obedience as the door to knowing God (The Way, The Truth); honest prayer and honest doubt (The Word of Jesus on Prayer, The Voice of Job).",
+      "work_page": "https://www.gutenberg.org/ebooks/9057",
+      "pages": {
+        "gutenberg": 9057,
+        "split": [
+          "h1",
+          "h2"
+        ],
+        "skip": "^(unspoken sermons|contents)"
+      },
+      "sections": null
+    },
+    "bounds_power": {
+      "author": "E. M. Bounds",
+      "title": "Power Through Prayer",
+      "translation": "original English (1907)",
+      "location_format": "chapter, e.g. Chapter 9",
+      "note": "Written to preachers, but its heart is for anyone: prayer as the real work, much time alone with God, beginning the day with prayer, the heart before the head. Use the passages on prayer itself, not those on preaching.",
+      "work_page": "https://ccel.org/ccel/bounds/power",
+      "pages": {
+        "ccel": "bounds/power"
+      },
+      "sections": null
+    },
+    "chesterton_orthodoxy": {
+      "author": "G. K. Chesterton",
+      "title": "Orthodoxy",
+      "translation": "original English (1908)",
+      "location_format": "chapter, e.g. Chapter IV",
+      "note": "Wonder and gratitude as the right response to existing at all (The Ethics of Elfland); humility put in the wrong place, doubting truth instead of ourselves (The Suicide of Thought); loving the world enough to want it changed (The Flag of the World); joy as 'the gigantic secret of the Christian'.",
+      "work_page": "https://www.gutenberg.org/ebooks/130",
+      "pages": {
+        "gutenberg": 130,
+        "split": "h3",
+        "skip": "^(orthodoxy|contents|preface)"
       },
       "sections": null
     },

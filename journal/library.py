@@ -87,5 +87,7 @@ def for_settings(choices=None):
             "name": w["name"], "label": w.get("label", w["name"]), "about": w["guide"],
             "works": ", ".join(titles) or w.get("works", ""), "quotable": bool(titles),
             "default": w.get("default", True), "on": w["name"] in on,
+            # why a writer with nothing quotable isn't quoted: still in copyright, or no checked text here yet
+            "unquoted": "" if titles else "no checked text here yet" if w.get("no_text") else "in copyright",
         })
     return eras

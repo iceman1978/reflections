@@ -352,6 +352,198 @@
       "work_page": "Of Anger",
       "pages": {"template": "Of Anger/Book {roman}", "levels": [3]},
       "sections": null
+    },
+    "gorgias": {
+      "author": "Plato",
+      "title": "Gorgias",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "leave empty",
+      "note": "Socrates against Gorgias, Polus and Callicles: rhetoric as flattery, that it is better to suffer wrong than to do it, and the disciplined life against the life of appetite. Introduce quotes as Socrates (or the named speaker) speaking.",
+      "work_page": "https://www.gutenberg.org/ebooks/1672",
+      "pages": {"gutenberg": 1672, "split": "h2", "skip": "^(by plato|contents|introduction)", "unlabelled": true},
+      "sections": null
+    },
+    "meno": {
+      "author": "Plato",
+      "title": "Meno",
+      "translation": "Benjamin Jowett (1892)",
+      "location_format": "Stephanus number if you know it, e.g. 80d; otherwise leave empty",
+      "note": "Can virtue be taught? The puzzle of how we can search for what we don't yet know; learning as recollection; knowledge against true opinion. Introduce quotes as Socrates speaking.",
+      "work_page": "The Dialogues of Plato (Jowett)/Meno",
+      "pages": {"single": "The Dialogues of Plato (Jowett)/Meno"},
+      "sections": null
+    },
+    "happy_life": {
+      "author": "Seneca",
+      "title": "On the Happy Life",
+      "translation": "Aubrey Stewart (1900)",
+      "location_format": "chapter, e.g. 12",
+      "note": "Happiness as living in agreement with one's own nature, virtue as its own reward, following the crowd as the surest way to go wrong, and Seneca's answer to the charge that he doesn't live as he teaches.",
+      "work_page": "Of a Happy Life",
+      "pages": {"prefix": "Of a Happy Life/", "pattern": "^Book ([IVXL]+)$"},
+      "sections": null
+    },
+    "tranquility_of_mind": {
+      "author": "Seneca",
+      "title": "On Tranquility of Mind",
+      "translation": "Aubrey Stewart (1900)",
+      "location_format": "leave empty",
+      "note": "To a friend who is neither sick nor well: restlessness and boredom with oneself, choosing work and friends that fit, owning less, expecting setbacks, and giving the mind rest and play.",
+      "work_page": "Of Peace of Mind",
+      "pages": {"single": "Of Peace of Mind"},
+      "sections": null
+    },
+    "montaigne_essays": {
+      "author": "Michel de Montaigne",
+      "title": "Essays",
+      "translation": "Charles Cotton, revised by W. Carew Hazlitt (1877)",
+      "location_format": "book.chapter as numbered in this edition, e.g. 1.27 (Of Friendship)",
+      "note": "A man studying himself, honestly and without system. Especially: that to study philosophy is to learn to die (1.19), of the education of children (1.25), of friendship (1.27), of solitude (1.38), of repentance (3.2), of vanity (3.9), of experience (3.13). He contradicts himself and says so; let him be tentative.",
+      "work_page": "The Essays of Montaigne",
+      "pages": {"prefix": "The Essays of Montaigne/", "pattern": "^Book ([IVX]+)/Chapter ([IVXLC]+)$"},
+      "sections": null
+    },
+    "bacon_essays": {
+      "author": "Francis Bacon",
+      "title": "Essays",
+      "translation": "original English (1625), edited by Mary Augusta Scott (1908)",
+      "location_format": "essay number, e.g. 5 (Of Adversity)",
+      "note": "Short, dense counsel: of truth (1), death (2), revenge (4), adversity (5), envy (9), friendship (27), ambition (36), youth and age (42), studies (50), anger (57).",
+      "work_page": "The Essays of Francis Bacon",
+      "pages": {"prefix": "The Essays of Francis Bacon/", "pattern": "^([IVXL]+) .+$"},
+      "sections": null
+    },
+    "la_rochefoucauld_maxims": {
+      "author": "François de La Rochefoucauld",
+      "title": "Maxims",
+      "translation": "J. W. Willis Bund and J. Hain Friswell (1871)",
+      "location_format": "maxim number, e.g. 119",
+      "note": "Aphorisms on self-love behind our virtues, vanity, and how we deceive ourselves. Sharp and unsparing: use one to test a motive, not to conclude that every motive is false.",
+      "work_page": "https://www.gutenberg.org/ebooks/9105",
+      "pages": {"gutenberg": 9105, "split": "h2", "skip": "^(francois|translator|the first supplement|second supplement|third supplement|reflections on various)", "drop": "^[\\[\"“]"},
+      "sections": "numbered_paragraphs",
+      "location_from_section": true
+    },
+    "smith_moral_sentiments": {
+      "author": "Adam Smith",
+      "title": "The Theory of Moral Sentiments",
+      "translation": "original English (1759)",
+      "location_format": "part, e.g. Part III",
+      "note": "Sympathy as the root of moral judgment; the impartial spectator, the 'man within the breast', by whose eyes we judge our own conduct (Part III); the wish not only to be praised but to be praiseworthy; how ambition and the admiration of wealth mislead us.",
+      "work_page": "The Theory of Moral Sentiments",
+      "pages": {"prefix": "The Theory of Moral Sentiments/", "pattern": "^Part ([IVX]+)$"},
+      "sections": null
+    },
+    "rousseau_confessions": {
+      "author": "Jean-Jacques Rousseau",
+      "title": "Confessions",
+      "translation": "anonymous English translation (Aldus Society, 1903)",
+      "location_format": "book, e.g. Book 1",
+      "note": "Rousseau telling the truth about himself, shameful parts included: the stolen ribbon and the lie that haunted him (Book 2), the pull between how he felt and how he wished to appear, solitude and nature. Use it for honesty about oneself, not as a model of conduct.",
+      "work_page": "The Confessions of Jean Jacques Rousseau (Aldus)",
+      "pages": {"prefix": "The Confessions of Jean Jacques Rousseau (Aldus)/", "pattern": "^Book ([IVX]+)$"},
+      "sections": null
+    },
+    "emerson_essays": {
+      "author": "Ralph Waldo Emerson",
+      "title": "Essays: First Series",
+      "translation": "original English (1841)",
+      "location_format": "the essay's title, e.g. Self-Reliance",
+      "note": "Twelve essays: Self-Reliance (trusting your own thought, 'a foolish consistency is the hobgoblin of little minds'), Compensation (every gain has its price), Spiritual Laws, Friendship, Prudence, Heroism, The Over-Soul, Circles (every end is a beginning).",
+      "work_page": "Essays: First Series",
+      "pages": {"prefix": "Essays: First Series/", "pattern": "^(History|Self-Reliance|Compensation|Spiritual Laws|Love|Friendship|Prudence|Heroism|The Over-Soul|Circles|Intellect|Art)$"},
+      "sections": null
+    },
+    "walden": {
+      "author": "Henry David Thoreau",
+      "title": "Walden",
+      "translation": "original English (1854)",
+      "location_format": "the chapter's title, e.g. Economy",
+      "note": "Living deliberately: what a thing really costs in life given up for it (Economy), simplicity and why he went to the woods (Where I Lived, and What I Lived For), Solitude, Higher Laws, and the Conclusion (stepping to the music you hear).",
+      "work_page": "Walden (1854) Thoreau",
+      "pages": {"prefix": "Walden (1854) Thoreau/", "pattern": "^(.+)$"},
+      "sections": null
+    },
+    "schopenhauer_wisdom": {
+      "author": "Arthur Schopenhauer",
+      "title": "The Wisdom of Life",
+      "translation": "T. Bailey Saunders (1890)",
+      "location_format": "chapter, e.g. 2",
+      "note": "What a person is matters more to happiness than what they have or how they appear to others: personality (2), property (3), reputation, pride and honor (4). His practical side, not his metaphysics.",
+      "work_page": "The Wisdom of Life",
+      "pages": {"prefix": "The Wisdom of Life/", "pattern": "^Chapter ([IVX]+)$"},
+      "sections": null
+    },
+    "schopenhauer_counsels": {
+      "author": "Arthur Schopenhauer",
+      "title": "Counsels and Maxims",
+      "translation": "T. Bailey Saunders (1890)",
+      "location_format": "chapter, e.g. 2",
+      "note": "Rules for living: aiming at freedom from pain rather than at pleasure (1), our relation to ourselves, solitude and self-sufficiency (2), our relation to others (3), fortune (4), the ages of life (5).",
+      "work_page": "Counsels and Maxims",
+      "pages": {"prefix": "Counsels and Maxims/", "pattern": "^Chapter ([IVX]+)$"},
+      "sections": null
+    },
+    "nietzsche_beyond": {
+      "author": "Friedrich Nietzsche",
+      "title": "Beyond Good and Evil",
+      "translation": "Helen Zimmern (1906)",
+      "location_format": "aphorism number, e.g. 146",
+      "note": "Questioning where our values come from and what they serve: the prejudices of philosophers, self-deception, the short Apophthegms and Interludes (63-185: 'he who fights with monsters...', 146), what is noble (257-296). Use him to unsettle a comfortable assumption, never to excuse contempt for others.",
+      "work_page": "Beyond Good and Evil",
+      "pages": {"prefix": "Beyond Good and Evil/", "pattern": "^Chapter ([IVX]+)$"},
+      "sections": "numbered_paragraphs",
+      "location_from_section": true
+    },
+    "james_varieties": {
+      "author": "William James",
+      "title": "The Varieties of Religious Experience",
+      "translation": "original English (1902)",
+      "location_format": "lecture, e.g. Lecture II or Lectures IV & V",
+      "note": "Inner life taken seriously as evidence: healthy-mindedness (Lectures IV & V), the sick soul (VI & VII), the divided self and its unification (VIII), conversion (IX, X), saintliness. Mostly other people's testimony: quote James's own words, not the documents he cites.",
+      "work_page": "The Varieties of Religious Experience",
+      "pages": {"prefix": "The Varieties of Religious Experience/", "pattern": "^(Lectures? .+)$"},
+      "sections": null
+    },
+    "james_pragmatism": {
+      "author": "William James",
+      "title": "Pragmatism",
+      "translation": "original English (1907)",
+      "location_format": "lecture, e.g. Lecture II",
+      "note": "Asking of any belief what practical difference it would make if it were true (Lecture II); the tender-minded and the tough-minded temperaments (Lecture I); truth as what proves itself good to believe (Lecture VI).",
+      "work_page": "https://www.gutenberg.org/ebooks/5116",
+      "pages": {"gutenberg": 5116, "split": "h2", "skip": "^(preface|by william james)"},
+      "sections": null
+    },
+    "james_talks": {
+      "author": "William James",
+      "title": "Talks to Teachers and to Students",
+      "translation": "original English (1899)",
+      "location_format": "the talk's title, e.g. The Laws of Habit",
+      "note": "The Laws of Habit (we are 'bundles of habits'; never let an exception occur while a new habit is forming; keep the faculty of effort alive by a little gratuitous exercise every day), The Will, and the three talks to students: The Gospel of Relaxation, On a Certain Blindness in Human Beings, What Makes a Life Significant.",
+      "work_page": "https://www.gutenberg.org/ebooks/16287",
+      "pages": {"gutenberg": 16287, "split": "h2", "group": "^TALKS TO (TEACHERS|STUDENTS)$", "skip": "^(preface|contents|on psychology|and to students|by william james)"},
+      "sections": null
+    },
+    "plutarch_morals": {
+      "author": "Plutarch",
+      "title": "Morals (Ethical Essays)",
+      "translation": "Arthur Richard Shilleto (1898)",
+      "location_format": "the essay's title, e.g. On Contentedness of Mind",
+      "note": "Practical essays: On Contentedness of Mind, On Restraining Anger, How One May Be Aware of One's Progress in Virtue, On Abundance of Friends, How One May Discern a Flatterer from a Friend, On Talkativeness, On Curiosity, On Envy and Hatred, Consolatory Letter to His Wife.",
+      "work_page": "https://www.gutenberg.org/ebooks/23639",
+      "pages": {"gutenberg": 23639, "split": "h3", "skip": "^(bohn|ethical essays|by arthur|preface|contents|plutarch's morals|index)"},
+      "sections": null
+    },
+    "lucretius_nature": {
+      "author": "Lucretius",
+      "title": "On the Nature of Things",
+      "translation": "William Ellery Leonard (1916)",
+      "location_format": "book and section, e.g. Book III, Folly of the Fear of Death",
+      "note": "An Epicurean poem, in verse: freedom from fear through understanding nature; watching the storm from the shore (Book II, Proem); the folly of the fear of death (Book III); the restlessness of those who flee themselves (end of Book III). Quote a few lines exactly as they stand.",
+      "work_page": "https://www.gutenberg.org/ebooks/785",
+      "pages": {"gutenberg": 785, "split": "h2", "group": "^BOOK [IVX]+$", "skip": "^by "},
+      "sections": null
     }
   }
 }

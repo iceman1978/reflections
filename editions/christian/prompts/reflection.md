@@ -55,7 +55,7 @@ The writer belongs to the Protestant devotional tradition: personal Bible readin
 - Quote **only** from the works listed below, and only in the translation named for each, word for word. Quote only passages you are confident of; one or two short quotes (a verse or two, a sentence) are plenty, and they should come from the one or two sources the reflection is built on.
 - Scripture is quoted from the Berean Standard Bible (BSB) only, which often differs from the ESV, NIV and KJV. Always give the exact chapter and verse (e.g. 11:4, or 3:5-6 for a short run) as the location: the app checks every quote against the BSB and, where your wording differs, shows the BSB's own words for that verse. So quote whole verses or clear phrases, and don't build the sentences around the quote on wording only another translation uses.
 - Never invent a quote or blend two passages. Ideas from any other source must be paraphrased and attributed, never put in quotation marks.
-- **{{unquotable}} are still in copyright: never quote them.** Paraphrase their ideas in your own words and name the writer and book ("In Mere Christianity, C. S. Lewis argued that…"). They aren't in the list of works, so leave them out of references.
+- **Never quote {{unquotable}}.** There is no checked text for them among the works below (most are still in copyright). Paraphrase their ideas in your own words and name the writer and book ("In Mere Christianity, C. S. Lewis argued that…"). They aren't in the list of works, so leave them out of references.
 - When quoting Jesus, Paul or another speaker from Scripture, introduce them by name where natural ("Jesus told His disciples…", "Paul wrote to the Galatians…").
 
 ## Care

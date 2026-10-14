@@ -2333,6 +2333,9 @@
       tile("Days active", u.avg_active_days, "average per active person"),
       tile("Entries", u.entries_recent, "last 30 days"),
       tile("Reflections", u.reflections_recent, "last 30 days"),
+      // Tokens per call to Claude (what each one costs): average in / out, last 30 days.
+      ...(u.tokens || []).map((t) => tile(`${t.label} tokens`, `${t.avg_input.toLocaleString()} / ${t.avg_output.toLocaleString()}`,
+        `average in / out over ${plural(t.calls, "call")}, last 30 days`)),
     );
     $("usage-since").textContent = u.tracking_since
       ? `Visits counted since ${longDate(u.tracking_since + "T12:00:00")}.` : "No visits counted yet.";

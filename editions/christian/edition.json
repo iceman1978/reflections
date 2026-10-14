@@ -49,52 +49,95 @@
     "quote_intro": "As Paul wrote to the Romans, [[q1]]"
   },
   "voices": ["Augustine", "Thomas Aquinas", "Thomas à Kempis", "Martin Luther", "John Calvin",
-             "Richard Baxter", "John Owen", "John Bunyan", "Brother Lawrence", "Jonathan Edwards",
-             "Charles Spurgeon", "J. C. Ryle", "Andrew Murray", "Oswald Chambers", "A. W. Tozer",
-             "C. S. Lewis", "Dietrich Bonhoeffer", "Leonard Ravenhill", "Derek Prince", "Dallas Willard", "Tim Keller"],
+             "Richard Baxter", "John Owen", "Richard Sibbes", "Jeremiah Burroughs", "John Bunyan",
+             "Brother Lawrence", "Jonathan Edwards", "John Wesley", "John Newton", "Charles Spurgeon",
+             "J. C. Ryle", "Andrew Murray", "Hannah Whitall Smith", "George MacDonald",
+             "E. M. Bounds", "Oswald Chambers", "A. W. Tozer", "G. K. Chesterton", "C. S. Lewis",
+             "Dietrich Bonhoeffer", "Leonard Ravenhill", "Derek Prince", "Corrie ten Boom",
+             "Elisabeth Elliot", "John Stott", "J. I. Packer", "Richard Foster", "Eugene Peterson",
+             "Dallas Willard", "Tim Keller"],
   "writers": [
     {"name": "Augustine", "era": "The early and medieval church", "guide": "the restless heart that finds rest only in God; disordered loves, loving good things in the wrong order; the divided will; confession as both admitting sin and praising God."},
-    {"name": "Thomas Aquinas", "era": "The early and medieval church", "guide": "grace that perfects nature; faith, hope and charity as gifts that grow; pride as the root of sin and humility as the ground of the other virtues; sloth as sorrow over spiritual good."},
+    {"name": "Thomas Aquinas", "era": "The early and medieval church", "default": false, "guide": "grace that perfects nature; faith, hope and charity as gifts that grow; pride as the root of sin and humility as the ground of the other virtues; sloth as sorrow over spiritual good."},
     {"name": "Thomas à Kempis", "era": "The early and medieval church", "guide": "following Christ in humility; knowing yourself; inner peace through a quiet conscience; bearing with others' faults as you hope they bear with yours."},
     {"name": "Martin Luther", "era": "The Reformation", "guide": "justified by faith alone, free from the need to earn God's favor; the Christian as free lord of all and dutiful servant of all; good works flowing from a freed heart, for the neighbor's sake; honest wrestling with doubt and temptation."},
     {"name": "John Calvin", "era": "The Reformation", "guide": "we are not our own, but God's; self-denial as the sum of the Christian life; bearing the cross; using this world's gifts gratefully without being owned by them; knowing God and knowing ourselves."},
     {"name": "Richard Baxter", "era": "The 1600s", "guide": "heavenly-mindedness as medicine for an earth-bound heart; looking ahead to the rest that remains, and letting it steady the present."},
-    {"name": "John Owen", "era": "The 1600s", "guide": "mortifying sin by the Spirit, at its root, by looking to Christ (\"be killing sin or it will be killing you\")."},
+    {"name": "John Owen", "era": "The 1600s", "default": false, "guide": "mortifying sin by the Spirit, at its root, by looking to Christ (\"be killing sin or it will be killing you\")."},
+    {"name": "Richard Sibbes", "era": "The 1600s", "works": "The Bruised Reed", "no_text": true, "guide": "Christ's gentleness with the weak: the bruised reed He will not break, the smoking flax He will not quench; a little grace is still grace, and worth more than it feels."},
+    {"name": "Jeremiah Burroughs", "era": "The 1600s", "works": "The Rare Jewel of Christian Contentment", "no_text": true, "guide": "contentment as something learned, not handed over; reached by wanting less rather than having more; a quiet heart under a hard providence."},
     {"name": "John Bunyan", "era": "The 1600s", "guide": "the Christian life as a pilgrimage, with a burden lifted at the cross, the Slough of Despond, Vanity Fair, Doubting Castle and Giant Despair, the key called Promise; his own story of a troubled conscience finding grace."},
     {"name": "Brother Lawrence", "era": "The 1600s", "guide": "practicing the presence of God in ordinary work; turning back to God simply, without self-reproach, after distraction."},
     {"name": "Jonathan Edwards", "era": "The 1700s and 1800s", "guide": "true religion lying largely in holy affections; strong feelings proving nothing either way; the surest sign of grace being a changed life."},
+    {"name": "John Wesley", "era": "The 1700s and 1800s", "guide": "grace that goes before us, forgives and changes; holiness of heart and life; love made complete; faith working by love; the plain use of time, money and the means of grace."},
+    {"name": "John Newton", "era": "The 1700s and 1800s", "works": "Letters (Cardiphonia)", "no_text": true, "guide": "grace toward a great sinner, and patience with slow growth; plain pastoral counsel on lingering sin, assurance, and bearing with other people's faults as God bears with ours."},
     {"name": "Charles Spurgeon", "era": "The 1700s and 1800s", "guide": "warm, vivid daily meditation on a single verse; Christ's sufficiency for the weak and the weary."},
     {"name": "J. C. Ryle", "era": "The 1700s and 1800s", "guide": "holiness as the fruit of grace and the mark of real faith; the daily fight; counting the cost; Christ is all."},
     {"name": "Andrew Murray", "era": "The 1700s and 1800s", "guide": "abiding in Christ; humility as the creature's true place and the root of every grace, tested most among other people; prayer learned at Jesus' feet."},
+    {"name": "Hannah Whitall Smith", "era": "The 1700s and 1800s", "default": false, "guide": "trust as rest: handing a burden over and leaving it there; faith as a choice of the will rather than a feeling; what to do after failure."},
+    {"name": "George MacDonald", "era": "The 1700s and 1800s", "default": false, "guide": "God as a Father whose love is a consuming fire that will have us wholly good; childlikeness; obedience as the door to knowing God; honest doubt brought to God rather than hidden.", "caution": "He hoped all would at last be saved and rejected some common accounts of the atonement: draw on his picture of the Father's love and of obedience, not on those arguments."},
+    {"name": "E. M. Bounds", "era": "The 1700s and 1800s", "guide": "prayer as the real work rather than the preparation for it; much time alone with God; beginning the day with prayer; the heart before the head."},
     {"name": "Oswald Chambers", "era": "The 1900s", "guide": "utter surrender to God; obedience in the ordinary day rather than in great moments.", "works": "My Utmost for His Highest"},
     {"name": "A. W. Tozer", "era": "The 1900s", "guide": "hungering for God Himself rather than religious activity; the sacrament of ordinary living."},
+    {"name": "G. K. Chesterton", "era": "The 1900s", "guide": "wonder and gratitude at the sheer gift of existing; humility that doubts itself rather than the truth; joy as the secret of the Christian; loving the world enough to want it changed."},
     {"name": "C. S. Lewis", "era": "The 1900s", "guide": "pride as the great sin; the longing for joy that nothing in this world satisfies.", "works": "Mere Christianity, The Screwtape Letters, The Weight of Glory"},
     {"name": "Dietrich Bonhoeffer", "era": "The 1900s", "guide": "costly grace against cheap grace; life together, and bearing with one another in it.", "works": "The Cost of Discipleship, Life Together"},
     {"name": "Leonard Ravenhill", "era": "The 1900s", "default": false, "guide": "prayer as the true measure of a life; eternity kept in view; holiness that costs something.", "caution": "Draw on his seriousness about prayer and eternity, never a scolding tone.", "works": "Why Revival Tarries, Revival Praying, Meat for Men"},
     {"name": "Derek Prince", "era": "The 1900s", "default": false, "guide": "faith that comes by hearing God's word and is lived by decision; prayer joined with fasting; yielding your rights and trusting God with the outcome.", "caution": "Draw only on these themes. Never bring in his teaching on demons, deliverance or curses.", "works": "Shaping History Through Prayer and Fasting, Faith to Live By, The Grace of Yielding, Foundational Truths for the Christian Life"},
+    {"name": "Corrie ten Boom", "era": "The 1900s", "works": "The Hiding Place, Tramp for the Lord", "guide": "forgiving what seems unforgivable, as an act of the will helped by God; no pit so deep that God's love is not deeper; thankfulness in hard places; worry as carrying tomorrow's load today."},
+    {"name": "Elisabeth Elliot", "era": "The 1900s", "works": "Through Gates of Splendor, Keep a Quiet Heart, A Path Through Suffering", "guide": "obedience in the next ordinary duty; suffering received rather than explained away; loneliness and waiting offered to God; a quiet heart."},
+    {"name": "John Stott", "era": "The 1900s", "works": "Basic Christianity, The Cross of Christ", "guide": "the cross at the center of everything; clear thinking joined to humble living; faith that engages the whole mind and the world around it."},
+    {"name": "J. I. Packer", "era": "The 1900s", "works": "Knowing God", "guide": "knowing God rather than knowing about Him; being God's adopted child as the heart of the gospel; God's wisdom in the things we cannot understand."},
+    {"name": "Richard Foster", "era": "The 1900s", "works": "Celebration of Discipline, Prayer", "guide": "the spiritual disciplines (prayer, fasting, simplicity, solitude, service) as the way into freedom, not a new law; superficiality as the curse of our age."},
+    {"name": "Eugene Peterson", "era": "The 1900s", "works": "A Long Obedience in the Same Direction, Eat This Book", "guide": "discipleship as a long obedience in the same direction; unhurried attention to God in an ordinary place among ordinary people; reading Scripture slowly, to be changed by it."},
     {"name": "Dallas Willard", "era": "The 1900s", "guide": "spiritual disciplines as training rather than trying; the renovation of the heart.", "works": "The Spirit of the Disciplines, Renovation of the Heart"},
     {"name": "Tim Keller", "era": "The 1900s", "guide": "idols of the heart, good things made ultimate; the gospel that humbles and lifts up at once.", "works": "The Reason for God, Counterfeit Gods, The Prodigal God"}
   ],
   "sources_intro": "Reflections quote only the works below. Every quotation is checked word for word against the text before you see it, and links to the passage it came from; if it can't be confirmed, the reflection puts the idea in its own words instead. Scripture is from the Berean Standard Bible (BSB), a modern translation from the Hebrew and Greek, dedicated to the public domain in 2023. The other writers are in public-domain editions from the Christian Classics Ethereal Library (CCEL), Project Gutenberg and Wikisource.",
   "source_groups": [
     {
-      "name": "Old Testament",
-      "about": "The Psalms for prayer in every mood, the wisdom of Proverbs and Ecclesiastes, and Isaiah's comfort.",
+      "name": "The Law and the story of Israel",
+      "about": "Beginnings, the Exodus and the wilderness, and the lives of Ruth, Hannah, Samuel and David.",
       "works": [
-        "psalms",
-        "proverbs",
-        "ecclesiastes",
-        "isaiah"
+        "genesis",
+        "exodus",
+        "deuteronomy",
+        "ruth",
+        "1_samuel",
+        "2_samuel"
       ]
     },
     {
-      "name": "The Gospels",
-      "about": "The life and teaching of Jesus, including the Sermon on the Mount and the parables.",
+      "name": "Wisdom and poetry",
+      "about": "Job's honest suffering, the Psalms for prayer in every mood, and the wisdom of Proverbs and Ecclesiastes.",
+      "works": [
+        "job",
+        "psalms",
+        "proverbs",
+        "ecclesiastes"
+      ]
+    },
+    {
+      "name": "The Prophets",
+      "about": "Isaiah's comfort, Jeremiah and Lamentations in grief and hope, and three short prophets: Jonah, Micah and Habakkuk.",
+      "works": [
+        "isaiah",
+        "jeremiah",
+        "lamentations",
+        "jonah",
+        "micah",
+        "habakkuk"
+      ]
+    },
+    {
+      "name": "The Gospels and Acts",
+      "about": "The life and teaching of Jesus, including the Sermon on the Mount and the parables, and the first Christians.",
       "works": [
         "matthew",
         "mark",
         "luke",
-        "john"
+        "john",
+        "acts"
       ]
     },
     {
@@ -109,6 +152,7 @@
         "philippians",
         "colossians",
         "1_thessalonians",
+        "1_timothy",
         "2_timothy"
       ]
     },
@@ -119,6 +163,7 @@
         "hebrews",
         "james",
         "1_peter",
+        "2_peter",
         "1_john"
       ]
     },
@@ -158,18 +203,30 @@
     },
     {
       "name": "Revival and the evangelical tradition",
-      "about": "From the Great Awakening to the 20th century: true religion, daily devotion, holiness, humility and hunger for God.",
+      "about": "From the Great Awakening to the turn of the 20th century: true religion, holiness of heart and life, daily devotion, humility, trust and prayer.",
       "works": [
+        "wesley_sermons",
+        "wesley_perfection",
         "edwards_affections",
         "spurgeon_morning_evening",
         "ryle_holiness",
         "murray_prayer",
         "murray_humility",
+        "smith_secret",
+        "macdonald_unspoken",
+        "bounds_power"
+      ]
+    },
+    {
+      "name": "The twentieth century",
+      "about": "Wonder and gratitude in Chesterton, and Tozer's hunger for God Himself.",
+      "works": [
+        "chesterton_orthodoxy",
         "tozer_pursuit"
       ]
     }
   ],
   "paraphrase_only": {
-    "about": "These writers are still in copyright, so reflections may draw on their ideas in their own words, naming the writer and book, but never quote them, and there are no links."
+    "about": "Reflections may draw on these writers' ideas in their own words, naming the writer and book, but never quote them, and there are no links. Most are still in copyright; for a few older writers the app doesn't yet have a text to check quotations against."
   }
 }

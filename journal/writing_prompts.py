@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 
-from . import store
+from . import store, tokens
 from .config import TZ
 from .library import Library
 from .reflection import ReflectionError, _client, _read_prompt, _request_options, friendly_error
@@ -82,6 +82,7 @@ def suggest(already_suggested=(), writers=None):
         log.warning("Writing prompt request failed: %r", exc)
         raise ReflectionError(friendly_error(exc, about_entry=False)) from exc
 
+    tokens.record("prompt", response)
     if response.stop_reason == "refusal":
         raise ReflectionError("Claude couldn't suggest a prompt right now. Try again.")
     text = next((b.text for b in response.content if b.type == "text"), "")

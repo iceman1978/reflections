@@ -14,7 +14,7 @@ from datetime import datetime
 import anthropic
 from dotenv import load_dotenv
 
-from . import sources, store, themes
+from . import sources, store, themes, tokens
 from .config import EDITION, EDITION_DIR, ROOT, TZ, settings
 from .library import Library
 
@@ -203,7 +203,8 @@ def _schema(library):
 def _system_prompt(library):
     """The edition's instructions, with this reader's writers and works filled in."""
     names = [w["name"] for w in library.unquotable()]
-    unquotable = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1] if names else "Writers not listed below"
+    unquotable = (names[0] if len(names) == 1 else ", ".join(names[:-1]) + " or " + names[-1] if names
+                  else "any writer who isn't among the works below")
     instructions = (_read_prompt("reflection.md")
                     .replace("{{writers}}", library.guide())
                     .replace("{{unquotable}}", unquotable))
@@ -303,6 +304,7 @@ def reflect(entry, writers=None):
         log.warning("Reflection request failed for %s: %r", entry["id"], exc)
         raise ReflectionError(friendly_error(exc)) from exc
 
+    tokens.record("reflection", response)
     if response.stop_reason == "refusal":
         log.warning("Claude declined to reflect on %s", entry["id"])
         raise ReflectionError("Claude declined to reflect on this entry. You can try again, "

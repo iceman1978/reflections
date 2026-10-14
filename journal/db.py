@@ -7,6 +7,7 @@ Tables
            their recovery key. On a personal computer there's a single user, "local".
   entries  one row per entry: a random ID, its owner, and the encrypted entry
   drafts   at most one encrypted draft per person
+  token_usage  tokens used by calls to Claude, per day and kind of call (counts only; for cost)
   kept     each person's kept passages (quotations starred in reflections),
            as one encrypted list
   usage    how many reflections / prompts each person used per day (for limits)
@@ -40,6 +41,9 @@ CREATE TABLE IF NOT EXISTS entries (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, 
 CREATE INDEX IF NOT EXISTS entries_by_user ON entries (user_id);
 CREATE TABLE IF NOT EXISTS drafts  (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS kept    (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
+CREATE TABLE IF NOT EXISTS token_usage (day TEXT NOT NULL, kind TEXT NOT NULL, calls INTEGER NOT NULL,
+                                    input INTEGER NOT NULL, output INTEGER NOT NULL, cache_read INTEGER NOT NULL DEFAULT 0,
+                                    cache_write INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, kind));
 CREATE TABLE IF NOT EXISTS usage   (user_id TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL,
                                     count INTEGER NOT NULL, PRIMARY KEY (user_id, day, kind));
 CREATE TABLE IF NOT EXISTS activity (user_id TEXT NOT NULL, day TEXT NOT NULL, entries INTEGER NOT NULL DEFAULT 0,

@@ -10,6 +10,7 @@ its text. They don't count toward the daily reflection limit.
 import json
 import logging
 
+from . import tokens
 from .config import EDITION_DIR
 
 log = logging.getLogger(__name__)
@@ -85,6 +86,7 @@ def tag_batch(entries):
             messages=[{"role": "user", "content": listing}],
             output_config={"format": {"type": "json_schema", "schema": schema}},
         )
+        tokens.record("themes", response)
         data = json.loads(next(b.text for b in response.content if b.type == "text"))
     except Exception as exc:
         log.warning("Theme tagging failed for a batch of %d: %r", len(entries), exc)
