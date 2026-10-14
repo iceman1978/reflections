@@ -4,7 +4,7 @@
 
 Reads every drawing in brand-source/vignettes/ (dark pencil on white, named after
 its theme: "family.png", "grief-and-loss.jpg") and writes a web-ready copy to
-static/vignettes/<theme>.png: cropped to the drawing, padded to the same 3:2
+static/vignettes/<theme>.png: cropped to the drawing, padded to the same wide 5:2
 shape, and turned into a cut-out (white becomes transparent, pencil stays), so
 the page can paint it in the reader's theme color, the way it does the logo.
 
@@ -18,8 +18,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "brand-source" / "vignettes"
 OUT = ROOT / "static" / "vignettes"
-WIDTH, HEIGHT = 600, 400          # 3:2, shown at up to about 200 x 133 px (sharp on high-density screens)
-MARGIN = 0.06                     # white space kept around the drawing, as a share of its size
+WIDTH, HEIGHT = 1000, 400         # 5:2, a wide strip: the full width of the reflection (up to about 460 x 184 px)
+MARGIN = 0.03                     # white space kept around the drawing, as a share of its size
 INK = 236                         # brightness below which a pixel counts as part of the drawing
 
 
@@ -32,7 +32,7 @@ def vignette(path):
     pad = int(max(right - left, bottom - top) * MARGIN)
     drawing = gray.crop((max(0, left - pad), max(0, top - pad),
                          min(gray.width, right + pad), min(gray.height, bottom + pad)))
-    # Fit it into the 3:2 frame, centered, keeping its proportions.
+    # Fit it into the 5:2 frame, centered, keeping its proportions.
     scale = min(WIDTH / drawing.width, HEIGHT / drawing.height)
     drawing = drawing.resize((max(1, round(drawing.width * scale)), max(1, round(drawing.height * scale))), Image.LANCZOS)
     frame = Image.new("L", (WIDTH, HEIGHT), 255)

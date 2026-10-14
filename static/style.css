@@ -416,7 +416,7 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
 }
 
 .prompt-heading { font-weight: 500; font-size: 1.7rem; margin: 0 0 16px; line-height: 1.25; }
-.greeting { font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--ink); }
+.greeting { font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--accent); }   /* in the theme color, like the journal name */
 .subtle { color: var(--muted); font-size: 0.85rem; }
 
 /* Writing area: ruled like a notebook. */
@@ -521,7 +521,7 @@ button.prompt-btn.nudge-glow {
 .entry-date { font-family: var(--hand); font-size: 1.3rem; color: var(--muted); }  /* past entries and today's page alike */
 .title-row { display: flex; align-items: flex-start; gap: 12px; }
 /* An entry's title is handwritten, like the "what's on your mind?" greeting. */
-.entry-title { flex: 1; font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--ink); margin: 0 0 10px; line-height: 1.3; }
+.entry-title { flex: 1; font-family: var(--hand); font-weight: 500; font-size: 2.3rem; color: var(--accent); margin: 0 0 10px; line-height: 1.3; }
 .entry-title.untitled { color: var(--muted); font-weight: 400; }
 .entry-title.plain-title { font-family: var(--serif); font-size: 1.8rem; line-height: 1.25; }   /* titles with all-capital words */
 /* Favorite entries: a cloth bookmark hanging from the top of the page. An
@@ -580,8 +580,8 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .insight p { margin: 0 0 1em; }
 /* The main theme's pencil drawing, at the top of the reflection, in the theme's color. */
 .reflection-vignette {
-  width: min(210px, 62%); aspect-ratio: 3 / 2; margin: 2px auto 14px;
-  background: var(--accent); opacity: 0.8;
+  width: 100%; max-width: 460px; aspect-ratio: 5 / 2; margin: 0 auto 16px;   /* a wide strip across the reflection */
+  background: var(--accent); opacity: 0.85;
   -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
 }
 .insight em { font-style: italic; }                        /* quotations */
@@ -722,7 +722,7 @@ button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(
   z-index: 2;
 }
 .past-header { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.past h2 { font-family: var(--hand); font-weight: 500; font-size: 1.6rem; color: var(--ink); margin: 0; }
+.past h2 { font-family: var(--hand); font-weight: 500; font-size: 1.6rem; color: var(--accent); margin: 0; }
 .filter { display: flex; gap: 4px; flex-wrap: wrap; }
 .filter-btn { font-size: 0.85rem; padding: 2px 12px; border-color: var(--rule); color: var(--muted); }
 .filter-btn[aria-pressed="true"], .filter-btn[aria-expanded="true"] {
