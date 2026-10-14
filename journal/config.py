@@ -55,11 +55,15 @@ PROMPTS_PER_DAY = int(os.environ.get("PROMPTS_PER_DAY", "10")) if HOSTED else 0
 # Each person's own choices (stored with their account). Everything else in
 # DEFAULTS is a setting for the whole app.
 PREF_KEYS = ("user_name", "journal_name", "theme", "colour_theme", "text_size", "background_photo", "photo_blur",
-             "photo_visibility", "lock_minutes", "draft_autosave_seconds")
+             "photo_visibility", "lock_minutes", "draft_autosave_seconds", "writers")
+# The edition's writers (see journal/library.py); a reader must keep at least this many on.
+WRITERS = EDITION.get("writers", [])
+MIN_WRITERS = 3
 
 DEFAULTS = {
     "user_name": "",
     "journal_name": "",       # the title in the header; blank = the app's name
+    "writers": {},            # {"writer": true/false}: only where a reader differs from the edition's defaults
     "port": 5050,
     "open_browser_on_start": True,
     "timezone": "America/Toronto",
@@ -179,7 +183,19 @@ def _text(max_len, required=False):
     return check
 
 
+def _writers(v):
+    """A reader's choice of writers: kept only where it differs from the edition's defaults."""
+    if not isinstance(v, dict):
+        raise ValueError("should be a list of writers that are on or off")
+    defaults = {w["name"]: w.get("default", True) for w in WRITERS}
+    chosen = {name: bool(on) for name, on in v.items() if name in defaults}
+    if sum(chosen.get(name, default) for name, default in defaults.items()) < MIN_WRITERS:
+        raise ValueError(f"need at least {MIN_WRITERS} switched on, so reflections have enough to draw on")
+    return {name: on for name, on in chosen.items() if on != defaults[name]}
+
+
 VALIDATORS = {
+    "writers": _writers,
     "user_name": _text(40),
     "journal_name": _text(30),
     "port": _int_in(1024, 65535),

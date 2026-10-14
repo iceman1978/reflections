@@ -14,7 +14,8 @@
       <h1 class="prompt-heading">Where the wisdom comes from</h1>
 
       {% if edition.sources_intro %}<p>{{ edition.sources_intro }}</p>{% endif %}
-      <p>Here are all {{ work_count }} of them, with links to the full texts.</p>
+      <p>Here are all {{ work_count }} of them, with links to the full texts. You can choose which writers your own
+        reflections draw on in <em>Settings → Library</em>.</p>
       {% if edition.translation_note %}
       <h2>{{ edition.translation_note.title }}</h2>
       <p>{{ edition.translation_note.text }}</p>
@@ -39,8 +40,8 @@
       <h2>Drawn on, never quoted</h2>
       <p class="subtle">{{ edition.paraphrase_only.about }}</p>
       <ul class="source-list">
-        {% for w in edition.paraphrase_only.writers %}
-        <li><strong>{{ w.author }}</strong> <span class="subtle">{{ w.works }}</span></li>
+        {% for w in unquoted %}
+        <li><strong>{{ w.label }}</strong> <span class="subtle">{{ w.works }}{% if not w.default %} · off unless you switch it on{% endif %}</span></li>
         {% endfor %}
       </ul>
       {% endif %}

@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, migrate, passkeys, reflection, stats, store, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, library, migrate, passkeys, reflection, stats, store, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -238,6 +238,9 @@ def index():
         colour_themes=config.COLOUR_THEMES,
         lock_choices=config.LOCK_MINUTE_CHOICES,
         works_count=len(sources.load_map()["works"]),      # "{works}" in the welcome page's points
+        library_eras=library.for_settings(prefs["writers"]),  # Settings → Library
+        min_writers=library.MIN_WRITERS,
+        has_scripture=any(not w["author"] for w in sources.works().values()),
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
         photo_visibility=prefs["photo_visibility"],
@@ -291,7 +294,9 @@ def terms_page():
 
 @app.get("/sources")
 def sources_page():
-    return render_template("sources.html", groups=source_groups(), hosted=HOSTED,
+    # Writers with no quotable work here (still in copyright): drawn on, never quoted.
+    unquoted = [w for era in library.for_settings() for w in era["writers"] if not w["quotable"]]
+    return render_template("sources.html", groups=source_groups(), hosted=HOSTED, unquoted=unquoted,
                            work_count=len(sources.works()))
 
 
@@ -879,7 +884,7 @@ def reflect_entry(entry_id):
         if not had_reflection:
             store.update_entry(entry_id, reflection_status=store.PENDING, reflection_error=None)
         try:
-            fields = reflection.reflect(entry)
+            fields = reflection.reflect(entry, users.prefs(g.user_id)["writers"])
         except reflection.ReflectionError as e:
             # "Reflect again" failing keeps the earlier reflection.
             status = store.DONE if had_reflection else store.FAILED
@@ -903,7 +908,7 @@ def writing_prompt():
     shown = [str(p)[:500] for p in (data.get("already_suggested") or [])][:10]
     try:
         usage.check(g.user_id, "prompt")
-        result = writing_prompts.suggest(shown)
+        result = writing_prompts.suggest(shown, users.prefs(g.user_id)["writers"])
     except usage.LimitReached as e:
         return jsonify(error=str(e), limit=True), 429
     except reflection.ReflectionError as e:

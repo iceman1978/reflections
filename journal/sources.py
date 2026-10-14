@@ -183,11 +183,13 @@ def match_label(location, pages):
     return best[1] if best else None
 
 
-def describe_for_prompt():
-    """The list of quotable works, appended to the reflection system prompt.
+def describe_for_prompt(allowed=None):
+    """The list of quotable works, appended to the reflection system prompt
+    (`allowed`: the works in this reader's library; all of them if not given).
     Shuffled each time, so no thinker gets an edge just from coming first."""
     lines = []
-    for work_id, w in random.sample(list(works().items()), len(works())):
+    listed = works() if allowed is None else allowed
+    for work_id, w in random.sample(list(listed.items()), len(listed)):
         by = f'{w["author"]}, ' if w["author"] else ""   # books of the Bible have no author line
         line = (f'- "{work_id}": {by}{w["title"]} ({w["translation"]}). '
                 f'Location format: {w["location_format"]}.')

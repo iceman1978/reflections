@@ -1712,7 +1712,7 @@
 
   // ---- Settings ---------------------------------------------------------
 
-  // Settings tabs: Basic, Theme, Security & Data, Admin (admins only).
+  // Settings tabs: Basic, Theme, Library, Security & Data, Admin (admins only).
   const settingsTabs = () => [...document.querySelectorAll('#settings-view [role="tab"]')];
 
   function selectSettingsTab(name, { focus = false } = {}) {
@@ -1750,6 +1750,11 @@
         else if (el.type === "radio") el.checked = el.value === settings[el.name];
         else el.value = settings[el.name];
       }
+      // Library: a writer is on unless the saved choices (or the edition's default) say otherwise.
+      for (const box of document.querySelectorAll("#panel-library [data-writer]")) {
+        const chosen = (settings.writers || {})[box.dataset.writer];
+        box.checked = chosen === undefined ? box.dataset.default === "1" : !!chosen;
+      }
       syncPhotoControls();
     } catch (err) {
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
@@ -1779,6 +1784,8 @@
       else if (el.type === "number" || el.type === "range") out[el.name] = Number(el.value);
       else out[el.name] = el.value;
     }
+    const writers = [...document.querySelectorAll("#panel-library [data-writer]")];
+    if (writers.length) out.writers = Object.fromEntries(writers.map((box) => [box.dataset.writer, box.checked]));
     try {
       const res = await api("PUT", "/api/settings", out);
       CFG.userName = res.settings.user_name;

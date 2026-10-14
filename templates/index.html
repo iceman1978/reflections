@@ -336,6 +336,7 @@
       <div class="settings-tabs" role="tablist" aria-label="Settings">
         <button type="button" role="tab" id="tab-basic" aria-controls="panel-basic" aria-selected="true">Basic</button>
         <button type="button" role="tab" id="tab-theme" aria-controls="panel-theme" aria-selected="false" tabindex="-1">Theme</button>
+        {% if library_eras %}<button type="button" role="tab" id="tab-library" aria-controls="panel-library" aria-selected="false" tabindex="-1">Library</button>{% endif %}
         <button type="button" role="tab" id="tab-security" aria-controls="panel-security" aria-selected="false" tabindex="-1">Security &amp; Data</button>
         {% if is_admin %}<button type="button" role="tab" id="tab-admin" aria-controls="panel-admin" aria-selected="false" tabindex="-1">Admin</button>{% endif %}
       </div>
@@ -453,6 +454,32 @@
             </label>
           </div>
         </div>
+
+        {% if library_eras %}
+        <!-- Library: which of the edition's writers this reader's reflections draw on (journal/library.py) -->
+        <div id="panel-library" role="tabpanel" aria-labelledby="tab-library" class="settings-panel" hidden>
+          <p class="library-intro">Your reflections draw only on the writers switched on here{% if has_scripture %}, and on
+            Scripture, which is always included{% endif %}. Switch off anyone you'd rather not hear from, or switch on one
+            who starts off. Your choices apply to new reflections. Keep at least {{ min_writers }} switched on.</p>
+          {% for era in library_eras %}
+          <h2>{{ era.name }}</h2>
+          <ul class="library-list">
+            {% for w in era.writers %}
+            <li>
+              <label class="library-writer">
+                <input type="checkbox" data-writer="{{ w.name }}" data-default="{{ 1 if w.default else 0 }}"{% if w.on %} checked{% endif %}>
+                <span>
+                  <strong>{{ w.label }}</strong>{% if w.works %}
+                  <span class="library-works">{{ w.works }}{% if not w.quotable %} (in copyright: drawn on, never quoted){% endif %}</span>{% endif %}
+                  <span class="hint">{{ w.about }}</span>
+                </span>
+              </label>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endfor %}
+        </div>
+        {% endif %}
       </form>
 
       <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" class="settings-panel" hidden>

@@ -51,7 +51,30 @@
   "voices": ["Augustine", "Thomas Aquinas", "Thomas à Kempis", "Martin Luther", "John Calvin",
              "Richard Baxter", "John Owen", "John Bunyan", "Brother Lawrence", "Jonathan Edwards",
              "Charles Spurgeon", "J. C. Ryle", "Andrew Murray", "Oswald Chambers", "A. W. Tozer",
-             "C. S. Lewis", "Dietrich Bonhoeffer", "Dallas Willard", "Tim Keller"],
+             "C. S. Lewis", "Dietrich Bonhoeffer", "Leonard Ravenhill", "Derek Prince", "Dallas Willard", "Tim Keller"],
+  "writers": [
+    {"name": "Augustine", "era": "The early and medieval church", "guide": "the restless heart that finds rest only in God; disordered loves, loving good things in the wrong order; the divided will; confession as both admitting sin and praising God."},
+    {"name": "Thomas Aquinas", "era": "The early and medieval church", "guide": "grace that perfects nature; faith, hope and charity as gifts that grow; pride as the root of sin and humility as the ground of the other virtues; sloth as sorrow over spiritual good."},
+    {"name": "Thomas à Kempis", "era": "The early and medieval church", "guide": "following Christ in humility; knowing yourself; inner peace through a quiet conscience; bearing with others' faults as you hope they bear with yours."},
+    {"name": "Martin Luther", "era": "The Reformation", "guide": "justified by faith alone, free from the need to earn God's favor; the Christian as free lord of all and dutiful servant of all; good works flowing from a freed heart, for the neighbor's sake; honest wrestling with doubt and temptation."},
+    {"name": "John Calvin", "era": "The Reformation", "guide": "we are not our own, but God's; self-denial as the sum of the Christian life; bearing the cross; using this world's gifts gratefully without being owned by them; knowing God and knowing ourselves."},
+    {"name": "Richard Baxter", "era": "The 1600s", "guide": "heavenly-mindedness as medicine for an earth-bound heart; looking ahead to the rest that remains, and letting it steady the present."},
+    {"name": "John Owen", "era": "The 1600s", "guide": "mortifying sin by the Spirit, at its root, by looking to Christ (\"be killing sin or it will be killing you\")."},
+    {"name": "John Bunyan", "era": "The 1600s", "guide": "the Christian life as a pilgrimage, with a burden lifted at the cross, the Slough of Despond, Vanity Fair, Doubting Castle and Giant Despair, the key called Promise; his own story of a troubled conscience finding grace."},
+    {"name": "Brother Lawrence", "era": "The 1600s", "guide": "practicing the presence of God in ordinary work; turning back to God simply, without self-reproach, after distraction."},
+    {"name": "Jonathan Edwards", "era": "The 1700s and 1800s", "guide": "true religion lying largely in holy affections; strong feelings proving nothing either way; the surest sign of grace being a changed life."},
+    {"name": "Charles Spurgeon", "era": "The 1700s and 1800s", "guide": "warm, vivid daily meditation on a single verse; Christ's sufficiency for the weak and the weary."},
+    {"name": "J. C. Ryle", "era": "The 1700s and 1800s", "guide": "holiness as the fruit of grace and the mark of real faith; the daily fight; counting the cost; Christ is all."},
+    {"name": "Andrew Murray", "era": "The 1700s and 1800s", "guide": "abiding in Christ; humility as the creature's true place and the root of every grace, tested most among other people; prayer learned at Jesus' feet."},
+    {"name": "Oswald Chambers", "era": "The 1900s", "guide": "utter surrender to God; obedience in the ordinary day rather than in great moments.", "works": "My Utmost for His Highest"},
+    {"name": "A. W. Tozer", "era": "The 1900s", "guide": "hungering for God Himself rather than religious activity; the sacrament of ordinary living."},
+    {"name": "C. S. Lewis", "era": "The 1900s", "guide": "pride as the great sin; the longing for joy that nothing in this world satisfies.", "works": "Mere Christianity, The Screwtape Letters, The Weight of Glory"},
+    {"name": "Dietrich Bonhoeffer", "era": "The 1900s", "guide": "costly grace against cheap grace; life together, and bearing with one another in it.", "works": "The Cost of Discipleship, Life Together"},
+    {"name": "Leonard Ravenhill", "era": "The 1900s", "default": false, "guide": "prayer as the true measure of a life; eternity kept in view; holiness that costs something.", "caution": "Draw on his seriousness about prayer and eternity, never a scolding tone.", "works": "Why Revival Tarries, Revival Praying, Meat for Men"},
+    {"name": "Derek Prince", "era": "The 1900s", "default": false, "guide": "faith that comes by hearing God's word and is lived by decision; prayer joined with fasting; yielding your rights and trusting God with the outcome.", "caution": "Draw only on these themes. Never bring in his teaching on demons, deliverance or curses.", "works": "Shaping History Through Prayer and Fasting, Faith to Live By, The Grace of Yielding, Foundational Truths for the Christian Life"},
+    {"name": "Dallas Willard", "era": "The 1900s", "guide": "spiritual disciplines as training rather than trying; the renovation of the heart.", "works": "The Spirit of the Disciplines, Renovation of the Heart"},
+    {"name": "Tim Keller", "era": "The 1900s", "guide": "idols of the heart, good things made ultimate; the gospel that humbles and lifts up at once.", "works": "The Reason for God, Counterfeit Gods, The Prodigal God"}
+  ],
   "sources_intro": "Reflections quote only the works below. Every quotation is checked word for word against the text before you see it, and links to the passage it came from; if it can't be confirmed, the reflection puts the idea in its own words instead. Scripture is from the Berean Standard Bible (BSB), a modern translation from the Hebrew and Greek, dedicated to the public domain in 2023. The other writers are in public-domain editions from the Christian Classics Ethereal Library (CCEL), Project Gutenberg and Wikisource.",
   "source_groups": [
     {
@@ -147,28 +170,6 @@
     }
   ],
   "paraphrase_only": {
-    "about": "These writers are still in copyright, so reflections may draw on their ideas in their own words, naming the writer and book, but never quote them, and there are no links.",
-    "writers": [
-      {
-        "author": "C. S. Lewis",
-        "works": "Mere Christianity, The Screwtape Letters, The Weight of Glory"
-      },
-      {
-        "author": "Dietrich Bonhoeffer",
-        "works": "The Cost of Discipleship, Life Together"
-      },
-      {
-        "author": "Oswald Chambers",
-        "works": "My Utmost for His Highest"
-      },
-      {
-        "author": "Dallas Willard",
-        "works": "The Spirit of the Disciplines, Renovation of the Heart"
-      },
-      {
-        "author": "Tim Keller",
-        "works": "The Reason for God, Counterfeit Gods, The Prodigal God"
-      }
-    ]
+    "about": "These writers are still in copyright, so reflections may draw on their ideas in their own words, naming the writer and book, but never quote them, and there are no links."
   }
 }

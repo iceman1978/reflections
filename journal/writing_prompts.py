@@ -5,6 +5,7 @@ from datetime import datetime
 
 from . import store
 from .config import TZ
+from .library import Library
 from .reflection import ReflectionError, _client, _read_prompt, _request_options, friendly_error
 
 log = logging.getLogger(__name__)
@@ -59,8 +60,10 @@ def _context(entries, already_suggested):
     return "\n\n".join(parts)
 
 
-def suggest(already_suggested=()):
-    """Returns {"prompt", "approach", "based_on": {id, title, date} or None}."""
+def suggest(already_suggested=(), writers=None):
+    """Returns {"prompt", "approach", "based_on": {id, title, date} or None}.
+    `writers`: the reader's choice of writers (their "writers" preference)."""
+    off_note = Library(writers).off_note(brief=True)
     entries = _recent_entries()
     already = [p for p in already_suggested if p][-10:]
     # Prompts used for recent entries shouldn't come back either.
@@ -70,6 +73,7 @@ def suggest(already_suggested=()):
         response = _client().messages.create(
             max_tokens=4000,
             system=_read_prompt("writing_prompt.md")
+            + (f"\n\n{off_note}" if off_note else "")
             + "\n\n## Response format\n\nRespond with JSON matching the schema.",
             messages=[{"role": "user", "content": _context(entries, already)}],
             **_request_options(schema=SCHEMA, effort=PROMPT_EFFORT),

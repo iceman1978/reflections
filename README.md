@@ -102,6 +102,14 @@ The **star in the header** (left of the giving hand; *Kept passages* in the phon
 
 Kept passages are stored as their own encrypted list (the `kept` table in `data/journal.db`, `journal/kept.py`), so a passage stays kept if an entry that quoted it is deleted. Wiping the journal removes them. They aren't in the CSV export.
 
+## Your library: choosing your writers
+
+*Settings → Library* lists every writer the edition draws on, grouped by era, each with a line on what they bring and the works used. Switch off anyone you'd rather not hear from, or switch on a writer who starts off (in In His Steps, Leonard Ravenhill and Derek Prince start off). Your reflections and writing prompts then draw only on the writers left on; in In His Steps, Scripture is always included. At least 3 writers must stay on. The choice applies to new reflections; earlier ones, and passages you've kept, don't change.
+
+How it works: a writer who is off is never mentioned to Claude. Their notes, their works and their name are left out of the instructions and of the list of works it may quote or refer to, the instructions say plainly who is not in this reader's library, and anything attributed to a work outside it is dropped. Your choices are saved with your other preferences (only where they differ from the edition's defaults), not inside the encrypted journal.
+
+For whoever runs the app: the writers live in `editions/<edition>/edition.json` under `writers`, one line each: `name`, `era` (writers of an era are listed together), `guide` (what they bring: shown in Settings and given to Claude), and optionally `default: false` (off unless switched on), `caution` (for Claude only, e.g. what not to draw on), `works` (the books to name, for a writer still in copyright with nothing quotable here), `label` and `voices` (Socrates comes with Plato). The reflection instructions take the list from there (the `{{writers}}` line in `prompts/reflection.md`), and the Sources page lists the never-quoted writers from it. The code is `journal/library.py`.
+
 ## Reflections
 
 When you click **Finish & reflect**, the entry is saved first, and only then is it sent to Claude. A reflection (an insight plus a question to sit with) appears under the entry, usually within 20–40 seconds.
@@ -207,7 +215,7 @@ Open the entry and click **Delete**. You'll be asked to confirm, then to choose:
 
 ## Settings
 
-Click the **⚙** in the top-right corner. Settings has tabs: **Basic** (your account, name, journal name, draft saving, auto-lock; on your own computer also the app-wide settings under *This computer*), **Theme** (day or evening, color, background photo), **Security & Data** (passphrase, recovery key, export, import, wipe, hidden entries) and, for admins, **Admin** (usage, invitation requests, feedback). **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
+Click the **⚙** in the top-right corner. Settings has tabs: **Basic** (your account, name, journal name, draft saving, auto-lock; on your own computer also the app-wide settings under *This computer*), **Theme** (day or evening, color, background photo), **Library** (which writers your reflections draw on), **Security & Data** (passphrase, recovery key, export, import, wipe, hidden entries) and, for admins, **Admin** (usage, invitation requests, feedback). **Save** saves and returns to your journal; **Discard** returns without saving anything. The ones under *Applied after restarting the app* take effect the next time you start `start.bat`.
 
 Your personal choices (name, journal name, day/evening, color, photo, draft saving, lock time) are saved with your journal in `data/journal.db`. The app-wide settings (port, time zone, backups, model…) are saved to `config/settings.json`, which you can also edit in Notepad and then restart the app. On the web version, each person only sees their personal choices; the app-wide ones come from the server's settings.
 

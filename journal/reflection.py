@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from . import sources, store, themes
 from .config import EDITION, EDITION_DIR, ROOT, TZ, settings
+from .library import Library
 
 log = logging.getLogger(__name__)
 
@@ -119,8 +120,9 @@ EXAMPLES = {
 }
 
 
-def _schema():
-    work_ids = list(sources.works().keys())
+def _schema(library):
+    work_ids = list(library.works().keys())
+    voices = library.voices()
     return {
         "type": "object",
         "properties": {
@@ -184,7 +186,7 @@ def _schema():
             "thinkers": {
                 "type": "array",
                 "description": f"The one to three {VOICE}s whose ideas the insight mainly draws on.",
-                "items": {"type": "string", "enum": THINKERS},
+                "items": {"type": "string", "enum": voices},
             },
             "wellbeing_concern": {
                 "type": "boolean",
@@ -198,11 +200,18 @@ def _schema():
     }
 
 
-def _system_prompt():
+def _system_prompt(library):
+    """The edition's instructions, with this reader's writers and works filled in."""
+    names = [w["name"] for w in library.unquotable()]
+    unquotable = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1] if names else "Writers not listed below"
+    instructions = (_read_prompt("reflection.md")
+                    .replace("{{writers}}", library.guide())
+                    .replace("{{unquotable}}", unquotable))
     return (
-        _read_prompt("reflection.md")
+        instructions
         + "\n\n## Works you may quote\n\n"
-        + sources.describe_for_prompt()
+        + sources.describe_for_prompt(library.works())
+        + (f"\n\n{library.off_note()}" if library.off_note() else "")
         + "\n\n## Response format\n\n"
         "Respond with JSON matching the schema. In the insight, put each quote's marker "
         "(e.g. [[q1]]) exactly where the quoted words belong, with the words that introduce it "
@@ -214,7 +223,7 @@ def _system_prompt():
     )
 
 
-def recent_thinkers(entry):
+def recent_thinkers(entry, voices=None):
     """How often each thinker featured in the writer's last few reflections (not
     counting this entry). Older reflections, from before thinkers were recorded,
     are read from their quotes and source links."""
@@ -223,7 +232,7 @@ def recent_thinkers(entry):
     counts = Counter()
     for e in reflected[-RECENT_REFLECTIONS:]:
         names = e.get("thinkers") or {c.get("author") for c in (e.get("quotes") or []) + (e.get("references") or [])}
-        counts.update(n for n in set(names) if n in THINKERS)   # only thinkers still on offer
+        counts.update(n for n in set(names) if n in (voices or THINKERS))   # only thinkers still on offer
     return counts, min(len(reflected), RECENT_REFLECTIONS)
 
 
@@ -242,14 +251,15 @@ def recent_scripture(entry):
     return counts
 
 
-def _variety_note(entry):
-    counts, seen = recent_thinkers(entry)
+def _variety_note(entry, voices=None):
+    voices = voices or THINKERS
+    counts, seen = recent_thinkers(entry, voices)
     if not seen:
         return None
     used = ", ".join(f"{name} ({n})" for name, n in counts.most_common()) or f"no named {VOICE}"
     note = (f"For variety: this person's last {seen} reflection{'s' if seen != 1 else ''} drew mainly on "
             f"{used}.")
-    fresh = [name for name in THINKERS if name not in counts]
+    fresh = [name for name in voices if name not in counts]
     if fresh:
         note += (f" Not used recently: {', '.join(fresh)}. Prefer one of those this time, unless a recent "
                  f"{VOICE} is clearly the best lens for this particular entry.")
@@ -261,7 +271,7 @@ def _variety_note(entry):
     return note
 
 
-def _user_message(entry):
+def _user_message(entry, voices=None):
     when = datetime.fromisoformat(entry["created_at"]).astimezone(TZ)
     clock = when.strftime("%I:%M %p").lstrip("0")
     parts = [f"Journal entry written {when:%A, %B} {when.day}, {when.year} at {clock}."]
@@ -270,22 +280,24 @@ def _user_message(entry):
     if entry.get("prompt"):
         parts.append(f"They were writing in response to this prompt: {entry['prompt']}")
     parts.append("<entry>\n" + entry["text"] + "\n</entry>")
-    if (variety := _variety_note(entry)):
+    if (variety := _variety_note(entry, voices)):
         parts.append(variety)
     return "\n\n".join(parts)
 
 
 # ---- The call -----------------------------------------------------------
 
-def reflect(entry):
-    """Returns the fields to store on the entry. Raises ReflectionError."""
+def reflect(entry, writers=None):
+    """Returns the fields to store on the entry. Raises ReflectionError.
+    `writers`: the reader's choice of writers (their "writers" preference)."""
+    library = Library(writers)
     try:
         client = _client()
         response = client.messages.create(
             max_tokens=16000,
-            system=_system_prompt(),
-            messages=[{"role": "user", "content": _user_message(entry)}],
-            **_request_options(schema=_schema()),
+            system=_system_prompt(library),
+            messages=[{"role": "user", "content": _user_message(entry, library.voices())}],
+            **_request_options(schema=_schema(library)),
         )
     except Exception as exc:
         log.warning("Reflection request failed for %s: %r", entry["id"], exc)
@@ -304,8 +316,12 @@ def reflect(entry):
                   entry["id"], response.stop_reason, len(text))  # never log the text itself
         raise ReflectionError("Claude's answer came back incomplete. Try again.") from None
 
-    rendered, citations, unverified = render_insight(insight, data.get("quotes") or [])
-    references = resolve_references((data.get("references") or []) + unverified, citations)
+    # Only works in this reader's library count (the response format already limits Claude to them).
+    allowed = library.works()
+    quotes = [q for q in data.get("quotes") or [] if q.get("work") in allowed]
+    rendered, citations, unverified = render_insight(insight, quotes)
+    references = resolve_references(
+        [r for r in data.get("references") or [] if r.get("work") in allowed] + unverified, citations)
     log.info("Reflection for %s: %d words, %d verified quote(s) of %d proposed, %d reference(s)",
              entry["id"], len(rendered.split()), len(citations), len(data.get("quotes") or []),
              len(references))
@@ -316,7 +332,7 @@ def reflect(entry):
         "quotes": citations,
         "references": references,
         "wellbeing_concern": bool(data.get("wellbeing_concern")),
-        "thinkers": [n for n in (data.get("thinkers") or []) if n in THINKERS][:3],
+        "thinkers": [n for n in (data.get("thinkers") or []) if n in library.voices()][:3],
         **({"themes": themes.clean(data.get("themes"))} if themes.THEMES else {}),
         "reflection_model": response.model,
         "reflected_at": datetime.now(TZ).isoformat(),
