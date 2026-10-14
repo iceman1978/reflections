@@ -2981,10 +2981,12 @@
     restartAutosave();
     clearInterval(statusTimer);
     statusTimer = setInterval(pollStatus, 10000);
-    if (!started && FEEDBACK_ON_START === "sources") {
+    // "Send feedback" links on the Sources and Privacy pages open the form, started for that topic.
+    const FEEDBACK_TOPICS = { sources: "About the sources: ", privacy: "About privacy: " };
+    if (!started && FEEDBACK_TOPICS[FEEDBACK_ON_START]) {
       try { sessionStorage.removeItem("journal.feedbackOnStart"); } catch (_) {}
       history.replaceState(null, "", "/");
-      $("feedback-text").value = $("feedback-text").value || "About the sources: ";
+      $("feedback-text").value = $("feedback-text").value || FEEDBACK_TOPICS[FEEDBACK_ON_START];
       setTimeout(openFeedback, 400);
     }
     started = true;

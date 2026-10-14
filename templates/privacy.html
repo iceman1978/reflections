@@ -13,12 +13,23 @@
       {% set page = "privacy" %}{% include "_info_nav.html" %}
       <h1 class="prompt-heading">How your writing is kept private</h1>
 
+      <h2>In short</h2>
+      <ul class="rules-list">
+        <li>Your entries are locked with a passphrase only you know. Neither the site nor its host can read what's stored.</li>
+        <li>Your writing goes to Claude only to write your reflections and prompts, without your name or email.</li>
+        <li>It isn't used to train AI.</li>
+        <li>No ads, analytics or tracking.</li>
+        <li>You can download your whole journal, or wipe it, at any time.</li>
+      </ul>
+
       <h2>Who can read your entries</h2>
       <p>Only you. Every entry is encrypted with a key that is locked by your passphrase.
         The server stores only the encrypted version, so whoever runs this site (or the hosting company)
         sees unreadable data. {% if hosted %}Signing in with Google only proves who you are; Google never sees your journal.{% endif %}</p>
       <p>Because of this, <strong>nobody can reset your passphrase</strong>. If you forget it, your recovery key
         is the only way back in. Without either, the entries can't be recovered by anyone.</p>
+      {% if hosted %}<p>If churches or small groups ever sponsor their members, their leaders will never see anything
+        anyone writes.</p>{% endif %}
 
       {% if hosted %}
       <h2 id="why-passphrase">Why a passphrase as well as Google?</h2>
@@ -63,6 +74,14 @@
       </ul>
       <p>No analytics, advertising or tracking scripts are used. The only cookies keep you signed in and
         remember that this browser has unlocked your journal.</p>
+
+      {% if hosted %}
+      <h2>Who runs {{ app_name }}, and where your journal is kept</h2>
+      <p>{{ app_name }} is made and run by Aaron de Vries. Journals are stored, encrypted, with Render, a hosting
+        company, in its data center in Ohio, in the United States. Reflections are written by Anthropic's Claude.
+        Questions about your privacy? <a href="/?feedback=privacy">Send feedback</a> (you'll be asked to unlock
+        your journal first).</p>
+      {% endif %}
 
       <h2>What's counted</h2>
       <p>So {% if hosted %}whoever runs {{ app_name }}{% else %}you{% endif %} can see how it's being used, the

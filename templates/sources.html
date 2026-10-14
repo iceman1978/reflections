@@ -13,9 +13,35 @@
       {% set page = "sources" %}{% include "_info_nav.html" %}
       <h1 class="prompt-heading">Where the wisdom comes from</h1>
 
+      <h2>How quotes are checked</h2>
+      <p>Claude may only quote the works on this page. Before a reflection is shown, the app looks for every quotation
+        in its own copy of that exact edition. If the words are there, you see the source's exact wording and a link
+        to the passage. If they aren't, the reflection puts the idea in its own words and names where it came from,
+        rather than risk a misquotation. Claude never writes the links: they always come from this list.</p>
+      {% if edition.check_example %}
+      <p>{{ edition.check_example.intro }}</p>
+      <blockquote class="check-example muted">“{{ edition.check_example.quoted }}”</blockquote>
+      <p>{{ edition.check_example.shown_intro }}</p>
+      <blockquote class="check-example">“{{ edition.check_example.shown }}”<br><span class="subtle">{{ edition.check_example.cite }}</span></blockquote>
+      {% endif %}
+
+      {% if edition.reflection_rules %}
+      <h2>{{ edition.reflection_rules.title }}</h2>
+      <ul class="rules-list">
+        {% for item in edition.reflection_rules["items"] %}<li>{{ item | safe }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+      {% if edition.foundation %}<p>{{ edition.foundation }}</p>{% endif %}
+
+      <h2>The library</h2>
+
       {% if edition.sources_intro %}<p>{{ edition.sources_intro }}</p>{% endif %}
       <p>Here are all {{ work_count }} of them, with links to the full texts. You can choose which writers your own
         reflections draw on in <em>Settings → Library</em>.</p>
+      {% if edition.selection %}
+      <h2>{{ edition.selection.title }}</h2>
+      <p>{{ edition.selection.text }}</p>
+      {% endif %}
       {% if edition.translation_note %}
       <h2>{{ edition.translation_note.title }}</h2>
       <p>{{ edition.translation_note.text }}</p>
@@ -45,12 +71,6 @@
         {% endfor %}
       </ul>
       {% endif %}
-
-      <h2>How quotes are checked</h2>
-      <p>Claude may only quote the works on this page. Before a reflection is shown, the app looks for every quotation
-        in its own copy of that exact edition. If the words are there, you see the source's exact wording and a link
-        to the passage. If they aren't, the reflection puts the idea in its own words and names where it came from,
-        rather than risk a misquotation. Claude never writes the links: they always come from this list.</p>
 
       <h2>Tell us what you think</h2>
       <p>Is there a writer or book you'd like to see here, a translation you'd prefer, or a quote that didn't seem

@@ -23,7 +23,7 @@
     {"icon": "calendar", "title": "A few lines are enough",
      "text": "The benefit of journaling comes from reflecting each day. A prompt is there when the page feels blank."},
     {"icon": "book", "title": "A well-stocked library of Christian wisdom",
-     "text": "Reflections draw <em>only</em> on selected books of Scripture and classic devotional writers, and tell you exactly where to find each passage.",
+     "text": "Reflections draw <em>only</em> on selected books of Scripture and classic devotional writers such as Augustine, Brother Lawrence, Bunyan, Wesley, Spurgeon and Andrew Murray, and tell you exactly where to find each passage.",
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "sandal", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry through your day. Easily find favorite entries and passages."},
@@ -34,6 +34,33 @@
   "welcome_quote": {
     "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
     "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"
+  },
+  "promises": [
+    "Every verse checked, word for word, with a link to read it in context.",
+    "A companion for quiet contemplation, pointing you to Scripture, to prayer, and to the words of Jesus.",
+    "Made to deepen your prayer and your quiet time, never to stand in for them or for your pastor."
+  ],
+  "check_example": {
+    "intro": "For example, if a reflection quotes Ecclesiastes 11:4 in the wording of another translation (the ESV):",
+    "quoted": "He who observes the wind will not sow, and he who regards the clouds will not reap.",
+    "shown_intro": "the app finds the verse and shows it as the Berean Standard Bible has it:",
+    "shown": "He who watches the wind will fail to sow, and he who observes the clouds will fail to reap.",
+    "cite": "Ecclesiastes 11:4 (BSB)"
+  },
+  "foundation": "In His Steps is rooted in the Protestant devotional tradition: Scripture is the final authority, and salvation is by grace through faith. Its reflections are written for believers from many churches, and steer clear of the questions that divide them.",
+  "reflection_rules": {
+    "title": "How reflections are written",
+    "items": [
+      "<strong>As a fellow traveler.</strong> A reflection never speaks for God or tells you what He thinks of you. It brings the words of people who walked the same road: the Psalmists, Paul, Peter, and the writers who came after them.",
+      "<strong>The words of Jesus, as He said them.</strong> His sayings are quoted word for word from the Gospels, and never stretched into what He would say about your situation.",
+      "<strong>Toward prayer and your church.</strong> Reflections encourage prayer, trust in God, and the people around you. They're no substitute for Scripture, a pastor, or a friend who knows you.",
+      "<strong>Checked before you see it.</strong> Every quotation is matched against its source, as described above.",
+      "<strong>With care in hard times.</strong> If an entry suggests real distress, the reflection sets everything else aside, responds with care, and shows where to find help."
+    ]
+  },
+  "selection": {
+    "title": "Why these books and writers",
+    "text": "The books of the Bible here are chosen for a daily quiet time: the Psalms and the wisdom books, the stories of Abraham, Joseph, Moses, Ruth and David, the prophets of comfort and lament, the Gospels and Acts, and the letters. Each comes with notes that steer reflections to the passages meant for devotion, and away from genealogies, laws and judgments that need more context than a short reflection can give. The writers are among the most widely loved devotional voices of the Protestant tradition, from the early church to the twentieth century. A few stronger or more contested voices start switched off."
   },
   "translation_note": {
     "title": "Why the Berean Standard Bible?",

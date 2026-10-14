@@ -56,6 +56,12 @@
         </li>
         {% endfor %}
       </ul>
+      {% if edition.promises %}
+      <!-- The worries people have about AI and faith, answered in a line each -->
+      <ul class="landing-promises">
+        {% for promise in edition.promises %}<li>{{ promise }}</li>{% endfor %}
+      </ul>
+      {% endif %}
       {% if edition.welcome_quote %}
       <figure class="landing-quote">
         <blockquote>{{ edition.welcome_quote.text }}</blockquote>
