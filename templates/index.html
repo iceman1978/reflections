@@ -216,7 +216,8 @@
       </button>
       <div id="header-actions" class="header-actions">
         <button id="kept-btn" class="icon-btn lock-btn" title="Kept passages" aria-label="Kept passages">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><polygon points="12,2.8 14.8,8.7 21.3,9.6 16.6,14.1 17.8,20.6 12,17.5 6.2,20.6 7.4,14.1 2.7,9.6 9.2,8.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <!-- A book with a star on its cover: favourite passages from the books ("book" from Lucide, lucide.dev, ISC licence) -->
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><polygon stroke-width="1.5" points="12.2,5.2 13.3,8.2 16.6,8.4 14.1,10.4 14.9,13.5 12.2,11.8 9.5,13.5 10.3,10.4 7.8,8.4 11.1,8.2"/></g></svg>
           <span class="menu-label">Kept passages</span>
         </button>
         {% if hosted %}
@@ -227,7 +228,8 @@
         </button>
         {% endif %}
         <button id="feedback-btn" class="icon-btn lock-btn" title="Send feedback" aria-label="Send feedback">
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8.5 8.5h7M8.5 11.5h4.5"/></svg>
+          <!-- A lightbulb: an idea or a fix ("lightbulb" from Lucide, lucide.dev, ISC licence) -->
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></g></svg>
           <span class="menu-label">Send feedback</span>
         </button>
         <button id="settings-btn" class="icon-btn" title="Settings" aria-label="Settings"><span class="menu-glyph" aria-hidden="true">&#9881;</span><span class="menu-label">Settings</span></button>
@@ -657,7 +659,7 @@
       {% endif %}
 
       <h2>Feedback received</h2>
-      <p class="hint">What people have sent with the Feedback button (the speech bubble at the top){% if hosted %} (only you can see this){% endif %}.
+      <p class="hint">What people have sent with the Feedback button (the lightbulb at the top){% if hosted %} (only you can see this){% endif %}.
         <a class="button-link" href="/api/feedback/export" download>Download (CSV)</a></p>
       <div class="key-test"><label class="checkbox"><input id="feedback-show-done" type="checkbox"> Show ones marked done</label></div>
       <ul id="feedback-list" class="feedback-list"></ul>

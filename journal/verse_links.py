@@ -24,8 +24,12 @@ TIMEOUT = 6
 
 
 def fragment(text):
-    """The highlight for some words: the first and last four (all of them, if eight or fewer)."""
+    """The highlight for some words: the first and last four (all of them, if eight or fewer),
+    starting from the second word: on BibleHub's chapter pages a verse's number runs into
+    its first word ("14for when..."), and a highlight must start at the start of a word."""
     words = [w for w in (text or "").split() if w]
+    if len(words) > 5:            # the verse number runs into the first word ("14for"), which can't be matched
+        words = words[1:]
     if not words:
         return ""
     words[0] = re.sub(r"^[^\w]+", "", words[0])
@@ -53,7 +57,7 @@ def url(t, book, chapter, verse):
     chapter_url = f"https://biblehub.com/{t}/{book}/{chapter}.htm"
     con = db.connect()
     try:
-        row = con.execute("SELECT fragment FROM verse_links WHERE t = ? AND book = ? AND chapter = ? AND verse = ?",
+        row = con.execute("SELECT fragment FROM verse_highlights WHERE t = ? AND book = ? AND chapter = ? AND verse = ?",
                           (t, book, chapter, verse)).fetchone()
     finally:
         con.close()
@@ -67,7 +71,7 @@ def url(t, book, chapter, verse):
                 con = db.connect()
                 try:
                     with con:
-                        con.execute("INSERT OR REPLACE INTO verse_links (t, book, chapter, verse, fragment, found_at) "
+                        con.execute("INSERT OR REPLACE INTO verse_highlights (t, book, chapter, verse, fragment, found_at) "
                                     "VALUES (?, ?, ?, ?, ?, ?)", (t, book, chapter, verse, found,
                                                                   datetime.now(timezone.utc).isoformat(timespec="seconds")))
                 finally:

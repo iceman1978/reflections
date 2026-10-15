@@ -776,7 +776,7 @@
   }
 
   // ---- Kept passages -------------------------------------------------------
-  // A star after a quotation keeps it; the star in the header opens the page
+  // A star after a quotation keeps it; the book with a star in the header opens the page
   // that gathers them by writer.
   const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2.8 14.8,8.7 21.3,9.6 16.6,14.1 17.8,20.6 12,17.5 6.2,20.6 7.4,14.1 2.7,9.6 9.2,8.7"/></svg>';
 
@@ -1140,7 +1140,10 @@
 
   function passageUrl(url, quote, location) {
     if ((CFG.bibleTranslation || "bsb") !== "bsb" && url.includes("://biblehub.com/bsb/")) return inTranslation(url, location);
-    const words = String(quote || "").trim().split(/\s+/).filter(Boolean);
+    let words = String(quote || "").trim().split(/\s+/).filter(Boolean);
+    // On BibleHub's chapter pages a verse's number runs into its first word ("14Indeed"),
+    // and a highlight must start at the start of a word: so start from the second.
+    if (words.length > 5) words = words.slice(1);
     if (!words.length) return url;
     words[0] = words[0].replace(/^[^\p{L}\p{N}]+/u, "");                      // no leading … or “
     words[words.length - 1] = words[words.length - 1].replace(/[^\p{L}\p{N}]+$/u, "");
@@ -2329,7 +2332,7 @@
       id: "feedback",
       ready: (s) => CFG.hosted && s.total_entries >= 5 && !s.feedback_sent && !recall("journal.nudge.feedback"),
       text: () => `<strong>How's ${esc(CFG.appName)} working for you?</strong> It's still in beta, and your ideas shape it. `
-        + "Tell us what to fix, improve or add, any time, with the speech bubble at the top.",
+        + "Tell us what to fix, improve or add, any time, with the lightbulb at the top.",
       go: () => "Send feedback",
       onGo: () => { remember("journal.nudge.feedback", 1); openFeedback(); return true; },
       later: () => remember("journal.nudge.feedback", 1),

@@ -66,6 +66,8 @@ def passage_url(url, quote):
     """The passage's page, scrolled to its words (as on the page: static/app.js passageUrl)."""
     from urllib.parse import quote as enc
     words = [w for w in (quote or "").split() if w]
+    if len(words) > 5:            # the verse number runs into the first word ("14for"), which can't be matched
+        words = words[1:]
     if not words:
         return url
     words[0] = re.sub(r"^[^\w]+", "", words[0])

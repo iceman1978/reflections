@@ -100,7 +100,7 @@ While reading a past entry, click the **cloth bookmark** hanging from the top ri
 
 When a reflection quotes a source word for word, a small **star** follows the quotation. Click it to keep the passage (the star turns gold); click again to let it go. Only checked, word-for-word quotations have a star: paraphrased ideas, and your own words quoted back to you, don't.
 
-The **star in the header** (left of the giving hand; *Kept passages* in the phone menu) opens the **Kept passages** page: everything you've kept, grouped by writer, the writers you've kept most from first. Books of the Bible come first under *Scripture*, a section per book. Each passage links to the source (*Read the passage*) and to every entry whose reflection quoted it (*Came up in…*), and each writer has a *More from…* link to their works on the Sources page. Clicking a passage's star there lets it go.
+The **book with a star** in the header (left of the giving hand; *Kept passages* in the phone menu) opens the **Kept passages** page: everything you've kept, sorted *In order* (Scripture in Bible order, then writers by when they lived), *Recently kept*, *A–Z* or *Most kept*, with chapter-and-verse order inside each book. Each passage links to the source (*Read the passage*) and to every entry whose reflection quoted it (*Came up in…*), and each writer has a *More from…* link to their works on the Sources page. Clicking a passage's star there lets it go.
 
 Kept passages are stored as their own encrypted list (the `kept` table in `data/journal.db`, `journal/kept.py`), so a passage stays kept if an entry that quoted it is deleted. Wiping the journal removes them. They aren't in the CSV export.
 
@@ -361,7 +361,7 @@ This is the groundwork for paying for reflections later (a small free monthly al
 
 ### Feedback
 
-The **speech bubble** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.
+The **lightbulb** at the top (left of the padlock) opens a short form: choose **Fix or improve something** or **Suggest a new feature**, write a few lines, and **Send**. Feedback is saved with the sender's email, the date, the screen they were on and their browser type. It is **not encrypted** (it's meant for you to read), and the form says so.
 
 You read it in **Settings → Feedback received**: newest first, with a **Done** tick-box to clear things you've handled, and **Download (CSV)** for a spreadsheet. Only addresses in `ADMIN_EMAILS` on Render see that section (on your own computer, you always do). Each person can send up to 20 a day.
 

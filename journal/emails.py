@@ -16,7 +16,7 @@ from .config import ROOT
 _ENV = Environment(loader=FileSystemLoader(ROOT / "templates" / "email"), autoescape=select_autoescape(["html"]))
 
 NO_REPLY = ("This address doesn't receive replies. If you have a question, use the Feedback "
-            "button (the speech bubble) once you're signed in.")
+            "button (the lightbulb) once you're signed in.")
 
 
 def _png_width(path):

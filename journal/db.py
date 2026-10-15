@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS shares   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
                                     sent_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS share_blocks (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS mail_failures (at TEXT NOT NULL, sender TEXT);
-CREATE TABLE IF NOT EXISTS verse_links (t TEXT NOT NULL, book TEXT NOT NULL, chapter INTEGER NOT NULL, verse INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS verse_highlights (t TEXT NOT NULL, book TEXT NOT NULL, chapter INTEGER NOT NULL, verse INTEGER NOT NULL,
                                     fragment TEXT NOT NULL, found_at TEXT NOT NULL, PRIMARY KEY (t, book, chapter, verse));
 CREATE TABLE IF NOT EXISTS signin_codes (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, code_hash TEXT NOT NULL,
                                     link_hash TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL,

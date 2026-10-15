@@ -1027,11 +1027,11 @@ class VerseLinkTests(unittest.TestCase):
         with mock.patch("journal.verse_links.requests.get", return_value=page) as get:
             first = verse_links.url("niv", "psalms", 90, 12)
             again = verse_links.url("niv", "psalms", 90, 12)
-        self.assertEqual(first, "https://biblehub.com/niv/psalms/90.htm#:~:text=Teach%20us%20to%20number,a%20heart%20of%20wisdom")
+        self.assertEqual(first, "https://biblehub.com/niv/psalms/90.htm#:~:text=us%20to%20number%20our,a%20heart%20of%20wisdom")
         self.assertEqual(again, first)
         self.assertEqual(get.call_count, 1)
         con = db.connect()
-        self.assertNotIn("number our days", json.dumps(con.execute("SELECT * FROM verse_links").fetchall()))
+        self.assertNotIn("number our days, that", json.dumps(con.execute("SELECT * FROM verse_highlights").fetchall()))
         con.close()
 
     def test_without_the_words_the_chapter_still_opens(self):
