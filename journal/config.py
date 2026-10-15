@@ -56,7 +56,7 @@ PROMPTS_PER_DAY = int(os.environ.get("PROMPTS_PER_DAY", "10")) if HOSTED else 0
 # DEFAULTS is a setting for the whole app.
 PREF_KEYS = ("user_name", "journal_name", "theme", "colour_theme", "text_size", "background_photo", "photo_blur",
              "photo_visibility", "lock_minutes", "draft_autosave_seconds", "writers", "email_reminders", "admin_digest",
-             "reflection_tone", "bible_translation")
+             "reflection_tone", "bible_translation", "kept_sort")
 # The edition's writers (see journal/library.py); a reader must keep at least this many on.
 WRITERS = EDITION.get("writers", [])
 MIN_WRITERS = 3
@@ -69,6 +69,7 @@ DEFAULTS = {
     "admin_digest": True,     # admins: the "new work" email, twice a day at most (journal/digest.py)
     "reflection_tone": "reflect",   # encourage / reflect / challenge (journal/reflection.py TONES)
     "bible_translation": "bsb",     # the translation "Read the passage" opens on BibleHub (quotes stay BSB)
+    "kept_sort": "in_order",        # Kept passages: in_order / recent / az / popular (journal/kept.py)
     "port": 5050,
     "open_browser_on_start": True,
     "timezone": "America/Toronto",
@@ -205,6 +206,7 @@ VALIDATORS = {
     "admin_digest": bool,
     "reflection_tone": _choice("encourage", "reflect", "challenge"),
     "bible_translation": _choice("bsb", "niv", "esv", "nlt", "kjv", "nasb"),
+    "kept_sort": _choice("in_order", "recent", "az", "popular"),
     "user_name": _text(40),
     "journal_name": _text(30),
     "port": _int_in(1024, 65535),

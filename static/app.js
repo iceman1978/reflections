@@ -813,24 +813,32 @@
     return btn;
   }
 
-  async function showKept() {
+  async function showKept(sort) {
     showView("kept");
-    window.scrollTo({ top: 0 });
-    let groups;
+    if (!sort) window.scrollTo({ top: 0 });
+    let res;
     try {
-      groups = (await api("GET", "/api/kept")).groups;
+      res = await api("GET", `/api/kept${sort ? `?sort=${sort}` : ""}`);
     } catch (err) {
       $("kept-intro").textContent = `Couldn't load your kept passages: ${err.message}`;
       return;
     }
-    renderKept(groups);
+    for (const b of document.querySelectorAll("#kept-sort [data-sort]")) b.setAttribute("aria-pressed", String(b.dataset.sort === res.sort));
+    renderKept(res.groups, res.sort);
   }
+  for (const b of document.querySelectorAll("#kept-sort [data-sort]")) b.addEventListener("click", () => showKept(b.dataset.sort));
 
-  function renderKept(groups) {
+  const KEPT_INTRO = {
+    in_order: "Scripture in Bible order, then the writers by when they lived.",
+    recent: "The passages you kept most recently, first.",
+    az: "Books of the Bible, then the writers, alphabetically.",
+    popular: "The books and writers people keep most, first.",
+  };
+
+  function renderKept(groups, sort = "in_order") {
     const total = groups.reduce((n, g) => n + g.count, 0);
-    $("kept-intro").textContent = total
-      ? `${plural(total, "passage")} you've starred in your reflections. The writers you return to most come first.`
-      : "";
+    $("kept-intro").textContent = total ? `${plural(total, "passage")} you've kept, or that were shared with you. ${KEPT_INTRO[sort]}` : "";
+    $("kept-sort").hidden = total < 2;
     const list = $("kept-list");
     list.replaceChildren();
     if (!total) {
@@ -843,6 +851,11 @@
     for (const g of groups) {
       const box = document.createElement("section");
       box.className = "kept-group";
+      if (g.flat) {                                // Recently kept: one list, each with where it's from
+        for (const p of g.sections[0].passages) box.append(keptPassage(p, g));
+        list.append(box);
+        continue;
+      }
       const head = document.createElement("header");
       const h = document.createElement("h2");
       h.textContent = g.name;
@@ -896,8 +909,16 @@
     const where = document.createElement("p");
     where.className = "kept-where";
     // Scripture: "— Romans 8:28". A writer's work is already the heading above, so just the place in it.
-    const place = group.scripture ? `— ${p.title}${p.location ? ` ${p.location}` : ""} ` : p.location ? `— ${p.location} ` : "";
+    // In one list (Recently kept), the whole citation, and when it was kept.
+    const place = group.flat ? `— ${citeText(p)} ` : group.scripture ? `— ${p.title}${p.location ? ` ${p.location}` : ""} `
+      : p.location ? `— ${p.location} ` : "";
     where.append(document.createTextNode(place));
+    if (group.flat && p.kept_at) {
+      const when = document.createElement("span");
+      when.className = "kept-when";
+      when.textContent = `· ${fmtDate(p.kept_at, { month: "short", day: "numeric" })} `;
+      where.append(when);
+    }
     if (typeof p.url === "string" && p.url.startsWith("https://")) {
       const a = document.createElement("a");
       a.href = passageUrl(p.url, p.quote, p.location);

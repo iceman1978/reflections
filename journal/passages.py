@@ -162,6 +162,19 @@ def released(key):
         log.exception("Couldn't count a released passage")
 
 
+def keep_counts(keys):
+    """How many times everyone has kept each of these passages (by key)."""
+    keys = list(keys)
+    if not keys:
+        return {}
+    con = db.connect()
+    try:
+        return dict(con.execute(f"SELECT key, keeps FROM passages WHERE key IN ({','.join('?' * len(keys))})",
+                                keys).fetchall())
+    finally:
+        con.close()
+
+
 def short(key):
     return key[:SHORT]
 

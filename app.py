@@ -910,7 +910,19 @@ def favourite_entry(entry_id):
 
 @app.get("/api/kept")
 def kept_list():
-    return jsonify(groups=kept.grouped(kept.passages(), store.visible_entries(), list(sources.load_map()["works"])))
+    """Kept passages, in the order this person chose (?sort= changes it, and it's remembered)."""
+    sort = request.args.get("sort")
+    if sort in kept.SORTS:
+        users.update_prefs(g.user_id, {"kept_sort": sort})
+    else:
+        sort = users.prefs(g.user_id)["kept_sort"]
+    mine = kept.passages()
+    counts = {}
+    if sort == "popular" and HOSTED:
+        from journal import passages
+        counts = passages.keep_counts(p["key"] for p in mine)
+    return jsonify(sort=sort, groups=kept.grouped(mine, store.visible_entries(), list(sources.load_map()["works"]),
+                                                   sort, [w["name"] for w in library.WRITERS], counts))
 
 
 @app.post("/api/kept")

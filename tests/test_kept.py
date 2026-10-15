@@ -42,8 +42,9 @@ class KeyTests(unittest.TestCase):
 
 
 class GroupingTests(unittest.TestCase):
-    def test_most_kept_writer_first(self):
-        groups = kept.grouped([stored(MARCUS, "1"), stored(SENECA_A, "2"), stored(SENECA_B, "3")], [])
+    def test_writers_by_when_they_lived(self):
+        groups = kept.grouped([stored(MARCUS, "1"), stored(SENECA_A, "2"), stored(SENECA_B, "3")], [],
+                              writer_order=["Seneca", "Marcus Aurelius"])
         self.assertEqual([(g["name"], g["count"]) for g in groups], [("Seneca", 2), ("Marcus Aurelius", 1)])
         self.assertEqual(groups[0]["anchor"], "seneca")
 
@@ -59,10 +60,38 @@ class GroupingTests(unittest.TestCase):
         self.assertEqual([s["name"] for s in groups[0]["sections"]], ["Psalm", "Romans"])
         self.assertEqual(groups[0]["anchor"], "")
 
-    def test_newest_kept_first_within_a_work(self):
+    def test_chapter_and_verse_within_a_book(self):
         later = dict(MARCUS, location="7.59", quote="Dig within.")
-        groups = kept.grouped([stored(MARCUS, "2026-10-01"), stored(later, "2026-10-05")], [])
-        self.assertEqual([p["location"] for p in groups[0]["sections"][0]["passages"]], ["7.59", "4.3"])
+        early = dict(MARCUS, location="2.1", quote="Begin the morning.")
+        groups = kept.grouped([stored(later, "2026-10-01"), stored(MARCUS, "2026-10-05"), stored(early, "2026-10-09")], [])
+        self.assertEqual([p["location"] for p in groups[0]["sections"][0]["passages"]], ["2.1", "4.3", "7.59"])
+        psalms = [stored(dict(PSALM, location=loc, quote=loc), "1") for loc in ("139:23", "23:1", "90:12")]
+        groups = kept.grouped(psalms, [])
+        self.assertEqual([p["location"] for p in groups[0]["sections"][0]["passages"]], ["23:1", "90:12", "139:23"])
+        self.assertEqual(kept.place_key("Book IX, Chapter 2"), (9, 2))
+
+    def test_recently_kept_is_one_list(self):
+        groups = kept.grouped([stored(PSALM, "2026-10-01"), stored(MARCUS, "2026-10-05"), stored(ROMANS, "2026-10-03")],
+                              [], sort="recent")
+        self.assertEqual(len(groups), 1)
+        self.assertTrue(groups[0]["flat"])
+        self.assertEqual([p["title"] for p in groups[0]["sections"][0]["passages"]], ["Meditations", "Romans", "Psalm"])
+
+    def test_a_to_z(self):
+        one_peter = cite("1_peter", "", "1 Peter", "5:7", "Cast all your anxiety on Him.")
+        groups = kept.grouped([stored(ROMANS, "1"), stored(one_peter, "2"), stored(PSALM, "3"), stored(SENECA_A, "4"),
+                               stored(MARCUS, "5")], [], sort="az", work_order=["psalms", "romans", "1_peter"])
+        self.assertEqual([s["name"] for s in groups[0]["sections"]], ["1 Peter", "Psalm", "Romans"])   # 1 Peter under P
+        self.assertEqual([g["name"] for g in groups[1:]], ["Marcus Aurelius", "Seneca"])          # Aurelius, Seneca
+
+    def test_most_kept_by_everyone(self):
+        counts = {kept.key_of(ROMANS): 9, kept.key_of(PSALM): 2, kept.key_of(MARCUS): 5, kept.key_of(SENECA_A): 1}
+        groups = kept.grouped([stored(PSALM, "1"), stored(ROMANS, "2"), stored(SENECA_A, "3"), stored(MARCUS, "4")], [],
+                              sort="popular", work_order=["psalms", "romans"], writer_order=["Seneca", "Marcus Aurelius"],
+                              counts=counts)
+        self.assertEqual([s["name"] for s in groups[0]["sections"]], ["Romans", "Psalm"])
+        self.assertEqual([g["name"] for g in groups[1:]], ["Marcus Aurelius", "Seneca"])
+        self.assertNotIn("kept_by_all", groups[0])                                   # the order, never the counts
 
     def test_each_passage_lists_every_entry_that_quoted_it_newest_first(self):
         entries = [entry("a", 1, MARCUS, title="First"), entry("b", 5, MARCUS, SENECA_A), entry("c", 3, PSALM)]

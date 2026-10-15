@@ -1567,6 +1567,11 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .kept-passage blockquote { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.08em; line-height: var(--lh, 1.6); color: var(--ink); }
 .kept-passage .kept-where { margin: 4px 0 0; font-size: 0.88rem; color: var(--muted); }
 .kept-passage .kept-where a { text-underline-offset: 2px; }
+/* Kept passages: how they're sorted. */
+.kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }
+.kept-sort button, .kept-sort button:hover:not(:disabled) { padding: 2px 12px; border-radius: 999px; font-size: 0.88rem; }
+.kept-sort button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.kept-when { color: var(--muted); }
 /* Kept passages a friend shared with you: who, when and their note, with a small gift mark. */
 .kept-shared { margin: 6px 0 0; font-size: 0.88rem; color: var(--accent); }
 .kept-shared p { margin: 0; }

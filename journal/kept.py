@@ -135,18 +135,55 @@ def release(key):
 
 # ---- The Kept passages page ---------------------------------------------------
 
-def grouped(kept_passages, entries, work_order=()):
-    """Kept passages arranged for the page: one group per writer, the most kept
-    first; books of the Bible together under "Scripture" (first), a section per
-    book in the Bible's order. Each passage lists the entries whose reflections
-    quoted it, newest first. `entries` are the visible entries; `work_order` is
-    the library's order of work ids."""
+SORTS = ("in_order", "recent", "az", "popular")
+
+
+def place_key(location):
+    """A passage's place as numbers, for chapter-and-verse order: "90:12" -> (90, 12),
+    "3:5-6" -> (3, 5, 6), "4.3" -> (4, 3), "Book IX, Chapter 2" -> (9, 2)."""
+    from .sources import roman_to_int
+    out = []
+    for token in re.findall(r"\d+|\b[IVXLCDM]+\b", location or ""):
+        n = int(token) if token.isdigit() else roman_to_int(token)
+        if n:
+            out.append(n)
+    return tuple(out) or (float("inf"),)
+
+
+def _surname(name):
+    """For A–Z: "C. S. Lewis" -> "lewis", "Thomas à Kempis" -> "kempis", "Augustine" -> "augustine"."""
+    return (name or "").split()[-1].lower() if name else ""
+
+
+def _book_name(title):
+    """For A–Z: "1 Peter" files under P, beside "2 Peter"."""
+    m = re.match(r"^(\d+)\s+(.*)$", title or "")
+    return (m.group(2).lower(), int(m.group(1))) if m else ((title or "").lower(), 0)
+
+
+def grouped(kept_passages, entries, work_order=(), sort="in_order", writer_order=(), counts=None):
+    """Kept passages arranged for the page. Each passage lists the entries whose
+    reflections quoted it, newest first. `entries` are the visible entries;
+    `work_order` the library's order of work ids; `writer_order` the edition's
+    writers, oldest first; `counts` how often everyone has kept each passage (by key).
+
+    sort: "in_order" (Scripture first in Bible order, then writers by when they
+    lived), "az" (books, then writers, alphabetically), "popular" (most kept by
+    everyone first; ties in order), each with chapter-and-verse order inside a
+    book; or "recent": one list, most recently kept first, without groups."""
     quoted_in = {}
     for e in sorted(entries, key=lambda e: e["created_at"], reverse=True):
         for q in e.get("quotes") or []:
             quoted_in.setdefault(key_of(q), []).append(
                 {"id": e["id"], "title": e.get("title"), "created_at": e["created_at"]})
     order = {work: i for i, work in enumerate(work_order)}
+    counts = counts or {}
+
+    if sort == "recent":
+        newest = sorted(kept_passages, key=lambda p: p.get("kept_at") or "", reverse=True)
+        return [{"name": "", "flat": True, "scripture": False, "count": len(newest), "anchor": "",
+                 "sections": [{"name": "", "work": "", "passages": [{**p, "entries": quoted_in.get(p["key"], [])}
+                                                                    for p in newest]}]}]
 
     groups = {}
     for p in sorted(kept_passages, key=lambda p: p.get("kept_at") or "", reverse=True):
@@ -157,9 +194,35 @@ def grouped(kept_passages, entries, work_order=()):
         section = group["sections"].setdefault(p["work"], {"name": p["title"], "work": p["work"], "passages": []})
         section["passages"].append({**p, "entries": quoted_in.get(p["key"], [])})
 
+    def popularity(passages):
+        return sum(counts.get(p["key"], 0) for p in passages)
+
+    def in_order(s):
+        return order.get(s["work"], len(order))
+
+    lived = {name: i for i, name in enumerate(writer_order)}
     out = []
     for group in groups.values():
-        sections = sorted(group["sections"].values(), key=lambda s: order.get(s["work"], len(order)))
-        out.append({**group, "sections": sections, "anchor": "" if group["scripture"] else slug(group["name"])})
-    out.sort(key=lambda g: (not g["scripture"], -g["count"], g["name"]))
+        sections = list(group["sections"].values())
+        for s in sections:                     # inside a book: chapter and verse (or the most kept)
+            s["passages"].sort(key=lambda p: place_key(p.get("location")))
+            if sort == "popular":
+                s["passages"].sort(key=lambda p: -counts.get(p["key"], 0))
+        if sort == "az":
+            sections.sort(key=lambda s: _book_name(s["name"]))
+        elif sort == "popular":
+            sections.sort(key=lambda s: (-popularity(s["passages"]), in_order(s)))
+        else:
+            sections.sort(key=in_order)
+        out.append({**group, "sections": sections, "anchor": "" if group["scripture"] else slug(group["name"]),
+                    "kept_by_all": sum(popularity(s["passages"]) for s in sections)})
+    if sort == "az":
+        key = lambda g: (not g["scripture"], _surname(g["name"]))                       # noqa: E731
+    elif sort == "popular":
+        key = lambda g: (not g["scripture"], -g["kept_by_all"], lived.get(g["name"], len(lived)))   # noqa: E731
+    else:
+        key = lambda g: (not g["scripture"], lived.get(g["name"], len(lived)), g["name"])          # noqa: E731
+    out.sort(key=key)
+    for g in out:
+        del g["kept_by_all"]                   # only the order: counts could say what a friend kept
     return out
