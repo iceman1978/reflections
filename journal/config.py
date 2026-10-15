@@ -205,7 +205,7 @@ VALIDATORS = {
     "email_reminders": bool,
     "admin_digest": bool,
     "reflection_tone": _choice("encourage", "reflect", "challenge"),
-    "bible_translation": _choice("bsb", "niv", "esv", "nlt", "kjv", "nasb"),
+    "bible_translation": _choice("bsb", "niv", "esv", "nlt", "kjv", "nkjv", "nasb"),
     "kept_sort": _choice("in_order", "recent", "az", "popular"),
     "user_name": _text(40),
     "journal_name": _text(30),
