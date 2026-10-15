@@ -2292,6 +2292,7 @@
       }
       syncPhotoControls();
       if ($("admin-digest")) $("admin-digest").checked = settings.admin_digest !== false;
+      settingsDirty = false;                            // freshly loaded: nothing changed yet
     } catch (err) {
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
     }
@@ -2340,6 +2341,7 @@
       if (savedLook.photo !== photoWas) loadBackground();  // only when switched on/off; Save alone keeps the photo
       restartAutosave();
       renderGreeting();
+      settingsDirty = false;
       leaveSettings();
       if (res.needs_restart.length) {
         showNotice("Settings saved. Restart the app (close the start.bat window and open it again) "
@@ -2486,6 +2488,7 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") setHeaderMenu(false); });
   $("settings-back-btn").addEventListener("click", () => {
     restoreSavedLook();  // Discard: undo any unsaved preview, save nothing
+    settingsDirty = false;
     leaveSettings();
   });
   // Preview look changes live (sliders update while dragging).
@@ -3693,6 +3696,66 @@
       $("email-signin-address").focus();
     });
   }
+
+  // ---- Home, and not losing unsaved changes --------------------------------------
+  // The journal's name goes back to today's page. Anything that leaves the page
+  // someone is changing (an entry being edited, Settings not yet saved) asks first.
+  // Pop-ups that open on top (Feedback, Invite, the coin) leave the work where it is.
+  let settingsDirty = false;
+  $("settings-form").addEventListener("input", () => { settingsDirty = true; });
+  $("settings-form").addEventListener("change", () => { settingsDirty = true; });
+
+  function unsavedWork() {
+    if (!$("entry-view").hidden && !$("entry-editor").hidden && state.current) {
+      const e = state.current;
+      const { date, time } = localParts(e.created_at);
+      if ($("entry-editor").value !== (e.text || "") || $("entry-title-input").value !== (e.title || "")
+          || $("entry-date-input").value !== date || $("entry-time-input").value !== time) return "entry";
+    }
+    if (!$("settings-view").hidden && settingsDirty) return "settings";
+    return null;
+  }
+
+  function discardUnsaved(kind) {
+    if (kind === "entry") setEditing(false);
+    if (kind === "settings") { restoreSavedLook(); settingsDirty = false; }
+  }
+
+  async function okToLeave() {
+    const kind = unsavedWork();
+    if (!kind) return true;
+    const what = kind === "entry" ? "changes to this entry" : "changes in Settings";
+    const leave = await ask("Leave without saving?", [`You have ${what} that haven't been saved. If you leave now, they'll be lost.`], [
+      { label: "Keep editing", value: false },
+      { label: "Discard and leave", value: true, style: "danger" },
+    ]);
+    if (leave) discardUnsaved(kind);
+    return !!leave;
+  }
+
+  // Everything that leaves the current page: checked before it acts.
+  const LEAVES = ["#journal-home", "#header-actions button:not(#feedback-btn):not(#invite-btn):not(#menu-btn)", ".nav-btn", "#new-btn",
+    "#past li", "#past .cal-day", "#kept-list .kept-entries button", ".prayer-meta button", "a[href='/logout']"].join(", ");
+  let letThrough = false;
+  document.addEventListener("click", async (e) => {
+    if (letThrough) { letThrough = false; return; }
+    const el = e.target.closest(LEAVES);
+    if (!el || !unsavedWork()) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (await okToLeave()) { letThrough = true; el.click(); }
+  }, true);
+  window.addEventListener("beforeunload", (e) => {
+    if (unsavedWork()) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  function goHome() {
+    hideToolbars();
+    showWrite();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  $("journal-home").addEventListener("click", goHome);
+  $("journal-home").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("journal-home").click(); } });
 
   // The admin email's "Open Admin" button links to /?settings=admin.
   const SETTINGS_ON_START = (() => {

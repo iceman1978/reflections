@@ -191,7 +191,8 @@
 
   <main id="book" class="book" hidden>
     <header class="book-header">
-      <div class="journal-brand">
+      <!-- The journal's name: back to today's page -->
+      <div id="journal-home" class="journal-brand" role="link" tabindex="0" title="Back to today's page">
         {% if logo_mask_url %}<span class="journal-logo themed" style="--logo-mask: url('{{ logo_mask_url }}')" aria-hidden="true"></span>
         {% elif logo_url %}<img class="journal-logo" src="{{ logo_url }}" alt="">{% endif %}
         <div id="journal-name" class="journal-name">{{ journal_name }}</div>

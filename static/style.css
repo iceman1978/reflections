@@ -1600,6 +1600,9 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .prayer-actions button { padding: 2px 12px; font-size: 0.82rem; border-radius: 999px; }
 .prayer-answered-heading { margin-top: 24px; }
 .prayer-quote { font-style: italic; }
+/* The journal's name in the header goes back to today's page. */
+#journal-home { cursor: pointer; border-radius: 10px; }
+#journal-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 /* Kept passages: how they're sorted. */
 .kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }
 .kept-sort button, .kept-sort button:hover:not(:disabled) { padding: 2px 12px; border-radius: 999px; font-size: 0.88rem; }
