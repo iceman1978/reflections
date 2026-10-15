@@ -1621,8 +1621,13 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .tour-dots { display: flex; gap: 5px; }
 .tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rule); }
 .tour-dots i.on { background: var(--accent); }
-.tour-again { margin: 0 0 14px; }
-.tour-again .hint { margin-left: 8px; }
+/* Settings → Basic, first thing: the tour (a compass). */
+.tour-card { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 12px 14px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.tour-card svg { flex: none; color: var(--accent); }
+.tour-card div { flex: 1; display: grid; gap: 1px; }
+.tour-card span { font-size: 0.88rem; color: var(--muted); }
+.tour-card button { flex: none; }
 @media (prefers-reduced-motion: reduce) { .tour-spot, .tour-bubble { transition: none; } }
 /* Kept passages: how they're sorted. */
 .kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }

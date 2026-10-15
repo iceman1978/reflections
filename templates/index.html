@@ -422,6 +422,15 @@
 
       <form id="settings-form" class="settings-form" novalidate>
         <div id="panel-basic" role="tabpanel" aria-labelledby="tab-basic" class="settings-panel">
+          <!-- First thing in Settings: the tour, to see what the journal can do -->
+          <div class="tour-card">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></g></svg>
+            <div>
+              <strong>Take the tour</strong>
+              <span>A one-minute look at what your journal can do.</span>
+            </div>
+            <button type="button" id="tour-again-btn" class="primary">Start</button>
+          </div>
           {% if hosted %}
         <h2>Account</h2>
         <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
@@ -443,8 +452,6 @@
               {% endfor %}
             </select>
           </label>
-          <p class="tour-again"><button type="button" id="tour-again-btn" class="share-link share-pill">Take the tour</button>
-            <span class="hint">A quick look at what the journal can do.</span></p>
           <!-- How reflections speak, and (with Scripture) the translation "Read the passage" opens -->
           <h2>Reflections</h2>
           <fieldset class="tone-choice">
