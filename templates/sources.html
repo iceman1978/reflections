@@ -14,10 +14,10 @@
       <h1 class="prompt-heading">Where the wisdom comes from</h1>
 
       <h2>How quotes are checked</h2>
-      <p>Claude may only quote the works on this page. Before a reflection is shown, the app looks for every quotation
+      <p>Reflections may only quote the works on this page. Before a reflection is shown, the app looks for every quotation
         in its own copy of that exact edition. If the words are there, you see the source's exact wording and a link
         to the passage. If they aren't, the reflection puts the idea in its own words and names where it came from,
-        rather than risk a misquotation. Claude never writes the links: they always come from this list.</p>
+        rather than risk a misquotation. The links never come from the AI: they always come from this list.</p>
       {% if edition.check_example %}
       <p>{{ edition.check_example.intro }}</p>
       <blockquote class="check-example muted">“{{ edition.check_example.quoted }}”</blockquote>
@@ -56,6 +56,7 @@
         {% for item in group["items"] %}
         <li{% if item.author and item.author not in seen.writers %} id="{{ item.author | slug }}"{% set seen.writers = seen.writers + [item.author] %}{% endif %}>
           <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{% if item.author %}{{ item.author }}, {% endif %}<cite>{{ item.title }}</cite></a>
+          {% if item.author in off_by_default %}<em class="subtle">off unless you switch it on</em>{% endif %}
           <span class="subtle">{{ item.translation }}{% if item.site %} · {{ item.site }}{% endif %}</span>
         </li>
         {% endfor %}
@@ -67,7 +68,7 @@
       <p class="subtle">{{ edition.paraphrase_only.about }}</p>
       <ul class="source-list">
         {% for w in unquoted %}
-        <li><strong>{{ w.label }}</strong> <span class="subtle">{{ w.works }}{% if not w.default %} · off unless you switch it on{% endif %}</span></li>
+        <li><strong>{{ w.label }}</strong>{% if not w.default %} <em class="subtle">off unless you switch it on</em>{% endif %} <span class="subtle">{{ w.works }}</span></li>
         {% endfor %}
       </ul>
       {% endif %}

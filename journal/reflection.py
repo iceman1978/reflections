@@ -64,11 +64,11 @@ def friendly_error(exc, about_entry=True):
     if isinstance(exc, anthropic.NotFoundError):
         return f'The model name in Settings ("{model}") wasn\'t recognized. Check the spelling.'
     if isinstance(exc, anthropic.RateLimitError):
-        return "Claude is getting too many requests right now. Wait a minute, then try again."
+        return "Reflections are very busy right now. Wait a minute, then try again."
     if isinstance(exc, anthropic.APITimeoutError):
-        return f"Claude took too long to answer.{saved} Try again in a moment."
+        return f"The reflection took too long.{saved} Try again in a moment."
     if isinstance(exc, anthropic.APIConnectionError):
-        return f"Couldn't reach Claude. Check your internet connection.{saved}"
+        return f"Couldn't reach the reflection service. Check your internet connection.{saved}"
     if isinstance(exc, anthropic.BadRequestError):
         msg = str(getattr(exc, "message", exc)).lower()
         if "credit" in msg or "billing" in msg:
@@ -77,7 +77,7 @@ def friendly_error(exc, about_entry=True):
         return "Claude couldn't process this request. Details are in logs/journal.log."
     if isinstance(exc, anthropic.APIStatusError):
         if exc.status_code in (500, 502, 503, 504, 529):
-            return "Claude is busy or having trouble right now. Try again in a few minutes."
+            return "Reflections are busy or having trouble right now. Try again in a few minutes."
         return f"Claude returned an error ({exc.status_code}). Details are in logs/journal.log."
     return "Something went wrong while asking Claude. Details are in logs/journal.log."
 
@@ -327,7 +327,7 @@ def reflect(entry, writers=None):
     tokens.record("reflection", response)
     if response.stop_reason == "refusal":
         log.warning("Claude declined to reflect on %s", entry["id"])
-        raise ReflectionError("Claude declined to reflect on this entry. You can try again, "
+        raise ReflectionError("A reflection couldn't be written for this entry. You can try again, "
                               "or edit the entry first.")
     text = next((b.text for b in response.content if b.type == "text"), "")
     try:
@@ -336,7 +336,7 @@ def reflect(entry, writers=None):
     except (ValueError, KeyError, AttributeError):
         log.error("Unusable reflection for %s (stop_reason=%s, %d characters)",
                   entry["id"], response.stop_reason, len(text))  # never log the text itself
-        raise ReflectionError("Claude's answer came back incomplete. Try again.") from None
+        raise ReflectionError("The reflection came back incomplete. Try again.") from None
 
     # Only works in this reader's library count (the response format already limits Claude to them).
     allowed = library.works()

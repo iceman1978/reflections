@@ -16,7 +16,7 @@
       <h2>In short</h2>
       <ul class="rules-list">
         <li>Your entries are locked with a passphrase only you know. Neither the site nor its host can read what's stored.</li>
-        <li>Your writing goes to Claude only to write your reflections and prompts, without your name or email.</li>
+        <li>{{ app_name }} sends your writing to Claude, an AI model made by Anthropic, only to write your reflections and prompts, and without your name or email.</li>
         <li>It isn't used to train AI.</li>
         <li>No ads, analytics or tracking.</li>
         <li>You can download your whole journal, or wipe it, at any time.</li>
@@ -44,7 +44,7 @@
       <p>In short: Google keeps strangers out; your passphrase keeps <em>everyone</em> out, including the people who
         run the site. A journal is only private if both are true.</p>
       <p class="subtle">To be fully transparent: while your journal is unlocked, the server uses your key to show you
-        your entries and to ask Claude for reflections, and it forgets the key when the journal locks. Someone who took
+        your entries and to write your reflections, and it forgets the key when the journal locks. Someone who took
         control of the server and secretly changed its code could, in principle, watch for passphrases as they're
         typed. The passphrase protects against everything short of that.</p>
 
@@ -61,8 +61,8 @@
       <h2>When something leaves the journal</h2>
       <ul>
         <li><strong>Reflections and writing prompts:</strong> the text of the entry (or, for prompts, a few recent
-          entries) is sent to Anthropic's Claude API to write the reflection. Anthropic doesn't use API data to
-          train its models by default.</li>
+          entries) is sent to Claude, the AI model made by Anthropic that {{ app_name }} uses to write reflections.
+          Anthropic doesn't use this data to train its models by default.</li>
         <li><strong>Export (CSV):</strong> downloads an unencrypted copy to your device, only when you ask for it.</li>
         <li><strong>Feedback:</strong> what you send with the Feedback button (speech bubble) is <em>not</em> encrypted,
           because it's meant to be read by {% if hosted %}whoever runs {{ app_name }}{% else %}you{% endif %}. It's stored
@@ -78,7 +78,7 @@
       {% if hosted %}
       <h2>Who runs {{ app_name }}, and where your journal is kept</h2>
       <p>{{ app_name }} is made and run by Aaron de Vries. Journals are stored, encrypted, with Render, a hosting
-        company, in its data center in Ohio, in the United States. Reflections are written by Anthropic's Claude.
+        company, in its data center in Ohio, in the United States. {{ app_name }} writes its reflections using Claude, an AI model made by Anthropic.
         Questions about your privacy? <a href="/?feedback=privacy">Send feedback</a> (you'll be asked to unlock
         your journal first).</p>
       {% endif %}

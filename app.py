@@ -307,7 +307,9 @@ def terms_page():
 def sources_page():
     # Writers with no quotable work here (still in copyright): drawn on, never quoted.
     unquoted = [w for era in library.for_settings() for w in era["writers"] if not w["quotable"]]
+    off_by_default = {w["name"] for w in library.WRITERS if not w.get("default", True)}   # marked on the page
     return render_template("sources.html", groups=source_groups(), hosted=HOSTED, unquoted=unquoted,
+                           off_by_default=off_by_default,
                            work_count=len(sources.works()))
 
 

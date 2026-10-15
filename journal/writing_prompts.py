@@ -84,7 +84,7 @@ def suggest(already_suggested=(), writers=None):
 
     tokens.record("prompt", response)
     if response.stop_reason == "refusal":
-        raise ReflectionError("Claude couldn't suggest a prompt right now. Try again.")
+        raise ReflectionError("A prompt couldn't be suggested right now. Try again.")
     text = next((b.text for b in response.content if b.type == "text"), "")
     try:
         data = json.loads(text)

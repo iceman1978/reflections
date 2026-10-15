@@ -40,6 +40,20 @@
     "A companion for quiet contemplation, pointing you to Scripture, to prayer, and to the words of Jesus.",
     "Made to deepen your prayer and your quiet time, never to stand in for them or for your pastor."
   ],
+  "sample": {
+    "link_text": "Read a sample reflection",
+    "title": "When the day crowds the quiet",
+    "entry": "Tried to pray this morning before the kids got up, but my mind kept running to the day ahead: the meeting at ten, groceries, the email I haven't answered. I got maybe two minutes of real quiet before the house woke up. I want my mornings with God to feel less like another item on the list.",
+    "theme": "prayer",
+    "paragraphs": [
+      "Two minutes of real quiet, before the house wakes up, is not nothing. Your mind ran to the meeting, the groceries and the unanswered email because those things matter to you and you are carrying them. That is not a failure of devotion. It may be the most honest prayer list you have.",
+      "Jesus, teaching on the hillside, said this about the pull of the day ahead: <em>“Therefore do not worry about tomorrow, for tomorrow will worry about itself. Today has enough trouble of its own.”</em> He did not say the day's trouble is imaginary. He said each day has its own, and that is enough to be getting on with. Maybe the morning doesn't need you to empty your head first. Maybe it needs you to hand the day over piece by piece. Say it out loud if you can: Lord, the ten o'clock meeting; Lord, that email I'm dreading; Lord, what we'll eat tonight. Then the list stops being what is crowding out prayer and becomes the prayer itself."
+    ],
+    "cite": "Matthew 6:34",
+    "cite_url": "https://biblehub.com/bsb/matthew/6.htm#:~:text=Therefore%20do%20not%20worry,of%20its%20own",
+    "question": "If you named the meeting, the groceries and the email to God one at a time tomorrow morning, which one would be hardest to hand over, and what does that tell you about what you're carrying?",
+    "note": "A real reflection from In His Steps, shortened. The full one also draws on Eugene Peterson."
+  },
   "check_example": {
     "intro": "For example, if a reflection quotes Ecclesiastes 11:4 in the wording of another translation (the ESV):",
     "quoted": "He who observes the wind will not sow, and he who regards the clouds will not reap.",
@@ -51,8 +65,8 @@
   "reflection_rules": {
     "title": "How reflections are written",
     "items": [
-      "<strong>As a fellow traveler.</strong> A reflection never speaks for God or tells you what He thinks of you. It brings the words of people who walked the same road: the Psalmists, Paul, Peter, and the writers who came after them.",
-      "<strong>The words of Jesus, as He said them.</strong> His sayings are quoted word for word from the Gospels, and never stretched into what He would say about your situation.",
+      "<strong>As a fellow believer.</strong> A reflection never speaks for God. It brings the words of people who walked the same road: the Psalmists, Paul, Peter, and the writers who came after them.",
+      "<strong>The words of Jesus, as He said them.</strong> His sayings are quoted word for word from the Gospels.",
       "<strong>Toward prayer and your church.</strong> Reflections encourage prayer, trust in God, and the people around you. They're no substitute for Scripture, a pastor, or a friend who knows you.",
       "<strong>Checked before you see it.</strong> Every quotation is matched against its source, as described above.",
       "<strong>With care in hard times.</strong> If an entry suggests real distress, the reflection sets everything else aside, responds with care, and shows where to find help."
@@ -60,7 +74,7 @@
   },
   "selection": {
     "title": "Why these books and writers",
-    "text": "The books of the Bible here are chosen for a daily quiet time: the Psalms and the wisdom books, the stories of Abraham, Joseph, Moses, Ruth and David, the prophets of comfort and lament, the Gospels and Acts, and the letters. Each comes with notes that steer reflections to the passages meant for devotion, and away from genealogies, laws and judgments that need more context than a short reflection can give. The writers are among the most widely loved devotional voices of the Protestant tradition, from the early church to the twentieth century. A few stronger or more contested voices start switched off."
+    "text": "The books of the Bible here are chosen for a daily quiet time: the Psalms and the wisdom books, the stories of Abraham, Joseph, Moses, Ruth and David, the prophets of comfort and lament, the Gospels and Acts, and the letters. Each comes with notes that steer reflections to the passages meant for devotion, and away from genealogies, laws and judgments that need more context than a short reflection can give. The writers are among the most widely loved devotional voices of the Protestant tradition, from the early church to the twentieth century. Any writer can be turned off, and more can be turned on, in Settings → Library."
   },
   "translation_note": {
     "title": "Why the Berean Standard Bible?",

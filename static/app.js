@@ -2675,6 +2675,12 @@
     showNotice("Your new passphrase is set. Your recovery key still works too.", 7000);
   }));
   $("show-recover").addEventListener("click", () => showVaultPanel("recover"));
+  // The welcome page's sample reflection: opens in a dialog; closes with ×, Esc or a click outside it.
+  if ($("sample-btn")) {
+    $("sample-btn").addEventListener("click", () => $("sample-dialog").showModal());
+    $("sample-close").addEventListener("click", () => $("sample-dialog").close());
+    $("sample-dialog").addEventListener("click", (e) => { if (e.target === $("sample-dialog")) $("sample-dialog").close(); });
+  }
   $("back-to-unlock").addEventListener("click", () => showVaultPanel("unlock"));
   $("recovery-saved").addEventListener("change", () => { $("recovery-done").disabled = !$("recovery-saved").checked; });
   $("copy-recovery").addEventListener("click", async () => {

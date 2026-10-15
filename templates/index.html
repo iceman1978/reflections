@@ -62,6 +62,11 @@
         {% for promise in edition.promises %}<li>{{ promise }}</li>{% endfor %}
       </ul>
       {% endif %}
+      {% if edition.sample %}
+      {% set sample = edition.sample %}
+      <!-- A real entry and its reflection, behind one quiet link so the page stays uncluttered -->
+      <button type="button" id="sample-btn" class="sample-link">{{ sample.link_text }}&nbsp;→</button>
+      {% endif %}
       {% if edition.welcome_quote %}
       <figure class="landing-quote">
         <blockquote>{{ edition.welcome_quote.text }}</blockquote>
@@ -705,6 +710,25 @@
         <ul id="my-invites" class="my-invites"></ul>
       </div>
     </form>
+  </dialog>
+  {% endif %}
+
+  {% if edition.sample %}{% set sample = edition.sample %}
+  <dialog id="sample-dialog" class="dialog sample-dialog" aria-labelledby="sample-title">
+    <button type="button" id="sample-close" class="sample-close" aria-label="Close">×</button>
+    <p class="sample-kicker">A sample entry</p>
+    <h2 id="sample-title" class="entry-title">{{ sample.title }}</h2>
+    <p class="entry-text">{{ sample.entry }}</p>
+    <aside class="reflection">
+      {% if vignettes.get(sample.theme) %}<div class="reflection-vignette" aria-hidden="true" style="--vignette: url('{{ vignettes.get(sample.theme) }}')"></div>{% endif %}
+      <div class="insight">
+        {% for p in sample.paragraphs %}<p>{{ p | safe }}</p>{% endfor %}
+        <p class="sample-more">…</p>
+      </div>
+      <ul class="citations"><li>— {{ sample.cite }} <a href="{{ sample.cite_url }}" target="_blank" rel="noopener noreferrer">Read the passage ↗</a></li></ul>
+      <p class="question">{{ sample.question }}</p>
+    </aside>
+    <p class="subtle sample-note">{{ sample.note }}</p>
   </dialog>
   {% endif %}
 
