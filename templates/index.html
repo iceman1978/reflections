@@ -366,6 +366,7 @@
           <div id="insight" class="insight"></div>
           <ul id="citations" class="citations"></ul>   <!-- the reflection's sources, right under its text -->
           <p id="question" class="question"></p>
+          {% if edition.prayer_list %}<button type="button" id="question-pray" class="share-link share-pill question-pray" hidden>+ Add as a prayer</button>{% endif %}
           <div class="reflection-footer">
             <!-- The tone it was written in; opens Settings → Basic at the Tone switch -->
             <button id="reflection-tone" type="button" class="reflection-tone" title="Change the tone for future reflections" hidden></button>
@@ -442,6 +443,8 @@
               {% endfor %}
             </select>
           </label>
+          <p class="tour-again"><button type="button" id="tour-again-btn" class="share-link share-pill">Take the tour</button>
+            <span class="hint">A quick look at what the journal can do.</span></p>
           <!-- How reflections speak, and (with Scripture) the translation "Read the passage" opens -->
           <h2>Reflections</h2>
           <fieldset class="tone-choice">
@@ -926,6 +929,22 @@
   </dialog>
   {% endif %}
 
+  <!-- The tour: the page dimmed but for one thing, and a bubble about it -->
+  <div id="tour" class="tour" hidden>
+    <div class="tour-catch"></div>
+    <div id="tour-spot" class="tour-spot"></div>
+    <div id="tour-bubble" class="tour-bubble" role="dialog" aria-live="polite" aria-labelledby="tour-title">
+      <span id="tour-arrow" class="tour-arrow"></span>
+      <h3 id="tour-title"></h3>
+      <p id="tour-text"></p>
+      <div class="tour-foot">
+        <span id="tour-dots" class="tour-dots" aria-hidden="true"></span>
+        <button type="button" id="tour-skip" class="link-button">Skip</button>
+        <button type="button" id="tour-next" class="primary">Next</button>
+      </div>
+    </div>
+  </div>
+
   <dialog id="dialog" class="dialog">
     <h2 id="dialog-title"></h2>
     <div id="dialog-body"></div>
@@ -942,6 +961,7 @@
     userName: {{ user_name | tojson }},
     bibleTranslation: {{ bible_translation | tojson }},
     prayerList: {{ (edition.prayer_list or false) | tojson }},
+    tourDone: {{ tour_done | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},
     photoBlur: {{ photo_blur | int }},

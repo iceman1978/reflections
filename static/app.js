@@ -776,7 +776,9 @@
       if (entry.support_note) note.innerHTML = renderSimpleMarkdown(entry.support_note);
     }
     if (entry.reflecting) pollWhileReflecting(entry.id);
+    if ($("question-pray")) $("question-pray").hidden = !done || !entry.question;
     applyHighlights(entry);
+    if (done) maybeStartTour(entry);
   }
 
   // ---- Kept passages -------------------------------------------------------
@@ -1002,7 +1004,7 @@
   // Selecting words in a saved entry or its reflection shows a little toolbar:
   // Highlight (and Add prayer). A highlight is stored with the entry as its words
   // and which occurrence of them (so it keeps its place through small edits).
-  const HL_ROOTS = { entry: () => $("entry-text"), reflection: () => $("insight") };
+  const HL_ROOTS = { entry: () => $("entry-text"), reflection: () => $("insight"), question: () => $("question") };
 
   function textNodesOf(root) {
     const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -1198,6 +1200,10 @@
   }
 
   if ($("prayer-dialog")) {
+    // "To sit with": the reflection's question, a natural thing to pray about.
+    $("question-pray").addEventListener("click", () => {
+      if (state.current) openPrayerDialog(state.current.question, state.current.id, null);
+    });
     $("prayer-cancel").addEventListener("click", () => $("prayer-dialog").close());
     $("prayer-form").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1311,6 +1317,106 @@
       $("prayer-answered-heading").hidden = !answered.length;
       $("prayer-answered").replaceChildren(...answered.map(prayerItem));
     };
+  }
+
+  // ---- The tour -------------------------------------------------------------------
+  // Shown once, when the first reflection arrives (never before the first entry:
+  // nothing should stand between someone and writing). Replay from Settings.
+  const prayersOn = !!CFG.prayerList;
+  const TOUR = [
+    { el: () => $("insight").querySelector("p") || $("insight"), title: "Your reflection",
+      text: "Wisdom chosen for what you wrote. Every quote is checked word for word: tap the reference beneath it to read it in context." },
+    { el: () => $("insight").querySelector(".quote-star") || $("insight"), title: "Keep and highlight",
+      text: prayersOn ? "Star a passage to keep it. Select any words, here or in your entry, to highlight them or add them to your prayer list."
+                      : "Star a passage to keep it. Select any words, here or in your entry, to highlight them." },
+    { el: () => $("question"), title: "To sit with",
+      text: prayersOn ? "A question to carry through your day, or to pray about." : "A question to carry through your day." },
+    { el: () => $("past"), title: "Your journal",
+      text: prayersOn ? "Every entry is kept here. Mark favourites with the ribbon on the page; your kept passages and prayer list are at the top."
+                      : "Every entry is kept here. Mark favourites with the ribbon on the page; your kept passages are at the top." },
+    { el: () => (isShown($("settings-btn")) ? $("settings-btn") : $("menu-btn")), title: "Make it yours",
+      text: "In Settings, choose the tone of your reflections and the writers on your bookshelf." },
+  ];
+  const isShown = (el) => !!(el && el.offsetParent !== null && el.getBoundingClientRect().width);
+  let tourStep = -1, tourShownThisVisit = false;
+
+  function placeTour() {
+    const step = TOUR[tourStep];
+    const el = step && step.el();
+    if (!el) return;
+    const r = el.getBoundingClientRect(), pad = 8;
+    const spot = $("tour-spot");
+    const top = Math.max(4, r.top - pad), height = Math.min(r.height + pad * 2, window.innerHeight - top - 4);
+    Object.assign(spot.style, { top: `${top}px`, left: `${Math.max(4, r.left - pad)}px`, width: `${r.width + pad * 2}px`, height: `${height}px` });
+    const bubble = $("tour-bubble"), arrow = $("tour-arrow");
+    const bw = bubble.offsetWidth, bh = bubble.offsetHeight;
+    const below = top + height + 14 + bh < window.innerHeight || top < bh + 24;
+    const bTop = below ? Math.min(top + height + 14, window.innerHeight - bh - 8) : top - bh - 14;
+    const centre = r.left + r.width / 2;
+    const bLeft = Math.min(Math.max(12, centre - bw / 2), window.innerWidth - bw - 12);
+    Object.assign(bubble.style, { top: `${Math.max(8, bTop)}px`, left: `${bLeft}px` });
+    Object.assign(arrow.style, { left: `${Math.min(Math.max(14, centre - bLeft - 7), bw - 28)}px`,
+      top: below ? "-7px" : "", bottom: below ? "" : "-7px" });
+  }
+
+  function showTourStep(i) {
+    tourStep = i;
+    const step = TOUR[i];
+    $("tour-title").textContent = step.title;
+    $("tour-text").textContent = step.text;
+    $("tour-next").textContent = i === TOUR.length - 1 ? "Done" : "Next";
+    $("tour-dots").replaceChildren(...TOUR.map((_, j) => { const d = document.createElement("i"); if (j === i) d.className = "on"; return d; }));
+    const el = step.el();
+    if (el) el.scrollIntoView({ block: el === $("past") ? "start" : "center", behavior: "instant" });
+    placeTour();
+    setTimeout(placeTour, 400);                          // after the scroll settles
+  }
+
+  function startTour() {
+    if (!$("tour") || $("entry-view").hidden || $("reflection").hidden) return;
+    hideToolbars();
+    $("tour").hidden = false;
+    showTourStep(0);
+    $("tour-next").focus();
+  }
+
+  function endTour() {
+    $("tour").hidden = true;
+    tourStep = -1;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!CFG.tourDone) {
+      CFG.tourDone = true;
+      api("PUT", "/api/settings", { tour_done: true }, { passive: true }).catch(() => {});
+    }
+  }
+
+  // The first time a finished reflection is on screen (once this visit, and only until they've seen it).
+  function maybeStartTour(entry) {
+    if (CFG.tourDone || tourShownThisVisit || !entry || entry.reflection_status !== "Done" || !entry.insight) return;
+    tourShownThisVisit = true;
+    setTimeout(() => { if (!document.querySelector("dialog[open]")) startTour(); else tourShownThisVisit = false; }, 900);
+  }
+
+  if ($("tour")) {
+    $("tour-next").addEventListener("click", () => (tourStep < TOUR.length - 1 ? showTourStep(tourStep + 1) : endTour()));
+    $("tour-skip").addEventListener("click", endTour);
+    $("tour").querySelector(".tour-catch").addEventListener("click", endTour);
+    document.addEventListener("keydown", (e) => {
+      if ($("tour").hidden) return;
+      if (e.key === "Escape") endTour();
+      else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); $("tour-next").click(); }
+      else if (e.key === "ArrowLeft" && tourStep > 0) showTourStep(tourStep - 1);
+      e.stopPropagation();
+    }, true);
+    window.addEventListener("resize", () => { if (!$("tour").hidden) placeTour(); });
+    window.addEventListener("scroll", () => { if (!$("tour").hidden) placeTour(); }, { passive: true });
+    // Settings → Take the tour: on the newest entry that has a reflection.
+    $("tour-again-btn").addEventListener("click", async () => {
+      const withReflection = [...(state.allEntries || [])].reverse().find((e) => e.reflection_status === "Done");
+      if (!withReflection) { showNotice("The tour starts with a reflection: write an entry and choose Finish & reflect first.", 5000); return; }
+      await openEntry(withReflection.id);
+      setTimeout(startTour, 700);
+    });
   }
 
   // ---- Sharing a passage -----------------------------------------------------

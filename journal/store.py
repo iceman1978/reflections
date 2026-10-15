@@ -201,7 +201,7 @@ def highlights_still_there(highlights, text):
 def add_highlight(entry_id, where, text, nth):
     """Highlight some words. Returns (entry, highlight). Raises KeyError or ValueError."""
     import secrets
-    if where not in ("entry", "reflection"):
+    if where not in ("entry", "reflection", "question"):
         raise ValueError("where")
     text = (text or "").strip()
     if not text or len(text) > HIGHLIGHT_MAX:

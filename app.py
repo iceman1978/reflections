@@ -256,6 +256,7 @@ def index():
         min_writers=library.MIN_WRITERS,
         has_scripture=any(not w["author"] for w in sources.works().values()),
         bible_translation=prefs["bible_translation"],
+        tour_done=prefs["tour_done"],
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
         photo_visibility=prefs["photo_visibility"],

@@ -1600,9 +1600,30 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .prayer-actions button { padding: 2px 12px; font-size: 0.82rem; border-radius: 999px; }
 .prayer-answered-heading { margin-top: 24px; }
 .prayer-quote { font-style: italic; }
+.share-link.question-pray { display: inline-block; margin: 6px 0 2px; }
 /* The journal's name in the header goes back to today's page. */
 #journal-home { cursor: pointer; border-radius: 10px; }
 #journal-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+/* The tour: everything dimmed but a cut-out around one thing, and a bubble pointing at it. */
+.tour { position: fixed; inset: 0; z-index: 60; }
+.tour[hidden] { display: none; }
+.tour-catch { position: absolute; inset: 0; }
+.tour-spot { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(15, 20, 30, 0.6);
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease; pointer-events: none; }
+.tour-bubble { position: fixed; width: min(340px, calc(100vw - 32px)); padding: 16px 18px 12px; border-radius: 12px;
+  background: var(--page); color: var(--ink); box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5);
+  transition: top 0.3s ease, left 0.3s ease; }
+.tour-bubble h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.tour-bubble p { margin: 0 0 12px; line-height: 1.5; font-size: 0.95rem; }
+.tour-arrow { position: absolute; width: 14px; height: 14px; background: var(--page); transform: rotate(45deg); }
+.tour-foot { display: flex; align-items: center; gap: 12px; }
+.tour-foot .primary { margin-left: auto; }
+.tour-dots { display: flex; gap: 5px; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rule); }
+.tour-dots i.on { background: var(--accent); }
+.tour-again { margin: 0 0 14px; }
+.tour-again .hint { margin-left: 8px; }
+@media (prefers-reduced-motion: reduce) { .tour-spot, .tour-bubble { transition: none; } }
 /* Kept passages: how they're sorted. */
 .kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }
 .kept-sort button, .kept-sort button:hover:not(:disabled) { padding: 2px 12px; border-radius: 999px; font-size: 0.88rem; }
