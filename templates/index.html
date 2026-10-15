@@ -66,12 +66,17 @@
       {% set sample = edition.sample %}
       <!-- A real entry and its reflection: a little page from the journal, which turns open into the whole sample -->
       <button type="button" id="sample-btn" class="sample-card" aria-haspopup="dialog">
+        {% if sample.image %}
+        <!-- A picture of the sample page, as it looks in the journal -->
+        <span class="sample-shot"><img src="{{ static_url(brand_path ~ '/' ~ sample.image) }}" alt="" width="880" height="672"></span>
+        {% else %}
         <span class="sample-mini" aria-hidden="true">
           <span class="sample-mini-ribbon"><svg viewBox="0 0 26 42" aria-hidden="true"><path d="M1.5 0V40.5L13 32.5L24.5 40.5V0"/></svg></span>
           <span class="sample-mini-title">{{ sample.title }}</span>
           {% if vignettes.get(sample.theme) %}<span class="sample-mini-vignette" style="--vignette: url('{{ vignettes.get(sample.theme) }}')"></span>{% endif %}
           <span class="sample-mini-text">{{ sample.entry }}</span>
         </span>
+        {% endif %}
         <span class="sample-card-caption">{{ sample.link_text }}&nbsp;→</span>
       </button>
       {% endif %}
