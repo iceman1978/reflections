@@ -1,0 +1,79 @@
+<!doctype html>
+{#- The invitation email. Email programs ignore stylesheets, web fonts and most
+    modern CSS, so everything is inline and laid out with tables; the app's
+    handwritten name is a picture (tools/make_email_art.py). Colours are the
+    app's default theme. -#}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>{{ subject }}</title>
+</head>
+<body style="margin:0;padding:0;background:#d5dbe1;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">{{ preview }}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#d5dbe1" style="background:#d5dbe1;">
+<tr><td align="center" style="padding:32px 12px 40px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
+
+  <!-- The cover: logo, the name in handwriting, the tagline -->
+  <tr><td align="center" bgcolor="#22364d" style="background:#22364d;background-image:linear-gradient(160deg,#2c4562,#1b2a3c);border-radius:12px 12px 0 0;padding:34px 24px 26px;">
+    <img src="{{ logo_url }}" width="76" height="76" alt="" style="display:block;border:0;border-radius:17px;margin:0 auto 18px;">
+    <img src="{{ wordmark_url }}" width="{{ wordmark_width }}" alt="{{ app }}" style="display:block;border:0;margin:0 auto;max-width:100%;height:auto;font-family:Georgia,serif;font-size:30px;font-style:italic;color:#f3efe4;">
+    {% if tagline %}<div style="margin-top:12px;font-family:Georgia,serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9d3df;">{{ tagline }}</div>{% endif %}
+  </td></tr>
+
+  <!-- The page -->
+  <tr><td bgcolor="#f1f5f9" style="background:#f1f5f9;padding:34px 38px 30px;border-left:6px solid #dfe5ec;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#2a3038;">
+    <p style="margin:0 0 14px;">{{ hello }}</p>
+    <p style="margin:0 0 18px;">{{ opening }}</p>
+    {% if lead %}<p style="margin:0 0 22px;font-size:20px;line-height:1.45;font-style:italic;color:#2c5180;">{{ lead }}</p>{% endif %}
+
+    {% if message %}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+      <tr><td bgcolor="#e1e8ef" style="background:#e1e8ef;border-left:3px solid #2c5180;border-radius:0 8px 8px 0;padding:14px 18px;font-style:italic;">
+        “{{ message }}”{% if who %}<div style="margin-top:6px;font-style:normal;font-size:14px;color:#5b6673;">{{ who }}</div>{% endif %}
+      </td></tr>
+    </table>
+    {% endif %}
+
+    {% if points %}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
+      {% for point in points %}
+      <tr>
+        <td valign="top" style="padding:0 10px 8px 0;font-size:15px;line-height:1.5;color:#2c5180;">&#10003;</td>
+        <td valign="top" style="padding:0 0 8px;font-size:15px;line-height:1.5;color:#3a424c;">{{ point }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    <!-- The button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 24px;">
+      <tr><td align="center" bgcolor="#2c5180" style="background:#2c5180;border-radius:8px;">
+        <a href="{{ site_url }}" style="display:inline-block;padding:14px 30px;font-family:Georgia,serif;font-size:17px;color:#ffffff;text-decoration:none;border-radius:8px;">Open {{ app }}</a>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:14px;line-height:1.55;color:#5b6673;">{{ sign_in }}</p>
+  </td></tr>
+
+  <!-- The foot of the page: the welcome verse -->
+  {% if quote %}
+  <tr><td align="center" bgcolor="#e1e8ef" style="background:#e1e8ef;border-left:6px solid #dfe5ec;border-radius:0 0 12px 12px;padding:22px 38px 24px;font-family:Georgia,serif;">
+    <div style="font-size:16px;line-height:1.5;font-style:italic;color:#2c5180;">{{ quote }}</div>
+    <div style="margin-top:6px;font-size:13px;color:#5b6673;">{{ quote_cite }}</div>
+  </td></tr>
+  {% endif %}
+
+  <!-- Below the book -->
+  <tr><td align="center" style="padding:20px 24px 0;font-family:Georgia,serif;font-size:12px;line-height:1.55;color:#5b6673;">
+    {{ no_reply }}<br>
+    <a href="{{ site_url }}privacy" style="color:#5b6673;">How your writing is kept private</a>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

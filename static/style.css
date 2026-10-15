@@ -1243,13 +1243,20 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   font-size: 0.85rem; line-height: 1.5;
   -webkit-mask: linear-gradient(to bottom, #000 30%, transparent 85%); mask: linear-gradient(to bottom, #000 30%, transparent 85%);
 }
+/* The picture of the sample page, centred, fading out at the bottom. The fade is on the
+   picture and the shadow on its frame, so the shadow fades with it. Not tilted: a turned
+   picture's edges go jagged. */
+.sample-card:has(.sample-shot), .sample-card:has(.sample-shot):hover:not(:disabled) { align-self: center; align-items: center; text-align: center; }
 .sample-shot {
-  display: block; width: min(100%, 440px); aspect-ratio: 880 / 672; overflow: hidden; border-radius: 3px 8px 8px 3px;
-  box-shadow: 10px 16px 30px -8px rgba(0, 0, 0, 0.45);
-  transform: rotate(-1.5deg); transition: transform 0.25s ease-out;
+  display: block; width: min(100%, 340px); aspect-ratio: 720 / 550;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.4));
+  transition: transform 0.25s ease-out;
 }
-.sample-shot img { display: block; width: 100%; height: auto; }
-.sample-card:hover .sample-shot, .sample-card:focus-visible .sample-shot { transform: rotate(0deg) translateY(-3px); }
+.sample-shot img {
+  display: block; width: 100%; height: auto;
+  -webkit-mask: linear-gradient(to bottom, #000 55%, transparent 98%); mask: linear-gradient(to bottom, #000 55%, transparent 98%);
+}
+.sample-card:hover .sample-shot, .sample-card:focus-visible .sample-shot { transform: translateY(-3px); }
 .sample-card:focus-visible .sample-shot { outline: 2px solid hsl(var(--paper-hue) 40% 94%); outline-offset: 4px; }
 .sample-card-caption { font-size: 0.95rem; text-decoration: underline; text-underline-offset: 3px; opacity: 0.95; }
 

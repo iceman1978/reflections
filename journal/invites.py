@@ -17,12 +17,21 @@ later (higher limits, free months, ...).
 Like feedback, requests are not encrypted: they're meant to be read by
 whoever runs the app.
 """
-import html
 import re
 from datetime import datetime
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 from . import config, db, mail
-from .config import TZ
+from .config import ROOT, TZ
+
+EMAILS = Environment(loader=FileSystemLoader(ROOT / "templates" / "email"), autoescape=select_autoescape(["html"]))
+
+
+def _png_width(path):
+    """A PNG's width, from its header (no imaging library on the server)."""
+    with open(path, "rb") as f:
+        return int.from_bytes(f.read(24)[16:20], "big")
 
 STATUSES = ("requested", "declined")   # "added" is worked out from the allowed list
 PER_DAY = 10
@@ -227,32 +236,36 @@ def invitation(inv, site_url):
 
     The note on a request was written to whoever runs the app, so it's never
     passed on; only a message written for the invitation itself is."""
-    app, lead = config.APP_NAME, config.EDITION.get("lead", "")
+    edition = config.EDITION
+    app, lead = config.APP_NAME, edition.get("lead", "")
     who = (inv.get("requester_name") or "").strip()
     subject = f"{who} invited you to {app}" if who else f"You're invited to {app}"
     hello = f"Hi {inv['name']}," if inv.get("name") else "Hi,"
     opening = f"{who} has invited you to {app}." if who else f"You're invited to {app}."
-    sign_in = (f"Open {app} and sign in with Google using this address ({inv['email']}). "
+    sign_in = (f"Sign in with Google using this address ({inv['email']}). "
                "The first time, you'll choose a passphrase that keeps your journal private: "
                "only you can read what you write.")
     no_reply = ("This address doesn't receive replies. If you have a question, use the Feedback "
                 "button (the speech bubble) once you're signed in.")
     message = inv.get("message")
+    points = [p["title"] for p in edition.get("points", [])]
+    quote = edition.get("welcome_quote") or {}
+    quote_cite = re.sub(r"<[^>]+>", "", quote.get("cite_html", ""))
     text = "\n\n".join(p for p in (
         hello, opening, lead, f"“{message}”" if message else None,
-        sign_in, f"Open {app}: {site_url}", no_reply) if p)
-    e = html.escape
-    accent = "#2f5687"
-    paras = (e(hello), e(opening), f"<em>{e(lead)}</em>" if lead else None,
-             f'<span style="display:block;border-left:3px solid {accent};padding-left:12px;font-style:italic">'
-             f'“{e(message)}”</span>' if message else None,
-             e(sign_in))
-    body = "".join(f'<p style="margin:0 0 16px">{p}</p>' for p in paras if p)
-    page = (f'<div style="font-family:Georgia,serif;font-size:17px;line-height:1.55;color:#2a2a2a;max-width:520px">'
-            f'{body}'
-            f'<p style="margin:24px 0"><a href="{e(site_url)}" style="background:{accent};color:#ffffff;'
-            f'text-decoration:none;padding:12px 22px;border-radius:6px;display:inline-block">Open {e(app)}</a></p>'
-            f'<p style="margin:24px 0 0;font-size:13px;color:#777777">{e(no_reply)}</p></div>')
+        "\n".join(f"- {p}" for p in points) or None,
+        f"Open {app}: {site_url}", sign_in,
+        f"{quote['text']}\n{quote_cite}" if quote else None, no_reply) if p)
+    site = site_url if site_url.endswith("/") else site_url + "/"
+    brand = f"{site}static/brands/{config.EDITION_NAME}"
+    wordmark = ROOT / "static" / "brands" / config.EDITION_NAME / "email-wordmark.png"
+    page = EMAILS.get_template("invitation.html").render(
+        subject=subject, preview=f"{opening} {lead}".strip(), app=app, tagline=edition.get("tagline"),
+        logo_url=f"{brand}/logo.png", wordmark_url=f"{brand}/email-wordmark.png",
+        wordmark_width=_png_width(wordmark) // 2 if wordmark.exists() else 300,
+        hello=hello, opening=opening, lead=lead, message=message, who=f"— {who}" if who else "",
+        points=points, site_url=site, sign_in=sign_in, quote=quote.get("text"), quote_cite=quote_cite,
+        no_reply=no_reply)
     return subject, text, page
 
 
