@@ -621,7 +621,6 @@
   // in In His Steps), one per reflection. Clicking it opens a small pop-up with
   // the count and when they come back (the place for top-ups later).
   const creditName = (n) => (n === 1 ? CFG.credit.one : CFG.credit.many);
-  const capital = (w) => w.charAt(0).toUpperCase() + w.slice(1);
 
   // Credits come back at midnight in the journal's time zone: that moment, in
   // the reader's own time ("midnight", or "9:00 pm" from further west).
@@ -682,12 +681,6 @@
       coin.classList.remove("pop"); void coin.offsetWidth; coin.classList.add("pop");
     }
     coin.dataset.left = left;
-    const note = $("limits-note");
-    if (note) {
-      note.textContent = `${capital(CFG.credit.many)}: ${left} of ${s.reflections_per_day} left today. Each reflection `
-        + `uses one, and you get ${s.reflections_per_day} new ${CFG.credit.many} every day. Entries are always saved, `
-        + "and an entry without a reflection can be reflected on another day.";
-    }
   }
 
   // Entry-count milestones: 5, 10, 25, 50, then every 50 (100, 150, 200…).
@@ -1759,7 +1752,7 @@
 
   // ---- Settings ---------------------------------------------------------
 
-  // Settings tabs: Basic, Theme, Library, Security & Data, Admin (admins only).
+  // Settings tabs: Basic, Theme, Bookshelf, Security & Data, Admin (admins only).
   const settingsTabs = () => [...document.querySelectorAll('#settings-view [role="tab"]')];
 
   function selectSettingsTab(name, { focus = false } = {}) {
@@ -1797,7 +1790,7 @@
         else if (el.type === "radio") el.checked = el.value === settings[el.name];
         else el.value = settings[el.name];
       }
-      // Library: a writer is on unless the saved choices (or the edition's default) say otherwise.
+      // Bookshelf: a writer is on unless the saved choices (or the edition's default) say otherwise.
       for (const box of document.querySelectorAll("#panel-library [data-writer]")) {
         const chosen = (settings.writers || {})[box.dataset.writer];
         box.checked = chosen === undefined ? box.dataset.default === "1" : !!chosen;
@@ -2772,7 +2765,7 @@
     "passkey-list", "usage-tiles", "usage-chart", "usage-table", "invite-requests", "feedback-list", "my-invites",
     "dialog-title", "dialog-body", "dialog-buttons", "entry-date", "entry-title", "entry-text", "entry-status", "nav-pos",
     "question", "support-note", "reflection-missing-text", "prompt-text", "prompt-source", "prompt-status",
-    "draft-state", "filter-note", "themes-status", "limits-note", "nudge-text", "new-recovery-key",
+    "draft-state", "filter-note", "themes-status", "nudge-text", "new-recovery-key",
     "new-recovery-result", "password-result", "passkey-result", "import-result", "test-key-result", "usage-since",
     "wipe-count", "wipe-number", "wipe-error", "feedback-error", "invite-error", "settings-state",
     "credit-pop-title", "credit-pop-text", "kept-list", "kept-intro",

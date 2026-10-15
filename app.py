@@ -249,7 +249,7 @@ def index():
         colour_themes=config.COLOUR_THEMES,
         lock_choices=config.LOCK_MINUTE_CHOICES,
         works_count=len(sources.load_map()["works"]),      # "{works}" in the welcome page's points
-        library_eras=library.for_settings(prefs["writers"]),  # Settings → Library
+        library_eras=library.for_settings(prefs["writers"]),  # Settings → Bookshelf
         vignettes=_vignettes(),                               # a drawing for the reflection's main theme
         min_writers=library.MIN_WRITERS,
         has_scripture=any(not w["author"] for w in sources.works().values()),

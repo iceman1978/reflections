@@ -25,6 +25,7 @@
      "text": "Entries are encrypted with a passphrase <em>only you know</em>. Your entry is only used to write your daily reflection, and isn’t used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
+  "email_vignette": "meditation-and-stillness",
   "welcome_quote": {
     "text": "“The unexamined life is not worth living.”",
     "cite_html": "Socrates, in Plato’s <cite>Apology</cite>"

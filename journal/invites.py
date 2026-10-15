@@ -266,6 +266,7 @@ def invitation(inv, site_url):
     page = EMAILS.get_template("invitation.html").render(
         subject=subject, preview=f"{opening} — {lead}" if lead else f"{opening}.", app=app, tagline=edition.get("tagline"),
         logo_url=f"{brand}/logo.png", wordmark_url=f"{brand}/email-wordmark.png",
+        vignette_url=f"{brand}/email-vignette.png" if edition.get("email_vignette") else None,
         wordmark_width=_png_width(wordmark) // 2 if wordmark.exists() else 300,
         hello=hello, opening=opening if lead else f"{opening}.", lead=lead, message=message, who=f"— {who}" if who else "",
         points=points, site_url=site, sign_in=sign_in, quote=quote.get("text"), quote_cite=quote_cite,

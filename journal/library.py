@@ -1,7 +1,7 @@
 """Each reader's own library: which of the edition's writers their reflections draw on.
 
 The edition lists its writers in edition.json ("writers"): a name, an era, a line
-on what they bring (shown in Settings → Library, and given to Claude), and
+on what they bring (shown in Settings → Bookshelf, and given to Claude), and
 whether they're on by default. A reader can switch writers on or off; their
 choices (only where they differ from the defaults) are saved with their
 preferences as {"name": true/false}. Scripture, in an edition that has it, is
@@ -76,7 +76,7 @@ class Library:
 
 
 def for_settings(choices=None):
-    """The writers by era, for the Library tab: name, what they bring, their works, and whether they're on."""
+    """The writers by era, for the Bookshelf tab: name, what they bring, their works, and whether they're on."""
     on = {w["name"] for w in Library(choices).writers}
     eras = []
     for w in WRITERS:

@@ -31,6 +31,7 @@
      "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
+  "email_vignette": "scripture",
   "email_points": [
     "Build a journaling habit. A few lines are enough.",
     "A well-stocked library of Christian wisdom, including Scripture and devotional writers",
@@ -82,7 +83,7 @@
   },
   "selection": {
     "title": "Why these books and writers",
-    "text": "The books of the Bible here are chosen for a daily quiet time: the Psalms and the wisdom books, the stories of Abraham, Joseph, Moses, Ruth and David, the prophets of comfort and lament, the Gospels and Acts, and the letters. Each comes with notes that steer reflections to the passages meant for devotion, and away from genealogies, laws and judgments that need more context than a short reflection can give. The writers are among the most widely loved devotional voices of the Protestant tradition, from the early church to the twentieth century. Any writer can be turned off, and more can be turned on, in Settings → Library."
+    "text": "The books of the Bible here are chosen for a daily quiet time: the Psalms and the wisdom books, the stories of Abraham, Joseph, Moses, Ruth and David, the prophets of comfort and lament, the Gospels and Acts, and the letters. Each comes with notes that steer reflections to the passages meant for devotion, and away from genealogies, laws and judgments that need more context than a short reflection can give. The writers are among the most widely loved devotional voices of the Protestant tradition, from the early church to the twentieth century. Any writer can be turned off, and more can be turned on, in Settings → Bookshelf."
   },
   "translation_note": {
     "title": "Why the Berean Standard Bible?",
