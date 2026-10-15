@@ -614,7 +614,14 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .citations:empty { display: none; }
 .citations li { margin: 2px 0; }
 .citations a { font-style: normal; text-decoration-thickness: 1px; text-underline-offset: 2px; }
-.reflection-footer { display: flex; justify-content: flex-end; margin-top: 6px; }
+.reflection-footer { display: flex; justify-content: flex-end; align-items: baseline; margin-top: 6px; }
+/* "Written to challenge": quiet, like the "To sit with" label; it opens the Tone setting. */
+.reflection-tone, .reflection-tone:hover:not(:disabled) { margin-right: auto; padding: 0; border: none; background: none;
+  font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.reflection-tone:hover:not(:disabled) { color: var(--accent); }
+/* Settings → Tone, just arrived at from a reflection: a brief glow. */
+.tone-choice.just-shown .tone-options { animation: tone-glow 1.6s ease-out; }
+@keyframes tone-glow { 0%, 40% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); } 100% { box-shadow: none; } }
 /* While Claude writes the reflection: the whole panel breathes, so it's
    obvious something is happening, even after a long entry. */
 .reflection-working {
@@ -1565,13 +1572,42 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .kept-group h3 { margin: 18px 0 2px; font-family: var(--serif); font-weight: 500; font-style: italic; font-size: 1.02rem; color: var(--muted); }
 .kept-passage { margin: 12px 0 0; padding: 2px 0 2px 16px; border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); }
 .kept-passage blockquote { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.08em; line-height: var(--lh, 1.6); color: var(--ink); }
-.kept-passage .kept-where { margin: 4px 0 0; font-size: 0.88rem; color: var(--muted); }
-.kept-passage .kept-where a { text-underline-offset: 2px; }
+/* Highlights: words someone marked in an entry or its reflection, like a highlighter pen. */
+mark.hl { background: color-mix(in srgb, var(--accent) 18%, transparent); color: inherit; border-radius: 2px;
+  padding: 0 1px; cursor: pointer; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+mark.hl:hover { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, transparent); }   /* on the prayer list */
+/* The little toolbar over a selection or a highlight. */
+.select-pill { position: absolute; z-index: 40; display: flex; gap: 2px; padding: 3px; border-radius: 999px;
+  background: var(--ink); box-shadow: 0 6px 18px -6px var(--shadow); }
+.select-pill[hidden] { display: none; }
+.select-pill button, .select-pill button:hover:not(:disabled) { padding: 4px 12px; border: none; border-radius: 999px;
+  background: transparent; color: var(--page); font-size: 0.85rem; white-space: nowrap; }
+.select-pill button:hover:not(:disabled) { background: color-mix(in srgb, var(--page) 18%, transparent); }
+.select-pill button[hidden] { display: none; }
+/* The prayer list. */
+.prayer-list { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 10px; }
+.prayer-item { padding: 10px 14px; border-left: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 5%, transparent);
+  border-radius: 0 8px 8px 0; }
+.prayer-item.answered { border-left-color: var(--gold); }
+.prayer-item p { margin: 0; }
+.prayer-text { font-size: 1.08em; }
+.prayer-meta { margin-top: 4px !important; font-size: 0.85rem; color: var(--muted); }
+.prayer-meta button { padding: 0; border: none; background: none; font-size: inherit; color: var(--accent);
+  text-decoration: underline; text-underline-offset: 2px; }
+.prayer-note { margin-top: 4px !important; font-style: italic; color: var(--muted); }
+.prayer-actions { display: flex; gap: 8px; margin-top: 8px; }
+.prayer-actions button { padding: 2px 12px; font-size: 0.82rem; border-radius: 999px; }
+.prayer-answered-heading { margin-top: 24px; }
+.prayer-quote { font-style: italic; }
 /* Kept passages: how they're sorted. */
 .kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }
 .kept-sort button, .kept-sort button:hover:not(:disabled) { padding: 2px 12px; border-radius: 999px; font-size: 0.88rem; }
 .kept-sort button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-.kept-when { color: var(--muted); }
+/* A passage just let go of, with Undo (it stays until they leave the page). */
+.kept-undo { margin: 6px 0 14px; padding: 8px 12px; border: 1px dashed var(--rule); border-radius: 8px;
+  color: var(--muted); font-size: 0.9rem; }
+.kept-undo .link-button { margin-left: 4px; font-size: 0.9rem; color: var(--accent); }
 /* Kept passages a friend shared with you: who, when and their note, with a small gift mark. */
 .kept-shared { margin: 6px 0 0; font-size: 0.88rem; color: var(--accent); }
 .kept-shared p { margin: 0; }
@@ -1584,7 +1620,14 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
 }
 .share-link:hover:not(:disabled) { color: var(--accent); }
-.kept-passage .kept-where .share-link { float: right; }
+/* Kept passages: the citation as the link, on the quote's line; "Came up in" and a Share pill below. */
+.kept-cite { font-style: normal; font-size: 0.88rem; color: var(--muted); white-space: nowrap; }
+.kept-cite a { text-underline-offset: 2px; }
+.kept-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin-top: 4px; }
+.kept-foot .kept-entries { margin: 0; flex: 1; }
+.share-link.share-pill, .share-link.share-pill:hover:not(:disabled) { flex: none; padding: 1px 12px; border: 1px solid var(--rule);
+  border-radius: 999px; text-decoration: none; font-size: 0.82rem; color: var(--muted); }
+.share-link.share-pill:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 .dialog .share-drawing { max-width: 260px; margin: 0 auto 10px; }
 .share-preview { margin: 0 0 14px; padding: 2px 0 2px 14px; border-left: 2px solid var(--accent); }
 .share-preview p { margin: 0 0 4px; font-style: italic; }

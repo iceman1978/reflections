@@ -884,6 +884,8 @@ def edit_entry(entry_id):
         old = _visible(entry_id)
         if _has_reflection(old) and old.get("reflected_text") is None:
             fields["reflected_text"] = old.get("text")   # reflected on before the text was kept: as it is now
+        if old.get("highlights"):
+            fields["highlights"] = store.highlights_still_there(old["highlights"], text)
         if "title" in data:
             title = store.clean_title(data.get("title"))
             if title != old.get("title"):
@@ -894,6 +896,107 @@ def edit_entry(entry_id):
         return jsonify(error="Entry not found."), 404
     log.info("Edited entry %s", entry_id)
     return jsonify(entry=_for_page(entry))
+
+
+# ---- Highlights and the prayer list ------------------------------------------
+
+@app.post("/api/entries/<entry_id>/highlights")
+def add_highlight(entry_id):
+    """Highlight words in an entry or its reflection: {where, text, nth}."""
+    data = request.get_json(silent=True) or {}
+    try:
+        _visible(entry_id)
+        entry, mark = store.add_highlight(entry_id, data.get("where"), data.get("text"), int(data.get("nth") or 0))
+    except KeyError:
+        return jsonify(error="Entry not found."), 404
+    except (TypeError, ValueError):
+        return jsonify(error="Those words couldn't be highlighted."), 400
+    return jsonify(entry=_for_page(entry), highlight=mark)
+
+
+@app.delete("/api/entries/<entry_id>/highlights/<highlight_id>")
+def remove_highlight(entry_id, highlight_id):
+    try:
+        _visible(entry_id)
+        entry, gone = store.remove_highlight(entry_id, highlight_id)
+    except KeyError:
+        return jsonify(error="Entry not found."), 404
+    if gone and gone.get("prayer_id") and config.EDITION.get("prayer_list"):
+        from journal import prayers
+        prayers.unlink_highlight(highlight_id)           # the prayer stays, still linked to the entry
+    return jsonify(entry=_for_page(entry))
+
+
+def _need_prayer_list():
+    return None if config.EDITION.get("prayer_list") else (jsonify(error="Not found"), 404)
+
+
+@app.get("/api/prayers")
+def list_prayers():
+    if (resp := _need_prayer_list()):
+        return resp
+    from journal import prayers
+    found = prayers.all_prayers()
+    titles = {}
+    for p in found:                                      # which entry each came from, for "from …"
+        if p.get("entry_id") and p["entry_id"] not in titles:
+            try:
+                e = _visible(p["entry_id"])
+                titles[p["entry_id"]] = {"id": e["id"], "title": e.get("title"), "created_at": e["created_at"]}
+            except KeyError:
+                titles[p["entry_id"]] = None
+        p["entry"] = titles.get(p.get("entry_id"))
+    return jsonify(prayers=found)
+
+
+@app.post("/api/prayers")
+def add_prayer():
+    """{text, entry_id?, highlight_id?}: a prayer, from a highlight or not."""
+    if (resp := _need_prayer_list()):
+        return resp
+    from journal import prayers
+    data = request.get_json(silent=True) or {}
+    entry_id, highlight_id = data.get("entry_id") or None, data.get("highlight_id") or None
+    try:
+        if entry_id:
+            _visible(entry_id)
+        item = prayers.add(data.get("text"), store.now().isoformat(), entry_id, highlight_id)
+    except KeyError:
+        return jsonify(error="Entry not found."), 404
+    except prayers.PrayerProblem as e:
+        return jsonify(error=str(e)), 400
+    entry = store.link_prayer(entry_id, highlight_id, item["id"]) if entry_id and highlight_id else None
+    return jsonify(prayer=item, entry=_for_page(entry) if entry else None)
+
+
+@app.post("/api/prayers/<prayer_id>")
+def update_prayer(prayer_id):
+    """{answered?: bool, note?, text?}"""
+    if (resp := _need_prayer_list()):
+        return resp
+    from journal import prayers
+    data = request.get_json(silent=True) or {}
+    try:
+        item = prayers.update(prayer_id, store.now().isoformat(), data.get("answered"), data.get("note"), data.get("text"))
+    except KeyError:
+        return jsonify(error="Not found"), 404
+    except prayers.PrayerProblem as e:
+        return jsonify(error=str(e)), 400
+    return jsonify(prayer=item)
+
+
+@app.delete("/api/prayers/<prayer_id>")
+def delete_prayer(prayer_id):
+    if (resp := _need_prayer_list()):
+        return resp
+    from journal import prayers
+    gone = prayers.remove(prayer_id)
+    if gone and gone.get("entry_id") and gone.get("highlight_id"):
+        try:
+            store.link_prayer(gone["entry_id"], gone["highlight_id"], None)   # the highlight stays
+        except KeyError:
+            pass
+    return jsonify(ok=True)
 
 
 @app.post("/api/entries/<entry_id>/favourite")
@@ -932,6 +1035,16 @@ def kept_set():
     verified quotations (so only real, checked quotes can be kept); to release
     one, its key is enough."""
     data = request.get_json(silent=True) or {}
+    if isinstance(data.get("restore"), dict):              # Undo: put back a passage just let go of
+        p = data["restore"]
+        found = sources.cite(str(p.get("work") or ""), str(p.get("location") or ""), str(p.get("quote") or ""))
+        if not found:
+            return jsonify(error="That passage wasn't found in the library."), 404
+        key = kept.restore({**p, **{f: found.get(f) for f in kept.FIELDS}})
+        if HOSTED and p.get("own") is not False:
+            from journal import passages
+            passages.kept_count(found, +1)                  # counted again, as it was
+        return jsonify(key=key, kept=True)
     if not data.get("keep"):
         kept.release(str(data.get("key") or ""))
         if HOSTED:
@@ -1020,10 +1133,12 @@ def reflect_entry(entry_id):
             entry = store.update_entry(entry_id, reflection_status=status, reflection_error=str(e))
             return jsonify(error=str(e), entry=_for_page(entry, reflecting=False)), 502
         usage.record(g.user_id, "reflection")
+        fields["reflection_tone"] = prefs["reflection_tone"]       # shown under it: "Written to challenge"
         suggested = store.clean_title(fields.pop("suggested_title", None))
         current = store.get_entry(entry_id)  # may have been renamed while Claude was thinking
         if suggested and not current.get("title"):
             fields.update(title=suggested, title_source="generated")
+        fields["highlights"] = [h for h in current.get("highlights") or [] if h.get("where") == "entry"]
         entry = store.update_entry(entry_id, reflection_status=store.DONE, reflection_error=None,
                                    reflected_text=entry.get("text"), **fields)
         return jsonify(entry=_for_page(entry, reflecting=False), **_limits(g.user_id))

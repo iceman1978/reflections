@@ -1039,3 +1039,72 @@ class VerseLinkTests(unittest.TestCase):
         from journal import verse_links
         with mock.patch("journal.verse_links.requests.get", side_effect=verse_links.requests.RequestException):
             self.assertEqual(verse_links.url("esv", "john", 3, 16), "https://biblehub.com/esv/john/3.htm")
+
+
+class KeptUndoTests(unittest.TestCase):
+    """Undo on Kept passages puts a passage back exactly as it was."""
+
+    def test_restore_after_letting_go(self):
+        from journal import kept
+        fresh_journal()
+        uid = users.from_google("g-undo", "undo@x.com", "Undo")
+        set_up_as(uid)
+        gift = {"work": "psalms", "author": "", "title": "Psalm", "translation": "t", "location": "23:1",
+                "quote": "The LORD is my shepherd", "url": "https://x/", "kept_at": "2026-10-01T09:00:00-04:00",
+                "own": False, "shared": [{"by": "Ann", "note": "For you", "at": "2026-10-01T09:00:00-04:00"}]}
+        kept.restore(gift)
+        key = kept.passages()[0]["key"]
+        kept.release(key)
+        self.assertEqual(kept.passages(), [])
+        kept.restore(gift)
+        back = kept.passages()[0]
+        self.assertEqual((back["kept_at"], back["own"], back["shared"][0]["note"]),
+                         ("2026-10-01T09:00:00-04:00", False, "For you"))
+        kept.restore(gift)                                                         # never twice
+        self.assertEqual(len(kept.passages()), 1)
+
+
+class HighlightAndPrayerTests(unittest.TestCase):
+    """Highlights in an entry or its reflection; the prayer list (In His Steps)."""
+
+    def setUp(self):
+        fresh_journal()
+        uid = users.from_google("g-hl", "hl@x.com", "Hl")
+        set_up_as(uid)
+        self.entry = store.create_entry("Dad's surgery is on Thursday. I keep thinking about Dad's surgery.")
+
+    def test_highlights_keep_their_place_and_survive_small_edits(self):
+        entry, second = store.add_highlight(self.entry["id"], "entry", "Dad's surgery", 1)   # the second one
+        entry, first = store.add_highlight(self.entry["id"], "entry", "Dad's surgery", 0)
+        self.assertEqual(len(entry["highlights"]), 2)
+        self.assertEqual(store.add_highlight(self.entry["id"], "entry", "Dad's surgery", 0)[1]["id"], first["id"])
+        with self.assertRaises(ValueError):
+            store.add_highlight(self.entry["id"], "entry", "not in it", 0)
+        edited = "Dad's surgery is on Friday now."
+        kept_marks = store.highlights_still_there(entry["highlights"], edited)
+        self.assertEqual([h["id"] for h in kept_marks], [first["id"]])            # the second occurrence went
+        entry, gone = store.remove_highlight(self.entry["id"], first["id"])
+        self.assertEqual(gone["id"], first["id"])
+        self.assertEqual([h["id"] for h in entry["highlights"]], [second["id"]])
+
+    def test_the_prayer_list(self):
+        from journal import prayers
+        entry, mark = store.add_highlight(self.entry["id"], "entry", "Dad's surgery", 0)
+        p = prayers.add("  Dad's   surgery,  Thursday ", "2026-10-15T09:00:00-04:00", self.entry["id"], mark["id"])
+        self.assertEqual(p["text"], "Dad's surgery, Thursday")
+        entry = store.link_prayer(self.entry["id"], mark["id"], p["id"])
+        self.assertEqual(entry["highlights"][0]["prayer_id"], p["id"])
+        other = prayers.add("The job search", "2026-10-16T09:00:00-04:00")
+        prayers.update(p["id"], "2026-10-20T09:00:00-04:00", answered=True, note="It went well")
+        listed = prayers.all_prayers()
+        self.assertEqual([x["id"] for x in listed], [other["id"], p["id"]])        # open first, then answered
+        self.assertEqual(listed[1]["answer_note"], "It went well")
+        prayers.unlink_highlight(mark["id"])
+        self.assertIsNone(prayers.all_prayers()[1]["highlight_id"])
+        self.assertEqual(prayers.remove(other["id"])["text"], "The job search")
+        with self.assertRaises(prayers.PrayerProblem):
+            prayers.add("   ", "2026-10-15T09:00:00-04:00")
+        con = db.connect()                                                          # encrypted, like entries
+        blob = con.execute("SELECT data FROM prayers").fetchone()[0]
+        con.close()
+        self.assertNotIn(b"surgery", bytes(blob))

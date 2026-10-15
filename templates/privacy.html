@@ -25,7 +25,8 @@
       <h2>Who can read your entries</h2>
       <p>Only you. Every entry is encrypted with a key that is locked by your passphrase.
         The server stores only the encrypted version, so whoever runs this site (or the hosting company)
-        sees unreadable data. {% if hosted %}Signing in with Google only proves who you are; Google never sees your journal.{% endif %}</p>
+        sees unreadable data. The same goes for your highlights, kept passages{% if edition.prayer_list %} and prayer
+        list{% endif %}. {% if hosted %}Signing in with Google only proves who you are; Google never sees your journal.{% endif %}</p>
       <p>Because of this, <strong>nobody can reset your passphrase</strong>. If you forget it, your recovery key
         is the only way back in. Without either, the entries can't be recovered by anyone.</p>
       {% if hosted %}<p>If churches or small groups ever sponsor their members, their leaders will never see anything

@@ -185,6 +185,61 @@ def update_entry(entry_id, touch=True, **fields):
         return put_entry(entry)
 
 
+# ---- Highlights: words someone marked in an entry or its reflection ----------
+# Each is {"id", "where": "entry" | "reflection", "text", "nth", "prayer_id"}: the
+# words as they appear, and which occurrence of them (0 = the first), so a highlight
+# keeps its place through small edits. Stored in the entry, so encrypted with it.
+
+HIGHLIGHT_MAX = 1000
+
+
+def highlights_still_there(highlights, text):
+    """The entry's own highlights whose words are still in its text (after an edit)."""
+    return [h for h in highlights or [] if h.get("where") != "entry" or text.count(h["text"]) > h.get("nth", 0)]
+
+
+def add_highlight(entry_id, where, text, nth):
+    """Highlight some words. Returns (entry, highlight). Raises KeyError or ValueError."""
+    import secrets
+    if where not in ("entry", "reflection"):
+        raise ValueError("where")
+    text = (text or "").strip()
+    if not text or len(text) > HIGHLIGHT_MAX:
+        raise ValueError("text")
+    with _lock:
+        entry = get_entry(entry_id)
+        if where == "entry" and entry.get("text", "").count(text) <= nth:
+            raise ValueError("not in the entry")
+        highlights = entry.get("highlights") or []
+        same = next((h for h in highlights if h["where"] == where and h["text"] == text and h.get("nth", 0) == nth), None)
+        if same:
+            return entry, same
+        mark = {"id": secrets.token_hex(5), "where": where, "text": text, "nth": max(0, int(nth)), "prayer_id": None}
+        return update_entry(entry_id, touch=False, highlights=highlights + [mark]), mark
+
+
+def remove_highlight(entry_id, highlight_id):
+    """Returns (entry, the removed highlight or None)."""
+    with _lock:
+        entry = get_entry(entry_id)
+        highlights = entry.get("highlights") or []
+        gone = next((h for h in highlights if h["id"] == highlight_id), None)
+        if not gone:
+            return entry, None
+        return update_entry(entry_id, touch=False, highlights=[h for h in highlights if h["id"] != highlight_id]), gone
+
+
+def link_prayer(entry_id, highlight_id, prayer_id):
+    """Mark a highlight as on the prayer list (prayer_id) or not (None)."""
+    with _lock:
+        entry = get_entry(entry_id)
+        highlights = entry.get("highlights") or []
+        for h in highlights:
+            if h["id"] == highlight_id:
+                h["prayer_id"] = prayer_id
+        return update_entry(entry_id, touch=False, highlights=highlights)
+
+
 def set_hidden(entry_id, hidden):
     """Hidden entries vanish from the app but stay in the journal (and exports)."""
     return update_entry(entry_id, hidden=bool(hidden))
@@ -232,6 +287,7 @@ def wipe_all_entries():
                 con.execute("DELETE FROM entries WHERE user_id = ?", (s.user_id,))
                 con.execute("DELETE FROM drafts WHERE user_id = ?", (s.user_id,))
                 con.execute("DELETE FROM kept WHERE user_id = ?", (s.user_id,))
+                con.execute("DELETE FROM prayers WHERE user_id = ?", (s.user_id,))
             db.checkpoint(con)
             con.execute("VACUUM")  # rebuild the file without the old pages
         finally:

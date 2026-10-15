@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS entries (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, 
 CREATE INDEX IF NOT EXISTS entries_by_user ON entries (user_id);
 CREATE TABLE IF NOT EXISTS drafts  (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS kept    (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
+CREATE TABLE IF NOT EXISTS prayers (user_id TEXT PRIMARY KEY, data BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS token_usage (day TEXT NOT NULL, kind TEXT NOT NULL, calls INTEGER NOT NULL,
                                     input INTEGER NOT NULL, output INTEGER NOT NULL, cache_read INTEGER NOT NULL DEFAULT 0,
                                     cache_write INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, kind));

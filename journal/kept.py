@@ -124,6 +124,25 @@ def take_shared(email):
     return len(rows)
 
 
+def restore(passage):
+    """Put back a passage just let go of (Undo on the Kept passages page), as it was:
+    when it was kept, whether it was their own keep, and who shared it. Returns its key."""
+    key = key_of(passage)
+    item = {**{f: passage.get(f) or "" for f in FIELDS}, "key": key, "kept_at": passage.get("kept_at") or ""}
+    if passage.get("own") is False:
+        item["own"] = False
+    shared = [{"by": str(s.get("by") or "")[:80], "note": str(s.get("note") or "")[:1000], "at": str(s.get("at") or "")}
+              for s in (passage.get("shared") or []) if isinstance(s, dict)]
+    if shared:
+        item["shared"] = shared
+    with db.write_lock:
+        current = _load()
+        if not any(p["key"] == key for p in current):
+            current.append(item)
+            _save(current)
+    return key
+
+
 def release(key):
     """No longer keep the passage with this key."""
     with db.write_lock:

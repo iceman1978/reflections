@@ -129,12 +129,12 @@
     el.classList.add(cls);
   }
 
-  const VIEWS = ["write", "entry", "settings", "kept"];   // the pages of the book
+  const VIEWS = ["write", "entry", "settings", "kept", ...(document.getElementById("prayers-view") ? ["prayers"] : [])];   // the pages of the book
   function showView(name) {
     const el = $(`${name}-view`);
     const changed = el.hidden;
     for (const v of VIEWS) $(`${v}-view`).hidden = v !== name;
-    $("past").hidden = name === "settings" || name === "kept";
+    $("past").hidden = ["settings", "kept", "prayers"].includes(name);
     if (changed) animatePage(el, "view-in");
   }
 
@@ -733,6 +733,9 @@
       $("reflect-btn").textContent = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
     }
     $("reflect-again-btn").hidden = busy || !entry.can_reflect_again;
+    const TONE_WORDS = { encourage: "Written to encourage", reflect: "Written to reflect", challenge: "Written to challenge" };
+    $("reflection-tone").hidden = !done || !TONE_WORDS[entry.reflection_tone];
+    $("reflection-tone").textContent = TONE_WORDS[entry.reflection_tone] || "";
     $("reflect-again-btn").textContent = entry.admin_reflect_again ? "Reflect again (admin)" : "Reflect on your edited entry";   // one reflection per entry, unless it's been rewritten
     if (done) {
       renderVignette(entry);
@@ -773,6 +776,7 @@
       if (entry.support_note) note.innerHTML = renderSimpleMarkdown(entry.support_note);
     }
     if (entry.reflecting) pollWhileReflecting(entry.id);
+    applyHighlights(entry);
   }
 
   // ---- Kept passages -------------------------------------------------------
@@ -882,6 +886,32 @@
     }
   }
 
+  // A passage just let go of: a slim line where it was, with Undo to put it back exactly
+  // as it was (kept date, and who shared it). It stays until they leave the page.
+  function keptUndo(p, group) {
+    const row = document.createElement("p");
+    row.className = "kept-undo";
+    row.append(`Let go of ${citeText(p)}. `);
+    const undo = document.createElement("button");
+    undo.type = "button";
+    undo.className = "link-button";
+    undo.textContent = "Undo";
+    undo.addEventListener("click", async () => {
+      undo.disabled = true;
+      try {
+        await api("POST", "/api/kept", { restore: p });
+        if (state.current) for (const q of state.current.quotes || []) if (q.key === p.key) q.kept = true;
+        row.replaceWith(keptPassage(p, group));
+      } catch (err) {
+        undo.disabled = false;
+        state.clientError = `Couldn't put that passage back: ${err.message}`;
+        renderBanner();
+      }
+    });
+    row.append(undo);
+    return row;
+  }
+
   function keptPassage(p, group) {
     const fig = document.createElement("figure");
     fig.className = "kept-passage";
@@ -897,8 +927,7 @@
       try {
         await api("POST", "/api/kept", { keep: false, key: p.key });
         if (state.current) for (const q of state.current.quotes || []) if (q.key === p.key) q.kept = false;
-        showKept();
-        showNotice("No longer kept.");
+        fig.replaceWith(keptUndo(p, group));          // folds to "Let go of … · Undo", until they leave the page
       } catch (err) {
         star.disabled = false;
         state.clientError = `Couldn't release that passage: ${err.message}`;
@@ -906,29 +935,27 @@
       }
     });
     quote.append(star);
-    const where = document.createElement("p");
-    where.className = "kept-where";
-    // Scripture: "— Romans 8:28". A writer's work is already the heading above, so just the place in it.
-    // In one list (Recently kept), the whole citation, and when it was kept.
-    const place = group.flat ? `— ${citeText(p)} ` : group.scripture ? `— ${p.title}${p.location ? ` ${p.location}` : ""} `
-      : p.location ? `— ${p.location} ` : "";
-    where.append(document.createTextNode(place));
-    if (group.flat && p.kept_at) {
-      const when = document.createElement("span");
-      when.className = "kept-when";
-      when.textContent = `· ${fmtDate(p.kept_at, { month: "short", day: "numeric" })} `;
-      where.append(when);
-    }
+    // Where it's from, on the same line, as the link to read it: "— Romans 8:28 ↗".
+    // Scripture: book, chapter and verse. A writer's work is already the heading above, so
+    // just the place in it. In one list (Recently kept), the whole citation.
+    const place = group.flat ? citeText(p) : group.scripture ? `${p.title}${p.location ? ` ${p.location}` : ""}`
+      : p.location || p.title;
+    const cite = document.createElement("span");
+    cite.className = "kept-cite";
+    cite.append("— ");
     if (typeof p.url === "string" && p.url.startsWith("https://")) {
       const a = document.createElement("a");
       a.href = passageUrl(p.url, p.quote, p.location);
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.textContent = "Read the passage ↗";
-      where.append(a);
+      a.textContent = `${place} ↗`;
+      a.title = "Read the passage in context";
+      cite.append(a);
+    } else {
+      cite.append(place);
     }
-    where.append(shareLink(p));
-    fig.append(quote, where);
+    quote.append(" ", cite);
+    fig.append(quote);
     // Shared with you by a friend (instead of, or as well as, coming up in your reflections).
     for (const gift of p.shared || []) {
       const from = document.createElement("div");
@@ -947,9 +974,12 @@
       fig.append(from);
     }
     if (p.own === false) fig.classList.add("kept-gift");
+    // One line under it: "Came up in …" on the left, Share on the right.
+    const foot = document.createElement("div");
+    foot.className = "kept-foot";
+    const from = document.createElement("p");
+    from.className = "kept-entries";
     if (p.entries.length) {
-      const from = document.createElement("p");
-      from.className = "kept-entries";
       from.append(document.createTextNode("Came up in "));
       p.entries.forEach((e, i) => {
         if (i) from.append(document.createTextNode(" · "));
@@ -960,9 +990,327 @@
         b.addEventListener("click", () => openEntry(e.id));
         from.append(b);
       });
-      fig.append(from);
     }
+    const share = shareLink(p);
+    share.classList.add("share-pill");
+    foot.append(from, share);
+    fig.append(foot);
     return fig;
+  }
+
+  // ---- Highlights (and, in In His Steps, prayers) -----------------------------
+  // Selecting words in a saved entry or its reflection shows a little toolbar:
+  // Highlight (and Add prayer). A highlight is stored with the entry as its words
+  // and which occurrence of them (so it keeps its place through small edits).
+  const HL_ROOTS = { entry: () => $("entry-text"), reflection: () => $("insight") };
+
+  function textNodesOf(root) {
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const out = [];
+    while (walk.nextNode()) out.push(walk.currentNode);
+    return out;
+  }
+
+  // Wrap the nth occurrence of `text` in root (across formatting) in <mark>s.
+  function markOccurrence(root, text, nth, h) {
+    const nodes = textNodesOf(root);
+    const starts = [];
+    let full = "";
+    for (const n of nodes) { starts.push(full.length); full += n.data; }
+    let at = -1;
+    for (let i = 0; i <= nth; i++) { at = full.indexOf(text, at + 1); if (at < 0) return; }
+    const end = at + text.length;
+    nodes.forEach((n, i) => {
+      const s = starts[i], e = s + n.data.length;
+      if (e <= at || s >= end) return;
+      const a = Math.max(at, s) - s, b = Math.min(end, e) - s;
+      let piece = n;
+      if (a > 0) piece = piece.splitText(a);
+      if (b - a < piece.data.length) piece.splitText(b - a);
+      const mark = document.createElement("mark");
+      mark.className = `hl${h.prayer_id ? " prayer" : ""}`;
+      mark.dataset.hl = h.id;
+      mark.title = h.prayer_id ? "Highlighted, and on your prayer list" : "Highlighted";
+      piece.parentNode.insertBefore(mark, piece);
+      mark.append(piece);
+    });
+  }
+
+  function applyHighlights(entry) {
+    for (const [where, rootOf] of Object.entries(HL_ROOTS)) {
+      const root = rootOf();
+      if (!root) continue;
+      for (const m of root.querySelectorAll("mark.hl")) m.replaceWith(...m.childNodes);
+      root.normalize();
+      if (!entry) continue;
+      for (const h of entry.highlights || []) if (h.where === where) markOccurrence(root, h.text, h.nth || 0, h);
+    }
+  }
+
+  // What's selected, if it's words in a saved entry (not being edited) or in one
+  // paragraph of its reflection: {where, text, nth, rect}.
+  function selectedWords() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount || $("entry-view").hidden || !$("entry-editor").hidden) return null;
+    const range = sel.getRangeAt(0);
+    for (const [where, rootOf] of Object.entries(HL_ROOTS)) {
+      const root = rootOf();
+      if (!root || !root.contains(range.commonAncestorContainer)) continue;
+      if (where === "reflection") {
+        const el = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+        const p = el && el.closest("p");
+        if (!p || !p.contains(range.endContainer)) return null;
+      }
+      const raw = range.toString();
+      const text = raw.trim();
+      if (text.length < 2) return null;
+      const before = document.createRange();
+      before.selectNodeContents(root);
+      before.setEnd(range.startContainer, range.startOffset);
+      const offset = before.toString().length + (raw.length - raw.trimStart().length);
+      const full = root.textContent;
+      let nth = 0;
+      for (let i = full.indexOf(text); i >= 0 && i < offset; i = full.indexOf(text, i + 1)) nth++;
+      return { where, text, nth, rect: range.getBoundingClientRect() };
+    }
+    return null;
+  }
+
+  // Place a toolbar over a spot (under it on touch screens, clear of the phone's own menu).
+  function placeToolbar(bar, rect) {
+    bar.hidden = false;
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    const w = bar.offsetWidth, h = bar.offsetHeight;
+    const left = Math.min(Math.max(8, rect.left + rect.width / 2 - w / 2), document.documentElement.clientWidth - w - 8);
+    const top = touch ? rect.bottom + 12 : rect.top - h - 8;
+    bar.style.left = `${left + window.scrollX}px`;
+    bar.style.top = `${Math.max(4, top) + window.scrollY}px`;
+  }
+
+  function hideToolbars() { $("select-pill").hidden = true; $("highlight-menu").hidden = true; }
+
+  let picked = null;           // the selection the toolbar is for
+  let selTimer = null;
+  document.addEventListener("selectionchange", () => {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(() => {
+      picked = selectedWords();
+      if (picked) { $("highlight-menu").hidden = true; placeToolbar($("select-pill"), picked.rect); }
+      else $("select-pill").hidden = true;
+    }, 220);
+  });
+  // Buttons in a toolbar mustn't clear the selection before they act.
+  for (const bar of [$("select-pill"), $("highlight-menu")]) bar.addEventListener("mousedown", (e) => e.preventDefault());
+
+  async function highlightWords(words) {
+    const res = await api("POST", `/api/entries/${state.current.id}/highlights`,
+      { where: words.where, text: words.text, nth: words.nth });
+    state.current = res.entry;
+    applyHighlights(state.current);
+    return res.highlight;
+  }
+
+  $("select-pill").addEventListener("click", async (e) => {
+    const act = e.target.closest("button")?.dataset.act;
+    if (!act || !picked || !state.current) return;
+    const words = picked;
+    hideToolbars();
+    window.getSelection().removeAllRanges();
+    try {
+      const h = await highlightWords(words);
+      if (act === "pray") openPrayerDialog(words.text, state.current.id, h.id);
+    } catch (err) {
+      state.clientError = `Couldn't highlight that: ${sentence(err.message)}`; renderBanner();
+    }
+  });
+
+  // Clicking a highlight: Add prayer / On your prayer list / Keep passage / Remove.
+  let menuFor = null;
+  for (const rootOf of Object.values(HL_ROOTS)) {
+    rootOf().addEventListener("click", (e) => {
+      const mark = e.target.closest("mark.hl");
+      if (!mark || !window.getSelection().isCollapsed || !state.current) return;
+      const h = (state.current.highlights || []).find((x) => x.id === mark.dataset.hl);
+      if (!h) return;
+      menuFor = h;
+      const menu = $("highlight-menu");
+      const pray = menu.querySelector('[data-act="pray"]'), onList = menu.querySelector('[data-act="prayers"]');
+      if (pray) pray.hidden = !!h.prayer_id;
+      if (onList) onList.hidden = !h.prayer_id;
+      menu.querySelector('[data-act="keep"]').hidden = !quoteFor(h);
+      $("select-pill").hidden = true;
+      placeToolbar(menu, mark.getBoundingClientRect());
+      e.stopPropagation();
+    });
+  }
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#highlight-menu, #select-pill, mark.hl")) $("highlight-menu").hidden = true;
+  });
+
+  // A highlight that is (part of) one of the reflection's checked quotes, not yet kept: offer to keep it.
+  function quoteFor(h) {
+    if (h.where !== "reflection" || !state.current) return null;
+    const norm = (s) => String(s || "").replace(/[“”"]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+    const words = norm(h.text);
+    const i = (state.current.quotes || []).findIndex((q) => !q.kept && q.quote
+      && (norm(q.quote).includes(words) || words.includes(norm(q.quote))));
+    return i < 0 ? null : { index: i, quote: state.current.quotes[i] };
+  }
+
+  $("highlight-menu").addEventListener("click", async (e) => {
+    const act = e.target.closest("button")?.dataset.act;
+    const h = menuFor;
+    if (!act || !h || !state.current) return;
+    $("highlight-menu").hidden = true;
+    try {
+      if (act === "remove") {
+        const res = await api("DELETE", `/api/entries/${state.current.id}/highlights/${h.id}`);
+        state.current = res.entry;
+        applyHighlights(state.current);
+      } else if (act === "pray") {
+        openPrayerDialog(h.text, state.current.id, h.id);
+      } else if (act === "prayers") {
+        showPrayers();
+      } else if (act === "keep") {
+        const found = quoteFor(h);
+        if (!found) return;
+        await api("POST", "/api/kept", { keep: true, entry_id: state.current.id, index: found.index });
+        found.quote.kept = true;
+        renderReflection(state.current);
+        showNotice("Kept. Find it in Kept passages.");
+      }
+    } catch (err) {
+      state.clientError = `Couldn't do that: ${sentence(err.message)}`; renderBanner();
+    }
+  });
+
+  // ---- The prayer list (In His Steps) -------------------------------------------
+  let prayerFor = null;        // {entry_id, highlight_id} the prayer box is adding for
+  let loadPrayers = null;      // set below, In His Steps only
+  function showPrayers() { if (loadPrayers) loadPrayers(); }
+  function openPrayerDialog(text, entryId, highlightId) {
+    if (!$("prayer-dialog")) return;
+    prayerFor = { entry_id: entryId || null, highlight_id: highlightId || null };
+    $("prayer-text").value = text || "";
+    $("prayer-error").hidden = true;
+    $("prayer-dialog").showModal();
+    $("prayer-text").focus();
+  }
+
+  if ($("prayer-dialog")) {
+    $("prayer-cancel").addEventListener("click", () => $("prayer-dialog").close());
+    $("prayer-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const res = await api("POST", "/api/prayers", { text: $("prayer-text").value, ...prayerFor });
+        $("prayer-dialog").close();
+        if (res.entry && state.current && res.entry.id === state.current.id) {
+          state.current = res.entry;
+          applyHighlights(state.current);
+        }
+        if (!$("prayers-view").hidden) showPrayers();
+        else showNotice("Added to your prayer list.");
+      } catch (err) {
+        $("prayer-error").textContent = sentence(err.message);
+        $("prayer-error").hidden = false;
+      }
+    });
+    $("prayers-btn").addEventListener("click", showPrayers);
+    $("prayers-back-btn").addEventListener("click", leaveSettings);
+    $("prayer-add-btn").addEventListener("click", () => openPrayerDialog("", null, null));
+
+    let answering = null;
+    $("answered-cancel").addEventListener("click", () => $("answered-dialog").close());
+    $("answered-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        await api("POST", `/api/prayers/${answering.id}`, { answered: true, note: $("answered-note").value });
+        $("answered-dialog").close();
+        showPrayers();
+      } catch (err) { state.clientError = `Couldn't save that: ${sentence(err.message)}`; renderBanner(); }
+    });
+
+    function prayerItem(p) {
+      const li = document.createElement("li");
+      li.className = `prayer-item${p.answered_at ? " answered" : ""}`;
+      const text = document.createElement("p");
+      text.className = "prayer-text";
+      text.textContent = p.text;
+      const meta = document.createElement("p");
+      meta.className = "prayer-meta";
+      const day = (iso) => fmtDate(iso, { month: "short", day: "numeric", year: "numeric" });
+      meta.append(p.answered_at ? `Answered ${day(p.answered_at)} · prayed since ${day(p.added_at)}` : `Added ${day(p.added_at)}`);
+      if (p.entry) {
+        meta.append(" · from ");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = p.entry.title || day(p.entry.created_at);
+        b.title = "Turn to this entry";
+        b.addEventListener("click", () => openEntry(p.entry.id));
+        meta.append(b);
+      }
+      li.append(text, meta);
+      if (p.answer_note) {
+        const note = document.createElement("p");
+        note.className = "prayer-note";
+        note.textContent = p.answer_note;
+        li.append(note);
+      }
+      const actions = document.createElement("div");
+      actions.className = "prayer-actions";
+      const button = (label, fn) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = label;
+        b.addEventListener("click", fn);
+        actions.append(b);
+      };
+      if (!p.answered_at) {
+        button("Answered", () => {
+          answering = p;
+          $("answered-prayer").textContent = p.text;
+          $("answered-note").value = "";
+          $("answered-dialog").showModal();
+        });
+      } else {
+        button("Still praying", async () => {
+          await api("POST", `/api/prayers/${p.id}`, { answered: false });
+          showPrayers();
+        });
+      }
+      button("Remove", async () => {
+        if (!confirm("Remove this prayer from your list?")) return;
+        await api("DELETE", `/api/prayers/${p.id}`);
+        if (state.current && p.entry && p.entry.id === state.current.id) {
+          for (const h of state.current.highlights || []) if (h.prayer_id === p.id) h.prayer_id = null;
+        }
+        showPrayers();
+      });
+      li.append(actions);
+      return li;
+    }
+
+    loadPrayers = async () => {
+      hideToolbars();
+      showView("prayers");
+      let list;
+      try {
+        list = (await api("GET", "/api/prayers")).prayers;
+      } catch (err) {
+        state.clientError = `Couldn't load your prayer list: ${sentence(err.message)}`; renderBanner();
+        return;
+      }
+      const open = list.filter((p) => !p.answered_at), answered = list.filter((p) => p.answered_at);
+      $("prayer-open").replaceChildren(...open.map(prayerItem));
+      if (!open.length) {
+        const li = document.createElement("li");
+        li.className = "subtle";
+        li.textContent = answered.length ? "Nothing waiting just now." : "Nothing here yet. Add a prayer, or highlight words in an entry and choose Add prayer.";
+        $("prayer-open").append(li);
+      }
+      $("prayer-answered-heading").hidden = !answered.length;
+      $("prayer-answered").replaceChildren(...answered.map(prayerItem));
+    };
   }
 
   // ---- Sharing a passage -----------------------------------------------------
@@ -3286,6 +3634,16 @@
       return asked || sessionStorage.getItem("journal.feedbackOnStart");
     } catch (_) { return asked; }
   })();
+
+  // "Written to …" under a reflection: Settings → Basic, at the Tone switch.
+  $("reflection-tone").addEventListener("click", async () => {
+    state.settingsTab = "basic";
+    await showSettings();
+    const tone = document.querySelector(".tone-choice");
+    if (!tone) return;
+    tone.scrollIntoView({ block: "center", behavior: "smooth" });
+    tone.classList.remove("just-shown"); void tone.offsetWidth; tone.classList.add("just-shown");
+  });
 
   // Signing in with an emailed code: any address that's been invited.
   if ($("email-signin-open")) {

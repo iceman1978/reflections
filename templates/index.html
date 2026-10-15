@@ -220,6 +220,13 @@
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><polygon stroke-width="1.5" points="12.2,5.2 13.3,8.2 16.6,8.4 14.1,10.4 14.9,13.5 12.2,11.8 9.5,13.5 10.3,10.4 7.8,8.4 11.1,8.2"/></g></svg>
           <span class="menu-label">Kept passages</span>
         </button>
+        {% if edition.prayer_list %}
+        <button id="prayers-btn" class="icon-btn lock-btn" title="Prayer list" aria-label="Prayer list">
+          <!-- A candle -->
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M9 11h6v10H9z"/><path d="M12 11V9"/><path d="M12 2.5c1.6 1.8 2.2 3 2.2 4.1a2.2 2.2 0 0 1-4.4 0c0-1.1.6-2.3 2.2-4.1z"/></g></svg>
+          <span class="menu-label">Prayer list</span>
+        </button>
+        {% endif %}
         {% if hosted %}
         <button id="invite-btn" class="icon-btn lock-btn" title="Invite someone" aria-label="Invite someone">
           <!-- A giving hand: "hand-heart" from Lucide (lucide.dev, ISC licence) -->
@@ -359,6 +366,8 @@
           <ul id="citations" class="citations"></ul>   <!-- the reflection's sources, right under its text -->
           <p id="question" class="question"></p>
           <div class="reflection-footer">
+            <!-- The tone it was written in; opens Settings → Basic at the Tone switch -->
+            <button id="reflection-tone" type="button" class="reflection-tone" title="Change the tone for future reflections" hidden></button>
             <!-- Only after the entry's text has changed materially since its reflection -->
             <button id="reflect-again-btn" class="quiet" hidden>Reflect on your edited entry</button>
           </div>
@@ -382,6 +391,21 @@
       </div>
       <div id="kept-list" class="kept-list"></div>
     </section>
+
+    {% if edition.prayer_list %}
+    <section id="prayers-view" class="page" hidden>
+      <nav class="entry-nav write-nav" aria-label="Back">
+        <button id="prayers-back-btn" type="button" class="nav-btn">‹ Back to your journal</button>
+      </nav>
+      <h1 class="prompt-heading">Prayer list</h1>
+      <p class="subtle kept-intro">What you're praying for. Add a prayer here, or by highlighting words in an entry or its
+        reflection. Mark one answered and it moves to <em>Answered prayers</em>, a record to look back on.</p>
+      <p><button type="button" id="prayer-add-btn" class="share-link share-pill">+ Add a prayer</button></p>
+      <ul id="prayer-open" class="prayer-list"></ul>
+      <h2 id="prayer-answered-heading" class="prayer-answered-heading" hidden>Answered prayers</h2>
+      <ul id="prayer-answered" class="prayer-list"></ul>
+    </section>
+    {% endif %}
 
     <!-- Settings -->
     <section id="settings-view" class="page settings-page" hidden>
@@ -841,6 +865,45 @@
   </dialog>
   {% endif %}
 
+  <!-- Selecting words in a saved entry or its reflection: highlight them (and, in In His Steps, pray about them) -->
+  <div id="select-pill" class="select-pill" role="toolbar" aria-label="Selected words" hidden>
+    <button type="button" data-act="highlight">Highlight</button>
+    {% if edition.prayer_list %}<button type="button" data-act="pray">Add prayer</button>{% endif %}
+  </div>
+  <div id="highlight-menu" class="select-pill" role="toolbar" aria-label="Highlight" hidden>
+    {% if edition.prayer_list %}<button type="button" data-act="pray">Add prayer</button>
+    <button type="button" data-act="prayers" hidden>On your prayer list</button>{% endif %}
+    <button type="button" data-act="keep" hidden>Keep passage</button>
+    <button type="button" data-act="remove">Remove</button>
+  </div>
+  {% if edition.prayer_list %}
+  <dialog id="prayer-dialog" class="dialog feedback-dialog" aria-labelledby="prayer-dialog-title">
+    <form id="prayer-form" novalidate>
+      <h2 id="prayer-dialog-title">Add to your prayer list</h2>
+      <label class="feedback-label" for="prayer-text">The prayer</label>
+      <textarea id="prayer-text" class="feedback-text" maxlength="500" rows="3" placeholder="e.g. Dad's surgery on Thursday"></textarea>
+      <p class="subtle feedback-note">Shorten it if you like. It stays private, encrypted like your entries.</p>
+      <p id="prayer-error" class="wipe-error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="prayer-cancel">Cancel</button>
+        <button type="submit" class="primary">Add</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="answered-dialog" class="dialog feedback-dialog" aria-labelledby="answered-title">
+    <form id="answered-form" novalidate>
+      <h2 id="answered-title">Answered</h2>
+      <p id="answered-prayer" class="prayer-quote"></p>
+      <label class="feedback-label" for="answered-note">How was it answered? <span class="subtle">(optional)</span></label>
+      <textarea id="answered-note" class="feedback-text" maxlength="1000" rows="3"></textarea>
+      <div class="dialog-buttons">
+        <button type="button" id="answered-cancel">Cancel</button>
+        <button type="submit" class="primary">Mark answered</button>
+      </div>
+    </form>
+  </dialog>
+  {% endif %}
+
   {% if edition.sample %}{% set sample = edition.sample %}
   <dialog id="sample-dialog" class="sample-dialog" aria-labelledby="sample-title">
    <article class="page sample-page">
@@ -877,6 +940,7 @@
     credit: {{ edition.credit | default({"one": "credit", "many": "credits"}) | tojson }},
     userName: {{ user_name | tojson }},
     bibleTranslation: {{ bible_translation | tojson }},
+    prayerList: {{ (edition.prayer_list or false) | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},
     photoBlur: {{ photo_blur | int }},
