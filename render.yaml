@@ -16,7 +16,7 @@ services:
       - key: EDITION
         value: philosophy     # the app name and content come from editions/philosophy/
       - key: PUBLIC_HOST
-        value: reflections-j7o5.onrender.com
+        value: welllived.app  # the custom domain; the old Render address forwards here
       - key: TIMEZONE
         value: America/Toronto
       - key: REFLECTIONS_PER_DAY
