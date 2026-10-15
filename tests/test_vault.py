@@ -482,6 +482,86 @@ class InviteTests(unittest.TestCase):
         with self.assertRaises(invites.InviteProblem):
             invites.add("u-ann", "ann@example.com", "Ann", "one-too-many@gmail.com")  # daily cap
 
+    def test_invite_lets_them_in_and_emails_them(self):
+        from unittest import mock
+        from journal import invites
+        req = invites.add("u-ann", "ann@example.com", "Ann", "sam@gmail.com", "Sam", "my cousin, keep this between us")
+        self.assertFalse(invites.allowed("sam@gmail.com"))
+        with mock.patch("journal.mail.send") as send:
+            inv, problem = invites.admit(req["id"], "https://inhissteps.app/")
+        self.assertIsNone(problem)
+        self.assertEqual(inv["status"], "added")
+        self.assertTrue(inv["emailed_at"])
+        self.assertTrue(invites.allowed("SAM@gmail.com"))                   # straight away, no redeploy
+        to, subject, text, html = send.call_args.args
+        self.assertEqual(to, "sam@gmail.com")
+        self.assertIn("Ann invited you", subject)
+        self.assertIn("https://inhissteps.app/", text)
+        self.assertNotIn("cousin", text + html)                             # the note was for whoever runs the app
+
+    def test_invite_directly_with_a_message(self):
+        from unittest import mock
+        from journal import invites
+        with mock.patch("journal.mail.send") as send:
+            inv, problem = invites.invite("u-ann", "ann@example.com", "Ann", " Pat@Gmail.com ", "Pat",
+                                          "Thought of you <3", "https://inhissteps.app/")
+        self.assertIsNone(problem)
+        self.assertTrue(invites.allowed("pat@gmail.com"))
+        html = send.call_args.args[3]
+        self.assertIn("Thought of you &lt;3", html)                          # escaped
+        with self.assertRaises(invites.InviteProblem):
+            invites.invite("u-ann", "ann@example.com", "Ann", "not an email")
+
+    def test_without_an_email_service_they_are_still_let_in(self):
+        from journal import invites
+        with mock_env(RESEND_API_KEY=None):
+            inv, problem = invites.invite("u-ann", "ann@example.com", "Ann", "lee@gmail.com")
+        self.assertIn("RESEND_API_KEY", problem)
+        self.assertEqual(inv["status"], "added")
+        self.assertIsNone(inv["emailed_at"])
+
+    def test_anyone_may_sign_in_only_while_there_is_no_list(self):
+        from journal import invites
+        config.ALLOWED_EMAILS.clear()
+        self.assertTrue(invites.allowed("stranger@gmail.com"))
+        invites.invite("u-ann", "ann@example.com", "Ann", "first@gmail.com")
+        self.assertFalse(invites.allowed("stranger@gmail.com"))
+        self.assertTrue(invites.allowed("first@gmail.com"))
+
+
+    def test_the_server_list_moves_into_the_app(self):
+        from journal import invites
+        self.assertEqual(invites.import_allowed(), 2)
+        self.assertEqual(invites.import_allowed(), 0)                           # once each
+        config.ALLOWED_EMAILS.clear()                                          # the server's list emptied
+        self.assertTrue(invites.allowed("ann@example.com"))
+        self.assertFalse(invites.allowed("stranger@gmail.com"))
+        self.assertTrue(invites.remove("friend-in@example.com"))
+        self.assertFalse(invites.allowed("friend-in@example.com"))
+        self.assertEqual([p["email"] for p in invites.people()], ["ann@example.com"])
+
+    def test_removing_someone_still_on_the_server_list_says_so(self):
+        from journal import invites
+        invites.import_allowed()
+        self.assertFalse(invites.remove("ann@example.com"))
+        self.assertTrue(next(p for p in invites.people() if p["email"] == "ann@example.com")["on_server"])
+
+
+def mock_env(**values):
+    """Set (or, with None, remove) environment variables for a `with` block."""
+    from unittest import mock
+    clean = {k: v for k, v in values.items() if v is not None}
+    patcher = mock.patch.dict(os.environ, clean)
+    class _Env:
+        def __enter__(self):
+            patcher.start()
+            for k, v in values.items():
+                if v is None:
+                    os.environ.pop(k, None)
+        def __exit__(self, *exc):
+            patcher.stop()
+    return _Env()
+
 
 class UpgradeTests(unittest.TestCase):
     """A single-person encrypted journal (before accounts) becomes the 'local' user."""

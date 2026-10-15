@@ -1032,6 +1032,15 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .invite-status.added { background: #e3f1df; border-color: #8fbf82; color: #2d5a22; }
 .invite-status.declined { text-decoration: line-through; }
 .invite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Settings → Invitations: invite someone directly. */
+.invite-direct { display: grid; gap: 8px; margin: 0 0 14px; }
+.invite-direct textarea.invite-input { resize: vertical; font: inherit; }
+.invite-direct button { justify-self: start; }
+.invite-direct .subtle { margin: 0; }
+.invite-emailed { font-size: 0.8rem; color: var(--muted); }
+.feedback-list li.access-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; }
+.access-row span:first-child { overflow-wrap: anywhere; }
+.access-row button { margin-left: auto; }
 .invite-actions button { font-size: 0.85rem; padding: 2px 10px; }
 
 /* test-web.bat only: makes the test copy unmistakable */
@@ -1181,7 +1190,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .brand-name.long-name { font-size: calc(var(--name-size) * 0.74); white-space: nowrap; }   /* "A Life Well Lived" on one line */
 .brand-tagline { font-family: var(--serif); font-size: 1.05rem; letter-spacing: 0.16em; text-transform: uppercase; margin: 0; opacity: 0.8; }
 .brand-name { font-family: var(--hand); font-weight: 500; word-spacing: 0.25em; font-size: var(--name-size); line-height: 1; margin: 0; }
-.landing-lead { font-size: 1.25rem; line-height: 1.45; margin: 0; max-width: 560px; opacity: 0.95; }
+.landing-lead { font-size: 1.4rem; line-height: 1.45; margin: 0; max-width: 560px; opacity: 0.95; }
 .landing-points { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(10px, 1.8vh, 18px); max-width: 560px; }
 .landing-points li { display: flex; gap: 14px; align-items: flex-start; }
 .landing-points svg {
@@ -1195,23 +1204,72 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.landing-points strong { display: block; font-weight: 600; font-size: 1.05rem; line-height: 1.35; }
-.landing-points span { display: block; font-size: 0.92rem; line-height: 1.5; opacity: 0.78; }
+.landing-points strong { display: block; font-weight: 600; font-size: 1.15rem; line-height: 1.35; }
+.landing-points span { display: block; font-size: 1.02rem; line-height: 1.5; opacity: 0.85; }
 .landing-points a { color: inherit; white-space: nowrap; text-underline-offset: 2px; }
-.landing-promises { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 560px; font-size: 0.9rem; line-height: 1.45; opacity: 0.85; }
+.landing-promises { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-width: 560px; font-size: 1rem; line-height: 1.45; opacity: 0.9; }
 .landing-promises li { position: relative; padding-left: 22px; }
 .landing-promises li::before { content: "✓"; position: absolute; left: 0; top: 0; font-weight: 700; opacity: 0.9; }
 /* "Read a sample reflection": a quiet link on the welcome page, the sample in a dialog. */
-.sample-link, .sample-link:hover:not(:disabled) { justify-self: start; padding: 0; border: none; background: none; color: inherit; font-size: 0.95rem; text-decoration: underline; text-underline-offset: 3px; opacity: 0.95; }
-.dialog.sample-dialog { max-width: 620px; max-height: calc(100vh - 48px); overflow-y: auto; padding: 26px 32px 22px; position: relative; text-align: left; }
-.sample-dialog .reflection { margin: 18px 0 10px; }
-.sample-kicker { margin: 0 0 2px; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.dialog.sample-dialog .entry-title { margin: 0 0 8px; font-size: 2rem; }
-.sample-dialog .reflection { animation: none; }   /* shown whole at once, not faded in like a new reflection */
-.sample-more { margin: -4px 0 0; color: var(--muted); }
+/* On the welcome page: a little page from the journal, lying a touch askew,
+   with its ribbon. It straightens and lifts under the pointer. */
+.sample-card, .sample-card:hover:not(:disabled) {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 12px;
+  padding: 4px 0 0; border: none; background: none; color: inherit; text-align: left; cursor: pointer;
+}
+.sample-mini {
+  position: relative; display: flex; flex-direction: column; gap: 6px;
+  width: min(100%, 320px); height: 196px; overflow: hidden;
+  padding: 18px 22px 0 28px; border-radius: 2px 6px 6px 2px;
+  background-color: var(--page); color: var(--ink);
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.09), rgba(0, 0, 0, 0.02) 16px, transparent 24px);   /* the binding */
+  box-shadow: 1px 1px 0 var(--page-edge), 3px 3px 0 var(--page-edge), 5px 5px 0 var(--page-edge),
+              7px 7px 0 1px hsl(var(--hue) calc(var(--sat) * 0.7) 24%), 10px 16px 30px -8px rgba(0, 0, 0, 0.45);
+  transform: rotate(-1.5deg);
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+}
+.sample-card:hover .sample-mini, .sample-card:focus-visible .sample-mini { transform: rotate(0deg) translateY(-3px); }
+.sample-card:focus-visible { outline: none; }
+.sample-card:focus-visible .sample-mini { outline: 2px solid hsl(var(--paper-hue) 40% 94%); outline-offset: 4px; }
+.sample-mini-ribbon { position: absolute; top: 0; right: 18px; line-height: 0; }
+.sample-mini-ribbon svg { width: 16px; height: 26px; }
+.sample-mini-ribbon path { fill: var(--accent); }
+.sample-mini-title { font-family: var(--hand); font-size: 1.35rem; line-height: 1.3; color: var(--accent); padding-right: 22px; }
+.sample-mini-vignette {
+  display: block; width: 100%; height: 64px; flex: none; background: var(--accent); opacity: 0.85;
+  -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
+}
+.sample-mini-text {
+  font-size: 0.85rem; line-height: 1.5;
+  -webkit-mask: linear-gradient(to bottom, #000 30%, transparent 85%); mask: linear-gradient(to bottom, #000 30%, transparent 85%);
+}
+.sample-card-caption { font-size: 0.95rem; text-decoration: underline; text-underline-offset: 3px; opacity: 0.95; }
+
+/* The whole sample: a page of the journal, which turns open from the spine. */
+.sample-dialog {
+  /* The same width as the journal's own pages: the book's 800px, less its side
+     padding and the page edges and cover that stick out on the right. */
+  width: min(100%, 800px); max-width: none; max-height: calc(100vh - 32px); overflow-y: auto;
+  padding: 6px calc(16px + 15px) 30px 16px; border: none; background: transparent; color: var(--ink);
+  scrollbar-width: none;   /* scrolls by wheel and touch; a scrollbar would make the page narrower than the journal's */
+}
+.sample-dialog::backdrop { background: rgba(30, 24, 18, 0.5); backdrop-filter: blur(2px); }
+.sample-page { text-align: left; }
+.sample-page .entry-date { margin: 0 0 2px; }
+.sample-page .entry-title { margin: 0 0 8px; padding-right: 64px; }
+.sample-page .reflection { margin: 18px 0 10px; animation: none; }   /* shown whole at once, not faded in like a new reflection */
+.sample-page .sample-ribbon { right: 56px; pointer-events: none; }   /* beside the ×, on phones too */
+.sample-ribbon path { fill: var(--accent); opacity: 1; }
 .sample-note { margin: 8px 0 0; }
 .sample-close, .sample-close:hover:not(:disabled) { position: absolute; top: 10px; right: 12px; padding: 2px 8px; border: none; background: none; font-size: 1.5rem; line-height: 1; color: var(--muted); }
-@media (max-width: 640px) { .sample-dialog { padding: 22px 18px 18px; } }
+.sample-page.opening { animation: turn-to-older 0.6s cubic-bezier(0.3, 0.6, 0.3, 1); transform-origin: left center; }
+.sample-page.closing { animation: turn-away 0.45s cubic-bezier(0.5, 0.1, 0.7, 0.6) forwards; transform-origin: left center; }
+.sample-page.opening, .sample-page.closing { box-shadow: 0 1px 2px var(--shadow), 6px 10px 24px -8px var(--shadow); }
+@media (max-width: 640px) {
+  .sample-dialog { padding: 4px calc(16px + 9px) 24px 16px; }
+  .sample-page .entry-title { font-size: 1.9rem; }
+  .sample-mini { width: 100%; height: 170px; }
+}
 .landing-quote { margin: 6px 0 0; padding-left: 16px; border-left: 2px solid hsl(var(--hue) calc(var(--sat) + 20%) 78% / 0.6); max-width: 560px; }
 .landing-quote blockquote { margin: 0; font-family: var(--hand); font-size: 2rem; line-height: 1.35; }
 .landing-quote figcaption { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }

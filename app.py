@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, library, migrate, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -94,7 +94,7 @@ def _signed_in_user():
     if not uid:
         return None
     user = users.get(uid)
-    if not user or (config.ALLOWED_EMAILS and (user["email"] or "").lower() not in config.ALLOWED_EMAILS):
+    if not user or not invites.allowed(user["email"]):
         session.clear()  # removed from the allowed list since signing in
         return None
     return uid
@@ -169,7 +169,7 @@ def _static_versions():
         version = int(path.stat().st_mtime) if path.exists() else 0
         return f"/static/{filename}?v={version}"
     return {"static_url": static_url, "app_name": config.APP_NAME, "copyright": config.COPYRIGHT, "app_version": config.APP_VERSION, "test_login": bool(HOSTED and TEST_LOGIN),
-            "test_emails": sorted(config.ALLOWED_EMAILS),
+            "test_emails": sorted(invites.access_list()) if HOSTED and TEST_LOGIN else [],
             "logo_url": _brand_file("logo"), "logo_mask_url": _brand_file("logo-mask"), "hero_url": _brand_file("hero"),
             "has_icons": (BRAND_DIR / "icon-192.png").exists(), "theme_colour": THEME_COLOUR,
             "edition": config.EDITION, "brand_url": BRAND_URL, "themes_enabled": bool(themes.THEMES), "brand_path": f"brands/{config.EDITION_NAME}"}
@@ -238,6 +238,7 @@ def index():
         "index.html",
         hosted=HOSTED,
         is_admin=_is_admin(uid),
+        mail_ready=mail.ready(),
         user_name=prefs["user_name"],
         journal_name=prefs["journal_name"] or config.APP_NAME,
         autosave_seconds=prefs["draft_autosave_seconds"],
@@ -375,7 +376,7 @@ def login():
 
 def _sign_in(sub, email, name):
     email = (email or "").lower()
-    if config.ALLOWED_EMAILS and email not in config.ALLOWED_EMAILS:
+    if not invites.allowed(email):
         log.info("Sign-in refused for an address that isn't on the allowed list")
         return redirect("/?signin=not-allowed")
     uid = users.from_google(sub, email, name)
@@ -1114,6 +1115,68 @@ def all_invites():
     return jsonify(invites.all_requests())
 
 
+def _site_url():
+    """The address invitations link to."""
+    return f"https://{config.PUBLIC_HOST}/" if config.PUBLIC_HOST else request.url_root
+
+
+def _invited(inv, problem):
+    if problem:
+        log.info("Invitation #%d: access given, email not sent", inv["id"])
+        return jsonify(ok=True, invite=inv, warning=f"They can sign in now, but the email wasn't sent. {problem}")
+    log.info("Invitation #%d: access given and emailed", inv["id"])
+    return jsonify(ok=True, invite=inv)
+
+
+@app.post("/api/admin/invites")
+def invite_directly():
+    """Let someone in and email them an invitation, without a request first."""
+    if (resp := _need_admin()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    user = users.get(g.user_id) or {}
+    try:
+        inv, problem = invites.invite(g.user_id, user.get("email"), users.prefs(g.user_id)["user_name"] or user.get("name"),
+                                      data.get("email"), data.get("name"), data.get("message"), _site_url())
+    except invites.InviteProblem as e:
+        return jsonify(error=str(e)), 400
+    return _invited(inv, problem)
+
+
+@app.post("/api/admin/invites/<int:invite_id>/invite")
+def invite_request(invite_id):
+    """Let the person in a request in, and email them (again, if they were)."""
+    if (resp := _need_admin()):
+        return resp
+    try:
+        inv, problem = invites.admit(invite_id, _site_url())
+    except KeyError:
+        return jsonify(error="Not found"), 404
+    return _invited(inv, problem)
+
+
+@app.get("/api/admin/access")
+def who_has_access():
+    if (resp := _need_admin()):
+        return resp
+    return jsonify(invites.people())
+
+
+@app.delete("/api/admin/access")
+def remove_access():
+    if (resp := _need_admin()):
+        return resp
+    email = ((request.get_json(silent=True) or {}).get("email") or "").strip().lower()
+    user = users.get(g.user_id) or {}
+    if email == (user.get("email") or "").lower():
+        return jsonify(error="That's you: you'd be locked out."), 400
+    if not invites.remove(email):
+        return jsonify(ok=True, warning="Removed here, but ALLOWED_EMAILS on Render still lets them in. "
+                                        "Take them off that list too.")
+    log.info("Access removed for an address")
+    return jsonify(ok=True)
+
+
 @app.post("/api/admin/invites/<int:invite_id>")
 def invite_status(invite_id):
     if (resp := _need_admin()):
@@ -1136,7 +1199,7 @@ def usage_stats():
     if (resp := _need_admin()):
         return resp
     stats = activity.summary()
-    stats["invited"] = len(config.ALLOWED_EMAILS) if HOSTED else None
+    stats["invited"] = len(invites.access_list()) if HOSTED else None
     stats["tokens"] = tokens.summary()                 # average tokens per call to Claude, last 30 days
     return jsonify(stats)
 
@@ -1229,6 +1292,8 @@ def main():
 if HOSTED and __name__ != "__main__":
     # Running under gunicorn on the server.
     vault.start_auto_lock()
+    if (copied := invites.import_allowed()):
+        log.info("Copied %d address(es) from ALLOWED_EMAILS into the invite list", copied)
     log.info("Journal started (hosted%s)", ", TEST SIGN-IN ENABLED" if TEST_LOGIN else "")
 
 if __name__ == "__main__":

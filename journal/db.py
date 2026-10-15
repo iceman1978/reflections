@@ -50,7 +50,9 @@ CREATE TABLE IF NOT EXISTS activity (user_id TEXT NOT NULL, day TEXT NOT NULL, e
                                     PRIMARY KEY (user_id, day));
 CREATE TABLE IF NOT EXISTS invites  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL,
                                     requester_email TEXT, requester_name TEXT, email TEXT NOT NULL, name TEXT,
-                                    note TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'requested');
+                                    note TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'requested',
+                                    message TEXT, emailed_at TEXT);
+CREATE TABLE IF NOT EXISTS access   (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT NOT NULL,
                                     prf_salt TEXT NOT NULL, key_wrapped TEXT NOT NULL,
                                     created_at TEXT NOT NULL, last_used_at TEXT);
@@ -59,6 +61,10 @@ CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
                                     name TEXT, created_at TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL,
                                     screen TEXT, device TEXT, done INTEGER NOT NULL DEFAULT 0);
 """
+
+# Columns added to existing tables after they were first made (CREATE TABLE IF
+# NOT EXISTS leaves an old table as it was): (table, column, type).
+ADDED_COLUMNS = (("invites", "message", "TEXT"), ("invites", "emailed_at", "TEXT"))
 
 LOCAL_USER = "local"
 
@@ -115,6 +121,9 @@ def _prepare(con, path):
         _upgrade_from_v1(con, path)
     con.executescript(SCHEMA)
     with con:
+        for table, column, kind in ADDED_COLUMNS:            # columns added since a table was first made
+            if column not in _columns(con, table):
+                con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
         con.execute("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)", (str(SCHEMA_VERSION),))
 
 

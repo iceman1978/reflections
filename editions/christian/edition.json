@@ -18,17 +18,17 @@
   "description": "A private journal for your daily quiet time, with a reflection from Scripture after every entry.",
   "theme_colour": "#2a4865",
   "default_colour_theme": "lake",
-  "lead": "A quiet place for reflection, drawing on deep Christian wisdom.",
+  "lead": "A quiet place for reflection, drawing on trusted Christian wisdom.",
   "points": [
     {"icon": "calendar", "title": "A few lines are enough",
      "text": "The benefit of journaling comes from reflecting each day. A prompt is there when the page feels blank."},
     {"icon": "book", "title": "A well-stocked library of Christian wisdom",
-     "text": "Reflections draw <em>only</em> on selected books of Scripture and classic devotional writers such as Augustine, Brother Lawrence, Bunyan, Wesley, Spurgeon and Andrew Murray, and tell you exactly where to find each passage.",
+     "text": "Reflections draw on books of Scripture and a range of devotional writers from every era, and tell you exactly where to find each passage.",
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "sandal", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry through your day. Easily find favorite entries and passages."},
     {"icon": "lock", "title": "Private, and never used to train AI",
-     "text": "Entries are encrypted with a passphrase <em>only you know</em>. Your entry is only used to write your daily reflection, and isn’t used to train AI.",
+     "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "welcome_quote": {
@@ -37,8 +37,8 @@
   },
   "promises": [
     "Every verse checked, word for word, with a link to read it in context.",
-    "A companion for quiet contemplation, pointing you to Scripture, to prayer, and to the words of Jesus.",
-    "Made to deepen your prayer and your quiet time, never to stand in for them or for your pastor."
+    "A companion for quiet contemplation, pointing you to Scripture and prayer.",
+    "Made to deepen your prayer and your quiet time, never to stand in for them."
   ],
   "sample": {
     "link_text": "Read a sample reflection",
@@ -47,12 +47,13 @@
     "theme": "prayer",
     "paragraphs": [
       "Two minutes of real quiet, before the house wakes up, is not nothing. Your mind ran to the meeting, the groceries and the unanswered email because those things matter to you and you are carrying them. That is not a failure of devotion. It may be the most honest prayer list you have.",
-      "Jesus, teaching on the hillside, said this about the pull of the day ahead: <em>“Therefore do not worry about tomorrow, for tomorrow will worry about itself. Today has enough trouble of its own.”</em> He did not say the day's trouble is imaginary. He said each day has its own, and that is enough to be getting on with. Maybe the morning doesn't need you to empty your head first. Maybe it needs you to hand the day over piece by piece. Say it out loud if you can: Lord, the ten o'clock meeting; Lord, that email I'm dreading; Lord, what we'll eat tonight. Then the list stops being what is crowding out prayer and becomes the prayer itself."
+      "Jesus, teaching on the hillside, said this about the pull of the day ahead: <em>“Therefore do not worry about tomorrow, for tomorrow will worry about itself. Today has enough trouble of its own.”</em> He did not say the day's trouble is imaginary. He said each day has its own, and that is enough to be getting on with. Maybe the morning doesn't need you to empty your head first. Maybe it needs you to hand the day over piece by piece. Say it out loud if you can: Lord, the ten o'clock meeting; Lord, that email I'm dreading; Lord, what we'll eat tonight. Then the list stops being what is crowding out prayer and becomes the prayer itself.",
+      "<strong>Eugene Peterson</strong> wrote of discipleship as a long obedience in the same direction, which suggests that faithfulness is built from many ordinary mornings, most of them unremarkable, and not from the ones that feel like a retreat. A morning with children asleep upstairs and a mind running ahead can still be one of those."
     ],
     "cite": "Matthew 6:34",
     "cite_url": "https://biblehub.com/bsb/matthew/6.htm#:~:text=Therefore%20do%20not%20worry,of%20its%20own",
     "question": "If you named the meeting, the groceries and the email to God one at a time tomorrow morning, which one would be hardest to hand over, and what does that tell you about what you're carrying?",
-    "note": "A real reflection from In His Steps, shortened. The full one also draws on Eugene Peterson."
+    "note": "A real reflection from In His Steps, as it was written."
   },
   "check_example": {
     "intro": "For example, if a reflection quotes Ecclesiastes 11:4 in the wording of another translation (the ESV):",

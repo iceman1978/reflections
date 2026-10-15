@@ -35,6 +35,8 @@ services:
         sync: false
       - key: ADMIN_EMAILS        # who can read feedback (Settings → Feedback received): your address
         sync: false
+      - key: RESEND_API_KEY      # sends invitation emails (resend.com; the domain in PUBLIC_HOST verified there)
+        sync: false
 
   # In His Steps (the Christian edition): the same code, its own address, disk, accounts and Google sign-in.
   # Keep the name above ("reflections") as it is: renaming a service here would make Render create a new one.
@@ -71,4 +73,6 @@ services:
       - key: ALLOWED_EMAILS
         sync: false
       - key: ADMIN_EMAILS
+        sync: false
+      - key: RESEND_API_KEY
         sync: false

@@ -2327,7 +2327,30 @@
       copy.addEventListener("click", async () => {
         try { await navigator.clipboard.writeText(i.email); copy.textContent = "Copied"; } catch (_) { copy.textContent = i.email; }
       });
-      actions.append(status, copy);
+      actions.append(status);
+      if (i.emailed_at) {
+        const sent = document.createElement("span");
+        sent.className = "invite-emailed";
+        sent.textContent = `emailed ${longDate(i.emailed_at)}`;
+        actions.append(sent);
+      }
+      // Invite: let them in and email them; once in, the email can be sent again.
+      const send = document.createElement("button");
+      send.type = "button";
+      send.textContent = i.status !== "added" ? "Invite" : i.emailed_at ? "Email again" : "Send email";
+      send.addEventListener("click", async () => {
+        send.disabled = true;
+        try {
+          const res = await api("POST", `/api/admin/invites/${i.id}/invite`);
+          if (res.warning) showNotice(res.warning, 8000);
+          else showNotice(`Invitation sent to ${i.email}.`, 4000);
+          refreshInviteRequests();
+        } catch (err) {
+          send.disabled = false;
+          state.clientError = `Couldn't invite them: ${sentence(err.message)}`; renderBanner();
+        }
+      });
+      actions.append(send, copy);
       if (i.status !== "added") {
         const flip = document.createElement("button");
         flip.type = "button";
@@ -2349,8 +2372,69 @@
       li.textContent = items.length ? "No requests waiting." : "No invitation requests yet.";
       ul.append(li);
     }
+    refreshAccessList();
+  }
+
+  // Settings → Who can sign in (only for whoever runs the app).
+  async function refreshAccessList() {
+    const ul = $("access-list");
+    if (!ul) return;
+    let people;
+    try { people = await api("GET", "/api/admin/access"); } catch (_) { return; }
+    ul.replaceChildren();
+    for (const p of people) {
+      const li = document.createElement("li");
+      li.className = "access-row";
+      const who = document.createElement("span");
+      who.textContent = p.email;
+      const when = document.createElement("span");
+      when.className = "invite-emailed";
+      when.textContent = [p.added_at ? `since ${longDate(p.added_at)}` : "", p.on_server ? "also in ALLOWED_EMAILS" : ""]
+        .filter(Boolean).join(" · ");
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", async () => {
+        if (!confirm(`Remove access for ${p.email}? Their journal stays, should you let them back in.`)) return;
+        try {
+          const res = await api("DELETE", "/api/admin/access", { email: p.email });
+          if (res.warning) showNotice(res.warning, 8000);
+          refreshInviteRequests();
+        } catch (err) { state.clientError = `Couldn't remove them: ${sentence(err.message)}`; renderBanner(); }
+      });
+      li.append(who, when, remove);
+      ul.append(li);
+    }
+    if (!people.length) {
+      const li = document.createElement("li");
+      li.className = "subtle";
+      li.textContent = "No list yet: anyone with a Google account can sign in.";
+      ul.append(li);
+    }
   }
   if ($("invites-show-all")) $("invites-show-all").addEventListener("change", refreshInviteRequests);
+  // Settings → Invitations: invite someone directly (no request first).
+  if ($("invite-direct-form")) {
+    $("invite-direct-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("invite-direct-btn"), result = $("invite-direct-result");
+      btn.disabled = true;
+      result.textContent = "Sending…";
+      try {
+        const res = await api("POST", "/api/admin/invites", {
+          email: $("invite-direct-email").value, name: $("invite-direct-name").value,
+          message: $("invite-direct-message").value,
+        });
+        result.textContent = res.warning || `Invitation sent to ${res.invite.email}. They can sign in now.`;
+        $("invite-direct-form").reset();
+        refreshInviteRequests();
+      } catch (err) {
+        result.textContent = sentence(err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
 
   // Settings → Usage (only on the page for whoever runs the app).
   function daysAgo(n) {
@@ -2675,11 +2759,32 @@
     showNotice("Your new passphrase is set. Your recovery key still works too.", 7000);
   }));
   $("show-recover").addEventListener("click", () => showVaultPanel("recover"));
-  // The welcome page's sample reflection: opens in a dialog; closes with ×, Esc or a click outside it.
+  // The welcome page's sample reflection: a page of the journal that turns open
+  // from the spine, and turns away again on ×, Esc or a click outside it.
   if ($("sample-btn")) {
-    $("sample-btn").addEventListener("click", () => $("sample-dialog").showModal());
-    $("sample-close").addEventListener("click", () => $("sample-dialog").close());
-    $("sample-dialog").addEventListener("click", (e) => { if (e.target === $("sample-dialog")) $("sample-dialog").close(); });
+    const dialog = $("sample-dialog");
+    const page = dialog.querySelector(".sample-page");
+    const play = (name, then) => {
+      page.classList.remove("opening", "closing");
+      void page.offsetWidth;                                    // restart the animation
+      page.classList.add(name);
+      let finished = false;
+      const onEnd = (e) => { if (e.target === page) end(); };   // not the page's inner animations
+      const end = () => {
+        if (finished) return;
+        finished = true;
+        page.removeEventListener("animationend", onEnd);
+        page.classList.remove(name);
+        if (then) then();
+      };
+      page.addEventListener("animationend", onEnd);
+      setTimeout(end, 800);                                     // in case no animation runs (reduced motion)
+    };
+    const shut = () => { if (dialog.open && !page.classList.contains("closing")) play("closing", () => dialog.close()); };
+    $("sample-btn").addEventListener("click", () => { dialog.showModal(); dialog.scrollTop = 0; play("opening"); });
+    $("sample-close").addEventListener("click", shut);
+    dialog.addEventListener("cancel", (e) => { e.preventDefault(); shut(); });   // Esc
+    dialog.addEventListener("click", (e) => { if (e.target === dialog) shut(); });
   }
   $("back-to-unlock").addEventListener("click", () => showVaultPanel("unlock"));
   $("recovery-saved").addEventListener("change", () => { $("recovery-done").disabled = !$("recovery-saved").checked; });

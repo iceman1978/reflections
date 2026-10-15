@@ -64,8 +64,16 @@
       {% endif %}
       {% if edition.sample %}
       {% set sample = edition.sample %}
-      <!-- A real entry and its reflection, behind one quiet link so the page stays uncluttered -->
-      <button type="button" id="sample-btn" class="sample-link">{{ sample.link_text }}&nbsp;→</button>
+      <!-- A real entry and its reflection: a little page from the journal, which turns open into the whole sample -->
+      <button type="button" id="sample-btn" class="sample-card" aria-haspopup="dialog">
+        <span class="sample-mini" aria-hidden="true">
+          <span class="sample-mini-ribbon"><svg viewBox="0 0 26 42" aria-hidden="true"><path d="M1.5 0V40.5L13 32.5L24.5 40.5V0"/></svg></span>
+          <span class="sample-mini-title">{{ sample.title }}</span>
+          {% if vignettes.get(sample.theme) %}<span class="sample-mini-vignette" style="--vignette: url('{{ vignettes.get(sample.theme) }}')"></span>{% endif %}
+          <span class="sample-mini-text">{{ sample.entry }}</span>
+        </span>
+        <span class="sample-card-caption">{{ sample.link_text }}&nbsp;→</span>
+      </button>
       {% endif %}
       {% if edition.welcome_quote %}
       <figure class="landing-quote">
@@ -562,12 +570,27 @@
       <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
 
       {% if hosted %}
-      <h2>Invitation requests</h2>
-      <p class="hint">People others would like to invite. To let someone in, add their address to Google's
-        <em>Test users</em> (if you haven't published the Google sign-in) and to <code>ALLOWED_EMAILS</code> on Render;
-        their request then shows <em>Has access</em> by itself.</p>
+      <h2>Invitations</h2>
+      <p class="hint"><em>Invite</em> lets someone sign in straight away and sends them an invitation email from
+        {{ app_name }}{% if not mail_ready %} (once <code>RESEND_API_KEY</code> is set on Render; until then they're let in
+        without an email){% endif %}. The note on a request is for you and isn't passed on. If the Google sign-in is
+        still in testing, add them to Google's <em>Test users</em> too.</p>
+      <form id="invite-direct-form" class="invite-direct" autocomplete="off">
+        <input id="invite-direct-name" class="invite-input" type="text" maxlength="80" placeholder="Their name (optional)">
+        <input id="invite-direct-email" class="invite-input" type="email" required placeholder="Their Google address">
+        <textarea id="invite-direct-message" class="invite-input" rows="2" maxlength="1000"
+                  placeholder="A short message for the email (optional)"></textarea>
+        <button type="submit" id="invite-direct-btn">Invite</button>
+        <p id="invite-direct-result" class="subtle" role="status"></p>
+      </form>
       <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Show ones that have access or were declined</label></div>
       <ul id="invite-requests" class="feedback-list"></ul>
+
+      <h2>Who can sign in</h2>
+      <p class="hint">Everyone who can sign in. <em>Remove</em> takes away someone's access; their journal stays,
+        should you let them back in. Addresses still in <code>ALLOWED_EMAILS</code> on Render are marked: they've
+        been copied here, so that list can now be emptied.</p>
+      <ul id="access-list" class="feedback-list"></ul>
       {% endif %}
 
       <h2>Feedback received</h2>
@@ -714,21 +737,23 @@
   {% endif %}
 
   {% if edition.sample %}{% set sample = edition.sample %}
-  <dialog id="sample-dialog" class="dialog sample-dialog" aria-labelledby="sample-title">
+  <dialog id="sample-dialog" class="sample-dialog" aria-labelledby="sample-title">
+   <article class="page sample-page">
+    <span class="page-ribbon sample-ribbon" aria-hidden="true"><svg viewBox="0 0 26 42" aria-hidden="true"><path d="M1.5 0V40.5L13 32.5L24.5 40.5V0"/></svg></span>
     <button type="button" id="sample-close" class="sample-close" aria-label="Close">×</button>
-    <p class="sample-kicker">A sample entry</p>
+    <p class="entry-date">A sample entry</p>
     <h2 id="sample-title" class="entry-title">{{ sample.title }}</h2>
     <p class="entry-text">{{ sample.entry }}</p>
     <aside class="reflection">
       {% if vignettes.get(sample.theme) %}<div class="reflection-vignette" aria-hidden="true" style="--vignette: url('{{ vignettes.get(sample.theme) }}')"></div>{% endif %}
       <div class="insight">
         {% for p in sample.paragraphs %}<p>{{ p | safe }}</p>{% endfor %}
-        <p class="sample-more">…</p>
       </div>
       <ul class="citations"><li>— {{ sample.cite }} <a href="{{ sample.cite_url }}" target="_blank" rel="noopener noreferrer">Read the passage ↗</a></li></ul>
       <p class="question">{{ sample.question }}</p>
     </aside>
     <p class="subtle sample-note">{{ sample.note }}</p>
+   </article>
   </dialog>
   {% endif %}
 
