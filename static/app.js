@@ -728,9 +728,24 @@
         "Pending": "This entry doesn't have a reflection yet.",
         "Not requested": "This entry doesn't have a reflection yet.",
       };
-      $("reflection-missing-text").textContent =
-        reasons[status] || "This entry doesn't have a reflection yet.";
-      $("reflect-btn").textContent = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
+      let text = reasons[status] || "This entry doesn't have a reflection yet.";
+      let button = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
+      // Turned away by a day's limit (perhaps another day): say what's true today.
+      const limited = status === "Failed" && (entry.reflection_limited || /used today's/i.test(entry.reflection_error || ""));
+      const left = state.lastStats && state.lastStats.reflections_left;
+      if (limited && left != null) {
+        if (left > 0) {
+          text = `This entry doesn't have a reflection yet. You have ${left} ${creditName(left)} left today: `
+            + `you can use one to reflect on it now.`;
+          button = `Reflect on this entry (uses 1 ${CFG.credit.one})`;
+        } else {
+          text = `This entry doesn't have a reflection yet. You've used today's ${CFG.credit.many}; `
+            + `they come back tomorrow, and you can reflect on it then.`;
+        }
+      }
+      $("reflection-missing-text").textContent = text;
+      $("reflect-btn").textContent = button;
+      $("reflect-btn").hidden = limited && left === 0;
     }
     $("reflect-again-btn").hidden = busy || !entry.can_reflect_again;
     const TONE_WORDS = { encourage: "Written to encourage", reflect: "Written to reflect", challenge: "Written to challenge" };

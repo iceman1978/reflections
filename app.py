@@ -1121,7 +1121,9 @@ def reflect_entry(entry_id):
             usage.check(g.user_id, "reflection")
         except usage.LimitReached as e:
             if not had_reflection:
-                entry = store.update_entry(entry_id, reflection_status=store.FAILED, reflection_error=str(e))
+                # Marked as the day's limit, so the page can say what's true when it's opened another day.
+                entry = store.update_entry(entry_id, reflection_status=store.FAILED, reflection_error=str(e),
+                                           reflection_limited=True)
             return jsonify(error=str(e), entry=_for_page(entry, reflecting=False), limit=True), 429
         if not had_reflection:
             store.update_entry(entry_id, reflection_status=store.PENDING, reflection_error=None)
@@ -1131,7 +1133,7 @@ def reflect_entry(entry_id):
         except reflection.ReflectionError as e:
             # A new reflection after an edit failing keeps the earlier one.
             status = store.DONE if had_reflection else store.FAILED
-            entry = store.update_entry(entry_id, reflection_status=status, reflection_error=str(e))
+            entry = store.update_entry(entry_id, reflection_status=status, reflection_error=str(e), reflection_limited=False)
             return jsonify(error=str(e), entry=_for_page(entry, reflecting=False)), 502
         usage.record(g.user_id, "reflection")
         fields["reflection_tone"] = prefs["reflection_tone"]       # shown under it: "Written to challenge"
@@ -1140,7 +1142,7 @@ def reflect_entry(entry_id):
         if suggested and not current.get("title"):
             fields.update(title=suggested, title_source="generated")
         fields["highlights"] = [h for h in current.get("highlights") or [] if h.get("where") == "entry"]
-        entry = store.update_entry(entry_id, reflection_status=store.DONE, reflection_error=None,
+        entry = store.update_entry(entry_id, reflection_status=store.DONE, reflection_error=None, reflection_limited=False,
                                    reflected_text=entry.get("text"), **fields)
         return jsonify(entry=_for_page(entry, reflecting=False), **_limits(g.user_id))
     finally:
