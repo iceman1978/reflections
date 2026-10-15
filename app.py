@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, reminders, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -77,7 +77,7 @@ else:
 
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
-PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz",
+PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz", "/reminders/off",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/vault/passkey-options", "/api/vault/unlock-passkey",
@@ -124,7 +124,7 @@ def _guard():
     if host not in ALLOWED_HOSTS:
         return jsonify(error="Forbidden"), 403
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get(CLIENT_HEADER) != "1" \
-            and request.path not in ("/logout",):
+            and request.path not in ("/logout", "/reminders/off"):   # the reminder email's own form and one-click link
         return jsonify(error="Forbidden"), 403
 
     vault.use(None)
@@ -1153,6 +1153,38 @@ def give_access():
     return jsonify(ok=True)
 
 
+@app.route("/reminders/off", methods=["GET", "POST"])
+def reminders_off():
+    """The link in every reminder: turn reminders off, without signing in. GET
+    asks first (mail programs open links to check them); POST turns them off,
+    from that page or from a mail program's one-click unsubscribe."""
+    uid = reminders.user_from_token(request.args.get("t"), app.secret_key) if HOSTED else None
+    if not uid or not users.get(uid):
+        return render_template("reminders_off.html", state="invalid"), 400
+    if request.method == "POST":
+        reminders.turn_off(uid)
+        return render_template("reminders_off.html", state="off")
+    return render_template("reminders_off.html", state="ask", token=request.args.get("t"))
+
+
+@app.post("/api/admin/share")
+def share_app():
+    """Email someone who can sign in: what's new (or the invitation, if they haven't joined)."""
+    if (resp := _need_admin()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    user = users.get(g.user_id) or {}
+    try:
+        problem = invites.share(data.get("email"), users.prefs(g.user_id)["user_name"] or user.get("name"),
+                                data.get("message"), _site_url())
+    except invites.InviteProblem as e:
+        return jsonify(error=str(e)), 400
+    if problem:
+        return jsonify(error=f"The email wasn't sent. {problem}"), 502
+    log.info("Shared the app with an address by email")
+    return jsonify(ok=True)
+
+
 @app.delete("/api/admin/access")
 def remove_access():
     if (resp := _need_admin()):
@@ -1201,6 +1233,10 @@ def usage_stats():
         joined = {r["email"] for r in stats["rows"]}
         stats["rows"] += [{"who": e, "email": e, "access": True, "me": e == me, "invited_only": True,
                            "joined": "", "set_up": False} for e in sorted(allowed - joined)]
+        shared = invites.shared_dates()                 # last emailed with the Email button
+        for r in stats["rows"]:
+            r["shared_at"] = shared.get(r["email"])
+        stats["mail_ready"] = mail.ready()
     stats["tokens"] = tokens.summary()                 # average tokens per call to Claude, last 30 days
     return jsonify(stats)
 
@@ -1293,6 +1329,7 @@ def main():
 if HOSTED and __name__ != "__main__":
     # Running under gunicorn on the server.
     vault.start_auto_lock()
+    reminders.start(app.secret_key)
     if (copied := invites.import_allowed()):
         log.info("Copied %d address(es) from ALLOWED_EMAILS into the invite list", copied)
     log.info("Journal started (hosted%s)", ", TEST SIGN-IN ENABLED" if TEST_LOGIN else "")

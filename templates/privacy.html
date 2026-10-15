@@ -79,8 +79,8 @@
       <h2>Who runs {{ app_name }}, and where your journal is kept</h2>
       <p>{{ app_name }} is made and run by Aaron de Vries. Journals are stored, encrypted, with Render, a hosting
         company, in its data center in Ohio, in the United States. {{ app_name }} writes its reflections using Claude, an AI model made by Anthropic.
-        Invitation emails are sent through Resend, an email service, which receives only the invited person's
-        name and address and the words of the invitation.
+        Invitation and reminder emails are sent through Resend, an email service, which receives only the
+        person's name and address and the words of the email.
         Questions about your privacy? <a href="/?feedback=privacy">Send feedback</a> (you'll be asked to unlock
         your journal first).</p>
       {% endif %}
@@ -91,6 +91,12 @@
         they wrote each day, and how many reflections and writing prompts they asked for. {% if hosted %}These are
         shown with your email address, only to the person who runs the site.{% endif %} That's all: nothing you
         write, no titles, no times of day, and nothing about what you read or click.</p>
+      {% if hosted %}
+      <h2>Reminder emails</h2>
+      <p>If you haven't written for a few days, {{ app_name }} sends a short, friendly reminder: after 2, 6 and 14
+        days, then nothing until you write again. It knows only the day of your last entry, never what you wrote.
+        Turn reminders off in <em>Settings → Basic</em>, or with the link at the bottom of any reminder.</p>
+      {% endif %}
 
       {% if hosted %}
       <h2>Leaving</h2>

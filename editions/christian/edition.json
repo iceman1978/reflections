@@ -32,6 +32,20 @@
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "email_vignette": "scripture",
+  "reminder_prompts": [
+    "What's one thing you're carrying into today?",
+    "Where did you notice God's goodness this week, even in something small?",
+    "What would you like to bring to God in prayer today?",
+    "What's been on your mind when things go quiet?",
+    "Who has been on your heart lately, and why?",
+    "What are you thankful for this morning?",
+    "Where do you need patience right now?",
+    "What are you hoping for today?",
+    "What has been hard lately, and what has helped?",
+    "What would it look like to rest in God today?",
+    "Is there something you need to forgive, or be forgiven for?",
+    "What's one small way you could love someone well today?"
+  ],
   "email_points": [
     "Build a journaling habit. A few lines are enough.",
     "A well-stocked library of Christian wisdom, including Scripture and devotional writers",

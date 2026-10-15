@@ -17,21 +17,12 @@ later (higher limits, free months, ...).
 Like feedback, requests are not encrypted: they're meant to be read by
 whoever runs the app.
 """
+import json
 import re
 from datetime import datetime
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-
-from . import config, db, mail
-from .config import ROOT, TZ
-
-EMAILS = Environment(loader=FileSystemLoader(ROOT / "templates" / "email"), autoescape=select_autoescape(["html"]))
-
-
-def _png_width(path):
-    """A PNG's width, from its header (no imaging library on the server)."""
-    with open(path, "rb") as f:
-        return int.from_bytes(f.read(24)[16:20], "big")
+from . import config, db, emails, mail
+from .config import TZ
 
 STATUSES = ("requested", "declined")   # "added" is worked out from the allowed list
 PER_DAY = 10
@@ -232,46 +223,84 @@ def invite(user_id, inviter_email, inviter_name, email, name=None, message=None,
     return admit(cur.lastrowid, site_url)
 
 
-def invitation(inv, site_url):
+def invitation(inv, site_url, joined=False):
     """The invitation email for a request: (subject, text, html).
+
+    joined: they already use the app, so it shares what's new instead of
+    inviting them, and doesn't explain signing up.
 
     Only the message (a personal note written for them) goes in; the older
     `note`, written to whoever runs the app, never does."""
     edition = config.EDITION
     app, lead = config.APP_NAME, edition.get("lead", "")
     who = (inv.get("requester_name") or "").strip()
-    subject = f"{who} invited you to {app}" if who else f"You're invited to {app}"
     hello = f"Hi {inv['name']}," if inv.get("name") else "Hi,"
-    opening = f"{who} has invited you to {app}" if who else f"You're invited to {app}"   # then " — " and the welcome line
-    # Whoever asked may not know which address someone uses with Google.
-    ask = f"ask {who} to invite" if who else "ask for an invitation for"
-    sign_in = (f"Sign in with your Google account. If {inv['email']} isn't the address you use with Google, "
-               f"{ask} the one you do (only Google sign-in is available while {app} is being tested). "
-               "The first time, you'll choose a passphrase that keeps your journal private: "
-               "only you can read what you write.")
-    no_reply = ("This address doesn't receive replies. If you have a question, use the Feedback "
-                "button (the speech bubble) once you're signed in.")
+    if joined:
+        subject = f"{who} shared what's new in {app}" if who else f"What's new in {app}"
+        opening = f"{who} wanted to share what's new in {app}" if who else f"Here's what's new in {app}"
+        sign_in = "Your journal is waiting: sign in with Google as usual."
+    else:
+        subject = f"{who} invited you to {app}" if who else f"You're invited to {app}"
+        opening = f"{who} has invited you to {app}" if who else f"You're invited to {app}"   # then " — " and the welcome line
+        # Whoever asked may not know which address someone uses with Google.
+        ask = f"ask {who} to invite" if who else "ask for an invitation for"
+        sign_in = (f"Sign in with your Google account. If {inv['email']} isn't the address you use with Google, "
+                   f"{ask} the one you do (only Google sign-in is available while {app} is being tested). "
+                   "The first time, you'll choose a passphrase that keeps your journal private: "
+                   "only you can read what you write.")
     message = inv.get("message")
     points = edition.get("email_points") or [p["title"] for p in edition.get("points", [])]
-    quote = edition.get("welcome_quote") or {}
-    quote_cite = re.sub(r"<[^>]+>", "", quote.get("cite_html", ""))
+    quote, quote_cite = emails.quote()
     text = "\n\n".join(p for p in (
         hello, f"{opening} — {lead}" if lead else f"{opening}.", f"“{message}”" if message else None,
         "\n".join(f"- {p}" for p in points) or None,
-        f"Open {app}: {site_url}", sign_in,
-        f"{quote['text']}\n{quote_cite}" if quote else None, no_reply) if p)
-    site = site_url if site_url.endswith("/") else site_url + "/"
-    brand = f"{site}static/brands/{config.EDITION_NAME}"
-    wordmark = ROOT / "static" / "brands" / config.EDITION_NAME / "email-wordmark.png"
-    page = EMAILS.get_template("invitation.html").render(
-        subject=subject, preview=f"{opening} — {lead}" if lead else f"{opening}.", app=app, tagline=edition.get("tagline"),
-        logo_url=f"{brand}/logo.png", wordmark_url=f"{brand}/email-wordmark.png",
-        vignette_url=f"{brand}/email-vignette.png" if edition.get("email_vignette") else None,
-        wordmark_width=_png_width(wordmark) // 2 if wordmark.exists() else 300,
-        hello=hello, opening=opening if lead else f"{opening}.", lead=lead, message=message, who=f"— {who}" if who else "",
-        points=points, site_url=site, sign_in=sign_in, quote=quote.get("text"), quote_cite=quote_cite,
-        no_reply=no_reply)
+        f"Open {app}: {emails.site(site_url)}", sign_in,
+        f"{quote}\n{quote_cite}" if quote else None, emails.NO_REPLY) if p)
+    page = emails.page(
+        site_url, subject=subject, preview=f"{opening} — {lead}" if lead else f"{opening}.",
+        hello=hello, opening=opening if lead else f"{opening}.", lead=lead, message=message,
+        who=f"— {who}" if who else "", points=points, sign_in=sign_in)
     return subject, text, page
+
+
+def share(email, inviter_name, message=None, site_url=""):
+    """Whoever runs the app emails someone who can already sign in: what's new
+    if they've joined, the invitation if they haven't yet. Returns the problem,
+    or None once it's sent (and its date is kept, for Settings)."""
+    email = (email or "").strip().lower()
+    if not has_access(email):
+        raise InviteProblem("They can't sign in, so there's nothing to share.")
+    con = db.connect()
+    try:
+        row = con.execute("SELECT name, prefs FROM users WHERE lower(email) = ?", (email,)).fetchone()
+    finally:
+        con.close()
+    name = None
+    if row:
+        try:
+            name = (json.loads(row[1] or "{}").get("user_name") or "").strip() or None
+        except ValueError:
+            pass
+        name = name or (row[0] or "").split(" ")[0] or None     # their Google first name
+    message = (message or "").strip()[:1000] or None
+    inv = {"email": email, "name": name, "requester_name": inviter_name, "message": message}
+    try:
+        mail.send(email, *invitation(inv, site_url, joined=bool(row)))
+    except mail.MailProblem as e:
+        return str(e)
+    now = datetime.now(TZ).isoformat(timespec="seconds")
+    _write("INSERT OR IGNORE INTO access (email, added_at) VALUES (?, ?)", (email, now))
+    _write("UPDATE access SET shared_at = ? WHERE email = ?", (now, email))
+    return None
+
+
+def shared_dates():
+    """When each address was last emailed from Settings → Usage."""
+    con = db.connect()
+    try:
+        return dict(con.execute("SELECT email, shared_at FROM access WHERE shared_at IS NOT NULL").fetchall())
+    finally:
+        con.close()
 
 
 def set_status(invite_id, status):

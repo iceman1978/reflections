@@ -391,6 +391,12 @@
               {% endfor %}
             </select>
           </label>
+          {% if hosted %}
+          <label class="checkbox">
+            <input name="email_reminders" type="checkbox"> Email reminders
+          </label>
+          <span class="hint checkbox-hint">A gentle email if you haven't written for a few days.</span>
+          {% endif %}
           <div id="install-section" class="install-section" hidden>
             <h2>Install as an app</h2>
             <p class="hint">Open {{ app_name }} from your home screen or desktop, in its own window, like any other app.</p>
@@ -701,6 +707,22 @@
   </dialog>
 
   {% if hosted %}
+  {% if is_admin %}
+  <!-- Settings → Usage → Email: send someone the app's email, with an optional message -->
+  <dialog id="share-dialog" class="dialog feedback-dialog" aria-labelledby="share-title">
+    <form id="share-form">
+      <h2 id="share-title">Email <span id="share-who"></span></h2>
+      <p id="share-what" class="subtle"></p>
+      <label class="feedback-label" for="share-message">A personal note <span class="subtle">(optional)</span></label>
+      <textarea id="share-message" class="feedback-text" maxlength="1000" rows="3" placeholder="e.g. Here's the latest: a new look and a sample reflection."></textarea>
+      <p id="share-error" class="wipe-error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="share-cancel-btn">Cancel</button>
+        <button type="submit" id="share-send-btn" class="primary">Send</button>
+      </div>
+    </form>
+  </dialog>
+  {% endif %}
   <dialog id="invite-dialog" class="dialog feedback-dialog" aria-labelledby="invite-title">
     <form id="invite-form" novalidate>
       <h2 id="invite-title">Invite someone</h2>

@@ -1,0 +1,34 @@
+<!doctype html>
+{#- The link at the bottom of every reminder email (journal/reminders.py).
+    state: "ask" (a button, since mail programs open links to check them),
+    "off" (done), or "invalid" (an old or broken link). -#}
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Email reminders · {{ app_name }}</title>
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy">
+    <section class="page">
+      <a class="info-back" href="/">← Back to {{ app_name }}</a>
+      <h1 class="prompt-heading">Email reminders</h1>
+      {% if state == "ask" %}
+      <p>{{ app_name }} sends a short reminder when you haven't written for a few days. Would you like to stop them?</p>
+      <form method="post" action="/reminders/off?t={{ token | urlencode }}">
+        <button type="submit" class="primary">Turn off reminders</button>
+      </form>
+      <p class="subtle">You can turn them back on any time in <em>Settings → Basic</em>.</p>
+      {% elif state == "off" %}
+      <p>Reminders are off. You won't get any more.</p>
+      <p class="subtle">If you change your mind, turn them back on in <em>Settings → Basic</em>.</p>
+      {% else %}
+      <p>This link doesn't work any more. You can turn reminders off in <em>Settings → Basic</em> once you're signed in.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

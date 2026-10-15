@@ -26,6 +26,20 @@
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "email_vignette": "meditation-and-stillness",
+  "reminder_prompts": [
+    "What's one thing you're carrying into today?",
+    "What went well this week, and what part did you play in it?",
+    "What's within your control today, and what isn't?",
+    "What's been on your mind when things go quiet?",
+    "Who has been on your mind lately, and why?",
+    "What are you grateful for this morning?",
+    "Where do you need patience right now?",
+    "What would make today a good day, by your own measure?",
+    "What has been hard lately, and what has helped?",
+    "What's one habit you'd like to strengthen?",
+    "What have you learned about yourself recently?",
+    "What's a small kindness you could offer someone today?"
+  ],
   "welcome_quote": {
     "text": "“The unexamined life is not worth living.”",
     "cite_html": "Socrates, in Plato’s <cite>Apology</cite>"

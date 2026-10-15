@@ -2443,6 +2443,16 @@
       if (!access) continue;
       const cell = tr.insertCell();
       if (r.me || !r.email) continue;                        // never yourself
+      if (r.access) {
+        // Email: what's new for someone who's joined, the invitation for someone who hasn't.
+        const mail = document.createElement("button");
+        mail.type = "button";
+        mail.className = "usage-access-btn";
+        mail.textContent = "Email";
+        if (r.shared_at) mail.title = `Last emailed ${longDate(r.shared_at)}`;
+        mail.addEventListener("click", () => openShare(r));
+        cell.append(mail, " ");
+      }
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "usage-access-btn";
@@ -2462,6 +2472,39 @@
       });
       cell.append(btn);
     }
+  }
+
+  // Settings → Usage → Email (whoever runs the app): the app's email to one person.
+  let shareTo = null;
+  function openShare(r) {
+    shareTo = r;
+    $("share-who").textContent = r.email;
+    $("share-what").textContent = (r.invited_only
+      ? "They haven't signed in yet, so this sends the invitation email."
+      : "They already use the app, so this sends the email as \u201cwhat's new\u201d, without the sign-up steps.")
+      + (r.shared_at ? ` Last emailed ${longDate(r.shared_at)}.` : "");
+    $("share-message").value = "";
+    $("share-error").hidden = true;
+    $("share-dialog").showModal();
+  }
+  if ($("share-form")) {
+    $("share-cancel-btn").addEventListener("click", () => $("share-dialog").close());
+    $("share-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("share-send-btn");
+      btn.disabled = true;
+      try {
+        await api("POST", "/api/admin/share", { email: shareTo.email, message: $("share-message").value });
+        $("share-dialog").close();
+        showNotice(`Email sent to ${shareTo.email}.`, 4000);
+        refreshUsage();
+      } catch (err) {
+        $("share-error").textContent = sentence(err.message);
+        $("share-error").hidden = false;
+      } finally {
+        btn.disabled = false;
+      }
+    });
   }
 
   // Import entries from a CSV made with Export.

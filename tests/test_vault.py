@@ -13,6 +13,7 @@ import sqlite3
 import sys
 import time
 import unittest
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -548,6 +549,26 @@ class InviteTests(unittest.TestCase):
         self.assertFalse(invites.remove("ann@example.com"))
 
 
+    def test_sharing_with_someone_who_has_joined(self):
+        from unittest import mock
+        from journal import invites, users
+        invites.import_allowed()
+        users.from_google("g-ann", "ann@example.com", "Ann Smith")
+        with mock.patch("journal.mail.send") as send:
+            self.assertIsNone(invites.share("ann@example.com", "Aaron", "Look at the new page"))
+        to, subject, text, html = send.call_args.args
+        self.assertIn("shared what's new", subject)
+        self.assertIn("Hi Ann,", text)
+        self.assertNotIn("passphrase", text)                                # no sign-up steps
+        self.assertIn("Look at the new page", html)
+        self.assertIn("ann@example.com", invites.shared_dates())
+        with mock.patch("journal.mail.send") as send:                       # not joined yet: the invitation
+            invites.share("friend-in@example.com", "Aaron")
+        self.assertIn("invited you", send.call_args.args[1])
+        with self.assertRaises(invites.InviteProblem):
+            invites.share("stranger@gmail.com", "Aaron")
+
+
 def mock_env(**values):
     """Set (or, with None, remove) environment variables for a `with` block."""
     from unittest import mock
@@ -562,6 +583,108 @@ def mock_env(**values):
         def __exit__(self, *exc):
             patcher.stop()
     return _Env()
+
+
+class ReminderTests(unittest.TestCase):
+    """Reminder emails: 2, 6 and 14 days after the last entry; once for an unfinished setup."""
+
+    TODAY = date(2026, 11, 20)
+
+    def setUp(self):
+        fresh_journal()
+        self._allowed = set(config.ALLOWED_EMAILS)
+        config.ALLOWED_EMAILS.clear()
+
+    def tearDown(self):
+        config.ALLOWED_EMAILS.clear()
+        config.ALLOWED_EMAILS.update(self._allowed)
+
+    def person(self, email, last_entry=None, set_up=True, joined="2026-11-01T12:00:00+00:00", entries=1):
+        from journal import users
+        uid = users.from_google("g-" + email, email, "Sam Jones")
+        con = db.connect()
+        with con:
+            con.execute("UPDATE users SET created_at = ?, key_password = ? WHERE id = ?",
+                        (joined, "{}" if set_up else None, uid))
+            if last_entry:
+                con.execute("INSERT INTO activity (user_id, day, entries) VALUES (?, ?, 1)", (uid, last_entry))
+            for i in range(entries if set_up else 0):
+                con.execute("INSERT INTO entries (id, user_id, data) VALUES (?, ?, x'00')", (f"{uid}-{i}", uid))
+        con.close()
+        return uid
+
+    def kinds(self, day=None):
+        from journal import reminders
+        return {p["email"]: (kind, days) for p, kind, days in reminders.due(day or self.TODAY)}
+
+    def test_the_schedule(self):
+        self.person("one@x.com", "2026-11-19")       # 1 day: nothing yet
+        self.person("two@x.com", "2026-11-18")       # 2 days
+        self.person("six@x.com", "2026-11-14")       # 6 days
+        self.person("old@x.com", "2026-10-30")       # 21 days: the last one
+        self.assertEqual(self.kinds(), {"two@x.com": (1, 2), "six@x.com": (2, 6), "old@x.com": (3, 21)})
+
+    def test_once_per_stage_then_quiet_until_they_write(self):
+        from unittest import mock
+        from journal import reminders
+        uid = self.person("sam@x.com", "2026-11-18")
+        with mock.patch("journal.mail.send") as send:
+            self.assertEqual(reminders.send_due(self.TODAY, "secret", "https://inhissteps.app/"), 1)
+            self.assertEqual(reminders.send_due(self.TODAY, "secret", "https://inhissteps.app/"), 0)   # claimed
+            self.assertEqual(self.kinds(date(2026, 11, 21)), {})                  # 3 days: still stage 1
+            self.assertEqual(self.kinds(date(2026, 11, 24)), {"sam@x.com": (2, 6)})
+        subject, text, html = send.call_args.args[1:4]
+        self.assertIn("Hi Sam,", text)
+        self.assertIn("2 days since your last entry", text)
+        self.assertIn("turn these reminders off", text)                         # the first one says so
+        self.assertIn("reminders/off?t=", html)
+        self.assertEqual(send.call_args.kwargs["local"], "reminder")
+        self.assertIn("List-Unsubscribe", send.call_args.kwargs["headers"])
+        con = db.connect()                                                        # they write again
+        with con:
+            con.execute("INSERT INTO activity (user_id, day, entries) VALUES (?, '2026-11-22', 1)", (uid,))
+        con.close()
+        self.assertEqual(self.kinds(date(2026, 11, 23)), {})
+        self.assertEqual(self.kinds(date(2026, 11, 24)), {"sam@x.com": (1, 2)})  # a fresh count
+
+    def test_a_failed_send_is_tried_again(self):
+        from unittest import mock
+        from journal import mail, reminders
+        self.person("sam@x.com", "2026-11-18")
+        with mock.patch("journal.mail.send", side_effect=mail.MailProblem("down")), \
+                mock.patch("journal.mail.ready", return_value=True):
+            self.assertEqual(reminders.send_due(self.TODAY, "secret", "https://x/"), 0)
+        self.assertEqual(self.kinds(), {"sam@x.com": (1, 2)})
+
+    def test_unfinished_setup_gets_one_email(self):
+        from unittest import mock
+        from journal import reminders
+        self.person("new@x.com", set_up=False, joined="2026-11-19T12:00:00+00:00")
+        self.assertEqual(self.kinds(), {"new@x.com": ("setup", 1)})
+        with mock.patch("journal.mail.send") as send:
+            reminders.send_due(self.TODAY, "secret", "https://x/")
+        self.assertIn("ready when you are", send.call_args.args[1])
+        self.assertEqual(self.kinds(date(2026, 11, 30)), {})
+
+    def test_no_reminders_when_switched_off_or_without_access(self):
+        from journal import invites, reminders, users
+        off = self.person("off@x.com", "2026-11-10")
+        users.update_prefs(off, {"email_reminders": False})
+        self.person("gone@x.com", "2026-11-10")
+        invites.grant("someone-else@x.com")                                       # there's a list now
+        invites.grant("off@x.com")
+        self.assertEqual(self.kinds(), {})
+        token = reminders.off_token(off, "secret")
+        self.assertEqual(reminders.user_from_token(token, "secret"), off)
+        self.assertIsNone(reminders.user_from_token(token, "another secret"))
+        self.assertIsNone(reminders.user_from_token("junk", "secret"))
+
+    def test_first_entry_wording(self):
+        from journal import reminders
+        self.person("fresh@x.com", entries=0, joined="2026-11-17T12:00:00+00:00")
+        person, kind, days = reminders.due(self.TODAY)[0]
+        subject, text, _ = reminders.email(person, kind, days, self.TODAY, "https://x/", "https://x/off")
+        self.assertIn("first entry", subject)
 
 
 class UpgradeTests(unittest.TestCase):

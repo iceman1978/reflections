@@ -1,7 +1,8 @@
 <!doctype html>
-{#- The invitation email. Email programs ignore stylesheets, web fonts and most
-    modern CSS, so everything is inline and laid out with tables; the app's
-    handwritten name is a picture (tools/make_email_art.py). Colours are the
+{#- The app's emails: invitations and reminders (journal/emails.py fills it in).
+    Email programs ignore stylesheets, web fonts and most modern CSS, so
+    everything is inline and laid out with tables; the app's handwritten name
+    and the drawing are pictures (tools/make_email_art.py). Colours are the
     app's default theme. -#}
 <html lang="en">
 <head>
@@ -27,6 +28,17 @@
   <tr><td bgcolor="#f1f5f9" style="background:#f1f5f9;padding:34px 38px 30px;border-left:6px solid #dfe5ec;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#2a3038;">
     <p style="margin:0 0 14px;">{{ hello }}</p>
     <p style="margin:0 0 22px;">{{ opening }}{% if lead %} — <em style="font-style:italic;color:#2c5180;">{{ lead }}</em>{% endif %}</p>
+    {% for p in paragraphs or [] %}<p style="margin:-8px 0 22px;">{{ p }}</p>{% endfor %}
+
+    {% if prompt %}
+    <!-- A question to start with (reminders) -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
+      <tr><td bgcolor="#e1e8ef" style="background:#e1e8ef;border-left:3px solid #2c5180;border-radius:0 8px 8px 0;padding:14px 18px;">
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#5b6673;margin-bottom:4px;">A question to start with</div>
+        <div style="font-size:18px;line-height:1.45;font-style:italic;color:#2c5180;">{{ prompt }}</div>
+      </td></tr>
+    </table>
+    {% endif %}
 
     {% if message %}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
@@ -50,11 +62,11 @@
     <!-- The button -->
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 24px;">
       <tr><td align="center" bgcolor="#2c5180" style="background:#2c5180;border-radius:8px;">
-        <a href="{{ site_url }}" style="display:inline-block;padding:14px 30px;font-family:Georgia,serif;font-size:17px;color:#ffffff;text-decoration:none;border-radius:8px;">Open {{ app }}</a>
+        <a href="{{ button_url or site_url }}" style="display:inline-block;padding:14px 30px;font-family:Georgia,serif;font-size:17px;color:#ffffff;text-decoration:none;border-radius:8px;">{{ button_text or "Open " ~ app }}</a>
       </td></tr>
     </table>
 
-    <p style="margin:0;font-size:14px;line-height:1.55;color:#5b6673;">{{ sign_in }}</p>
+    {% if sign_in %}<p style="margin:0;font-size:14px;line-height:1.55;color:#5b6673;">{{ sign_in }}</p>{% endif %}
     {% if vignette_url %}<img src="{{ vignette_url }}" width="300" alt="" style="display:block;border:0;width:300px;max-width:100%;height:auto;margin:26px auto 0;">{% endif %}
   </td></tr>
 
@@ -68,6 +80,8 @@
 
   <!-- Below the book -->
   <tr><td align="center" style="padding:20px 24px 0;font-family:Georgia,serif;font-size:12px;line-height:1.55;color:#5b6673;">
+    {% if unsubscribe_url %}You're getting this because email reminders are on.
+    <a href="{{ unsubscribe_url }}" style="color:#5b6673;">Turn off reminders</a>, or change it in Settings → Basic.<br>{% endif %}
     {{ no_reply }}<br>
     <a href="{{ site_url }}privacy" style="color:#5b6673;">How your writing is kept private</a>
   </td></tr>

@@ -1034,6 +1034,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .invite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .invite-emailed { font-size: 0.8rem; color: var(--muted); }
 .usage-table tr.no-access td { color: var(--muted); }
+.checkbox-hint { display: block; margin: -6px 0 12px 26px; }   /* under a checkbox, lined up with its words */
 .usage-table td:last-child { text-align: right; }
 .usage-access-btn, .usage-access-btn:hover:not(:disabled) { padding: 1px 10px; font-size: 0.8rem; }
 .invite-actions button { font-size: 0.85rem; padding: 2px 10px; }
