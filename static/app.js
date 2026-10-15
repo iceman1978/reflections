@@ -756,7 +756,7 @@
         li.append(document.createTextNode(`— ${q.author ? `${q.author}, ` : ""}${q.title}${where} `));
         if (typeof q.url === "string" && q.url.startsWith("https://")) {
           const a = document.createElement("a");
-          a.href = q.kind === "quote" ? passageUrl(q.url, q.quote) : inTranslation(q.url);
+          a.href = q.kind === "quote" ? passageUrl(q.url, q.quote, q.location) : inTranslation(q.url, q.location);
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = q.kind === "quote" ? "Read the passage ↗" : "Read the source ↗";
@@ -900,7 +900,7 @@
     where.append(document.createTextNode(place));
     if (typeof p.url === "string" && p.url.startsWith("https://")) {
       const a = document.createElement("a");
-      a.href = passageUrl(p.url, p.quote);
+      a.href = passageUrl(p.url, p.quote, p.location);
       a.target = "_blank";
       a.rel = "noopener noreferrer";
       a.textContent = "Read the passage ↗";
@@ -1105,13 +1105,20 @@
 
   // BibleHub's BSB pages, in the reader's chosen translation (Settings → Basic). The words
   // to scroll to are the BSB's, so for another translation the link opens the chapter.
-  function inTranslation(url) {
+  // Another translation can't be scrolled to by the BSB's words, so a verse opens on
+  // BibleHub's own page for that verse in that translation (…/niv/psalms/90-12.htm);
+  // a chapter, or a passage without a verse, opens the chapter.
+  function inTranslation(url, location) {
     const t = CFG.bibleTranslation || "bsb";
-    return t === "bsb" ? url : url.replace("://biblehub.com/bsb/", `://biblehub.com/${t}/`);
+    if (t === "bsb" || !url.includes("://biblehub.com/bsb/")) return url;
+    const verse = /^\s*(\d+):(\d+)/.exec(location || "");
+    const m = /^(https:\/\/biblehub\.com)\/bsb\/([^/]+)\/(\d+)\.htm/.exec(url);
+    if (verse && m && verse[1] === m[3]) return `${m[1]}/${t}/${m[2]}/${m[3]}-${verse[2]}.htm`;
+    return url.replace("://biblehub.com/bsb/", `://biblehub.com/${t}/`).replace(/#.*$/, "");
   }
 
-  function passageUrl(url, quote) {
-    if ((CFG.bibleTranslation || "bsb") !== "bsb" && url.includes("://biblehub.com/bsb/")) return inTranslation(url);
+  function passageUrl(url, quote, location) {
+    if ((CFG.bibleTranslation || "bsb") !== "bsb" && url.includes("://biblehub.com/bsb/")) return inTranslation(url, location);
     const words = String(quote || "").trim().split(/\s+/).filter(Boolean);
     if (!words.length) return url;
     words[0] = words[0].replace(/^[^\p{L}\p{N}]+/u, "");                      // no leading … or “
