@@ -1,0 +1,54 @@
+<!doctype html>
+{#- A passage's own page (/p/<id>): what's shared from the app, by email or a
+    phone's share sheet. Public. The passage, its drawing, a button on to the
+    source, and a quiet word about the app. -#}
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% if found %}
+  <title>{{ found.cite }} · {{ app_name }}</title>
+  <meta name="description" content="“{{ found.quote }}”">
+  {#- The card that Messages, WhatsApp and others show for the link -#}
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="{{ app_name }}">
+  <meta property="og:title" content="{{ found.cite }} · {{ app_name }}">
+  <meta property="og:description" content="“{{ found.quote }}”">
+  <meta property="og:url" content="{{ page_url }}">
+  <meta property="og:image" content="{{ og_image }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  {% else %}
+  <title>Passage not found · {{ app_name }}</title>
+  {% endif %}
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy passage-page">
+    <section class="page">
+      {% if found %}
+      {% if found.drawing %}<div class="reflection-vignette" aria-hidden="true" style="--vignette: url('{{ static_url(found.drawing) }}')"></div>{% endif %}
+      <blockquote class="passage-quote">
+        <p>“{{ found.quote }}”</p>
+        <footer>— {{ found.cite }}</footer>
+      </blockquote>
+      {% if found.source_url %}
+      <p class="passage-source">
+        <a class="passage-source-btn" href="{{ found.source_url }}" target="_blank" rel="noopener noreferrer">Read it in context ↗</a>
+        <span class="subtle">on {{ found.source_name }}{% if found.translation %} ({{ found.translation }}){% endif %}</span>
+      </p>
+      {% endif %}
+      <div class="passage-about">
+        <p>Shared from <a href="/">{{ app_name }}</a> — <em>{{ edition.lead }}</em></p>
+        <p class="subtle">{{ app_name }} is invitation-only for now. <a href="/">Learn more →</a></p>
+      </div>
+      {% else %}
+      <h1 class="prompt-heading">This passage couldn't be found</h1>
+      <p>The link may be incomplete. <a href="/">Go to {{ app_name }} →</a></p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

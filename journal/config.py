@@ -55,7 +55,7 @@ PROMPTS_PER_DAY = int(os.environ.get("PROMPTS_PER_DAY", "10")) if HOSTED else 0
 # Each person's own choices (stored with their account). Everything else in
 # DEFAULTS is a setting for the whole app.
 PREF_KEYS = ("user_name", "journal_name", "theme", "colour_theme", "text_size", "background_photo", "photo_blur",
-             "photo_visibility", "lock_minutes", "draft_autosave_seconds", "writers", "email_reminders")
+             "photo_visibility", "lock_minutes", "draft_autosave_seconds", "writers", "email_reminders", "admin_digest")
 # The edition's writers (see journal/library.py); a reader must keep at least this many on.
 WRITERS = EDITION.get("writers", [])
 MIN_WRITERS = 3
@@ -65,6 +65,7 @@ DEFAULTS = {
     "journal_name": "",       # the title in the header; blank = the app's name
     "writers": {},            # {"writer": true/false}: only where a reader differs from the edition's defaults
     "email_reminders": True,  # on the web: a gentle email after a few days without an entry (journal/reminders.py)
+    "admin_digest": True,     # admins: the "new work" email, twice a day at most (journal/digest.py)
     "port": 5050,
     "open_browser_on_start": True,
     "timezone": "America/Toronto",
@@ -198,6 +199,7 @@ def _writers(v):
 VALIDATORS = {
     "writers": _writers,
     "email_reminders": bool,
+    "admin_digest": bool,
     "user_name": _text(40),
     "journal_name": _text(30),
     "port": _int_in(1024, 65535),

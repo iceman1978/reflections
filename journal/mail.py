@@ -34,6 +34,13 @@ def sender(local="invitations"):
     return f"{config.APP_NAME} <{local}@{host}>"
 
 
+def _failed(local):
+    """Count it for the admin email (not the admin email itself: it would only report on itself)."""
+    if local != "admin":
+        from . import digest          # here, to avoid a circular import
+        digest.record_failure(local)
+
+
 def ready():
     return bool(os.environ.get("RESEND_API_KEY") and sender())
 
@@ -56,6 +63,7 @@ def send(to, subject, text, html, local="invitations", headers=None, reply_to=No
                           headers={"Authorization": f"Bearer {key}", "User-Agent": f"{config.APP_NAME} journal"})
     except requests.RequestException:
         log.warning("Couldn't reach the email service")
+        _failed(local)
         raise MailProblem("Couldn't reach the email service. Try again in a minute.") from None
     if r.status_code >= 300:
         try:
@@ -63,5 +71,6 @@ def send(to, subject, text, html, local="invitations", headers=None, reply_to=No
         except ValueError:
             detail = ""
         log.warning("The email service refused a message (%s): %s", r.status_code, detail)
+        _failed(local)
         raise MailProblem(f"The email service refused it ({r.status_code}){': ' + detail if detail else ''}.")
     log.info("Email sent")

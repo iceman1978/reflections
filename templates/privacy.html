@@ -100,6 +100,12 @@
       <p>When you share a passage, the email holds only the passage, where it's from, and your note, never your
         entries or reflections. Replies go to your email address. Anyone can ask not to receive shared passages,
         with the link at the bottom of each one.</p>
+      <p>A shared passage gets its own page on {{ app_name }} (the link in the email or message), which shows the
+        passage and links on to its source. For each passage, the app also counts how many times it has been kept
+        (starred) and shared, with no record of who: your own kept passages stay private and encrypted.</p>
+      <p>A passage shared with someone who uses {{ app_name }} also appears in their Kept passages, with your
+        name and note. Until they next unlock their journal, it waits on the server, unencrypted, since only they
+        hold the key to their list; it moves in, encrypted, the next time they unlock.</p>
       {% endif %}
 
       {% if hosted %}

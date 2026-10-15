@@ -571,6 +571,23 @@
 
       {% if is_admin %}
       <div id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" class="settings-panel" hidden>
+      {% if hosted %}
+      <label class="checkbox">
+        <input id="admin-digest" type="checkbox"> Email me when there's new work
+      </label>
+      <span class="hint checkbox-hint">Invitation requests, feedback, people who joined, and emails that couldn't be
+        sent: at 9:00 and 17:00 if anything is new, so at most twice a day.</span>
+      {% endif %}
+      {% if hosted %}
+      <!-- First, the work waiting: invitation requests to approve -->
+      <h2 class="invite-heading">Invitation requests <span id="invite-count" class="invite-count" hidden></span></h2>
+      <p class="hint">People others would like to invite. <em>Invite</em> lets them sign in and emails them an
+        invitation{% if not mail_ready %} (once <code>RESEND_API_KEY</code> is set on Render){% endif %}, with the
+        personal note from whoever asked.</p>
+      <ul id="invite-requests" class="invite-cards"></ul>
+      <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Also show ones that have access or were declined</label></div>
+      {% endif %}
+
       <h2>Usage</h2>
       <p class="hint">Counts only, never what anyone writes. Last 30 days unless noted{% if hosted %}; only you can see this.
         <em>Remove</em> takes away someone's access (their journal stays, should you let them back in){% endif %}.
@@ -581,12 +598,11 @@
       <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
 
       {% if hosted %}
-      <h2>Invitation requests</h2>
-      <p class="hint">People others would like to invite. <em>Invite</em> lets them sign in and sends them an invitation
-        email{% if not mail_ready %} (once <code>RESEND_API_KEY</code> is set on Render){% endif %}, with the personal
-        note from whoever asked.</p>
-      <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Show ones that have access or were declined</label></div>
-      <ul id="invite-requests" class="feedback-list"></ul>
+      <h2>Passages that need a theme</h2>
+      <p class="hint">Shared passages whose drawing wasn't a good fit: none of the themes fitted, the theme picker
+        named one the list is missing, or the pick failed (it's tried again the next time the passage is shared).
+        For growing the themes and drawings.</p>
+      <ul id="theme-gaps" class="feedback-list"></ul>
       {% endif %}
 
       <h2>Feedback received</h2>

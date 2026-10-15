@@ -23,7 +23,7 @@ from datetime import date, datetime
 
 from itsdangerous import BadSignature, URLSafeSerializer
 
-from . import config, db, emails, invites, mail
+from . import config, db, digest, emails, invites, mail
 from .config import TZ
 
 log = logging.getLogger(__name__)
@@ -237,13 +237,16 @@ def _watch(secret, site_url):
             now = datetime.now(TZ)
             if SEND_FROM <= now.hour < SEND_UNTIL and mail.ready():
                 send_due(now.date(), secret, site_url)
+            if mail.ready():
+                digest.send_due(now, site_url)             # the admin's "new work" email
         except Exception:                                   # never let the timer die
             log.exception("Reminders check failed")
         time.sleep(CHECK_EVERY)
 
 
 def start(secret):
-    """On the server: check every few minutes, and send in the morning."""
+    """On the server: check every few minutes, and send in the morning (and the
+    admin's email at its times)."""
     if not config.PUBLIC_HOST:
         return
     threading.Thread(target=_watch, args=(secret, f"https://{config.PUBLIC_HOST}/"),

@@ -13,7 +13,7 @@ import sqlite3
 import sys
 import time
 import unittest
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -694,6 +694,7 @@ class ShareTests(unittest.TestCase):
         fresh_journal()
         from journal import invites, sources
         invites.grant("ann@example.com")                                          # a sign-in list, without Cole
+        self.pick = ("Trust & surrender", None, None)
         self.work = next(iter(sources.works()))
         self.found = {"work": self.work, "author": "", "title": "Psalms", "translation": "Berean Standard Bible",
                       "location": "23:1", "quote": "The LORD is my shepherd; I shall not want.",
@@ -703,7 +704,7 @@ class ShareTests(unittest.TestCase):
         from unittest import mock
         from journal import share
         with mock.patch("journal.sources.cite", return_value=self.found if found else None), \
-                mock.patch("journal.passages._theme_of", return_value="Trust & surrender") as self.picked, \
+                mock.patch("journal.passages._theme_of", return_value=self.pick) as self.picked, \
                 mock.patch("journal.mail.send") as send:
             share.send("u-ann", "ann@example.com", "Ann", to, "Cole", note, self.work, "23:1",
                        "The LORD is my shepherd", "https://inhissteps.app/", "secret")
@@ -717,7 +718,7 @@ class ShareTests(unittest.TestCase):
         self.assertIn("The LORD is my shepherd; I shall not want.", text)          # the source's wording
         self.assertIn("Psalms 23:1 (BSB)", text)
         self.assertIn("ask Ann for an invitation", text)                          # not invited yet
-        self.assertIn("#:~:text=", html)
+        self.assertIn("https://inhissteps.app/p/", html)                          # the passage's own page
         self.assertEqual(send.call_args.kwargs["reply_to"], "ann@example.com")
         self.assertEqual(send.call_args.kwargs["local"], "share")
 
@@ -750,6 +751,57 @@ class ShareTests(unittest.TestCase):
         self.picked.assert_not_called()                                         # chosen once, then saved
         self.assertNotIn("cole", json.dumps(top).lower())                      # never who it went to
 
+    def test_passages_that_need_a_theme_are_listed(self):
+        from journal import passages
+        self.pick = (None, "Shepherding", None)                                   # nothing fitted
+        html = self.send().call_args.args[3]
+        self.assertIn("email-vignette.png", html)                                # the edition's drawing instead
+        gaps = passages.needing_themes()
+        self.assertEqual([(g["theme"], g["missing_theme"]) for g in gaps], [(None, "Shepherding")])
+        self.pick = ("Trust & surrender", None, None)                            # tried again next time
+        self.send(to="pat@x.com")
+        self.assertEqual(passages.needing_themes(), [])
+
+    def test_a_passage_has_its_own_short_link_and_counts(self):
+        from journal import kept, passages
+        html = self.send().call_args.args[3]
+        key = kept.key_of(self.found)
+        self.assertIn(f"https://inhissteps.app/p/{key[:10]}", html)                 # through the app, not the source
+        self.assertNotIn("biblehub.com", html)
+        self.assertEqual(passages.by_short(key[:10])["quote"], self.found["quote"])
+        self.assertIsNone(passages.by_short("../etc"))
+        passages.shared(key, by_email=False)
+        passages.kept_count(self.found, +1)
+        passages.kept_count(self.found, +1)
+        passages.released(key)
+        p = passages.get(key)
+        self.assertEqual((p["shares"], p["other_shares"], p["keeps"]), (1, 1, 1))
+        passages.released(key), passages.released(key)
+        self.assertEqual(passages.get(key)["keeps"], 0)                           # never below nothing
+
+    def test_a_shared_passage_waits_in_their_kept_passages(self):
+        from journal import kept
+        uid = users.from_google("g-cole", "cole@gmail.com", "Cole")
+        set_up_as(uid)
+        mine = {**self.found, "quote": "He makes me lie down in green pastures.", "location": "23:2"}
+        kept.keep(mine, "2026-10-01T09:00:00-04:00")                              # one he kept himself
+        vault.use(None)
+        text = self.send(note="For your mornings").call_args.args[2]
+        self.assertIn("also waiting in your Kept passages", text)                 # he's a member
+        self.found = mine
+        self.send(to="cole@gmail.com", note=None)                                 # one he already has
+        vault.lock_all()
+        unlock_as(uid)
+        self.assertEqual(kept.take_shared("cole@gmail.com"), 2)
+        got = {p["location"]: p for p in kept.passages()}
+        self.assertEqual(got["23:1"]["own"], False)
+        self.assertEqual([(s["by"], s["note"]) for s in got["23:1"]["shared"]], [("Ann", "For your mornings")])
+        self.assertNotIn("own", got["23:2"])                                      # still his own keep
+        self.assertEqual(got["23:2"]["shared"][0]["by"], "Ann")
+        self.assertEqual(kept.take_shared("cole@gmail.com"), 0)                   # moved, not copied
+        kept.release(got["23:1"]["key"])                                          # he can let it go
+        self.assertEqual(len(kept.passages()), 1)
+
     def test_asking_not_to_receive_them(self):
         from journal import share
         token = share.stop_token("cole@gmail.com", "secret")
@@ -758,6 +810,83 @@ class ShareTests(unittest.TestCase):
         share.block("Cole@gmail.com")
         with self.assertRaises(share.ShareProblem):
             self.send()
+
+
+class DigestTests(unittest.TestCase):
+    """The admin's "new work" email: at 9:00 and 17:00, only when something's new."""
+
+    def setUp(self):
+        fresh_journal()
+        self._admins = set(config.ADMIN_EMAILS)
+        config.ADMIN_EMAILS.clear()
+        config.ADMIN_EMAILS.add("boss@x.com")
+
+    def tearDown(self):
+        config.ADMIN_EMAILS.clear()
+        config.ADMIN_EMAILS.update(self._admins)
+
+    def at(self, hour, day=15):
+        from journal.config import TZ
+        return datetime(2026, 10, day, hour, 5, tzinfo=TZ)
+
+    @staticmethod
+    def at_noon():
+        """Date everything made so far at noon on the 15th (between the 9:00 and 17:00 emails)."""
+        con = db.connect()
+        with con:
+            for table in ("invites", "feedback", "users"):
+                con.execute(f"UPDATE {table} SET created_at = '2026-10-15T12:00:00-04:00'")
+            con.execute("UPDATE mail_failures SET at = '2026-10-15T16:00:00+00:00'")
+        con.close()
+
+    def run_at(self, hour, day=15):
+        from unittest import mock
+        from journal import digest
+        with mock.patch("journal.mail.send") as send:
+            digest.send_due(self.at(hour, day), "https://inhissteps.app/")
+        return send
+
+    def test_twice_a_day_and_only_with_news(self):
+        from journal import feedback, invites
+        self.assertFalse(self.run_at(8).called)                                  # before 9: nothing
+        self.assertFalse(self.run_at(9).called)                                  # nothing new
+        invites.add("u-ann", "ann@example.com", "Ann", "pal@gmail.com", note="my cousin")
+        feedback.add("u-ann", "ann@example.com", "Ann", "fix", "The button is odd")
+        self.at_noon()
+        send = self.run_at(10)
+        self.assertFalse(send.called)                                            # the 9:00 email was this morning's
+        send = self.run_at(17)
+        to, subject, text, html = send.call_args.args
+        self.assertEqual(to, "boss@x.com")
+        self.assertIn("1 invitation request", subject)
+        self.assertIn("from Ann", text)
+        self.assertIn("1 new piece of feedback", text)
+        self.assertNotIn("pal@gmail.com", text + html)                           # names only
+        self.assertNotIn("cousin", text + html)
+        self.assertNotIn("button is odd", text + html)
+        self.assertIn("?settings=admin", html)
+        self.assertEqual(send.call_args.kwargs["local"], "admin")
+        self.assertFalse(self.run_at(18).called)                                 # once per slot
+        self.assertFalse(self.run_at(9, day=16).called)                          # nothing new since
+
+    def test_joined_and_failed_emails_are_counted(self):
+        from journal import digest, users
+        self.run_at(9)
+        users.from_google("g-new", "new@x.com", "New Person")
+        digest.record_failure("reminder")
+        self.at_noon()
+        text = self.run_at(17).call_args.args[2]
+        self.assertIn("1 person joined", text)
+        self.assertIn("1 email couldn't be sent", text)
+
+    def test_an_admin_can_turn_it_off(self):
+        from journal import feedback, users
+        uid = users.from_google("g-boss", "boss@x.com", "Boss")
+        users.update_prefs(uid, {"admin_digest": False})
+        self.run_at(9)
+        feedback.add("u-ann", "ann@example.com", "Ann", "fix", "Hello")
+        self.at_noon()
+        self.assertFalse(self.run_at(17).called)
 
 
 class UpgradeTests(unittest.TestCase):

@@ -907,6 +907,24 @@
     }
     where.append(shareLink(p));
     fig.append(quote, where);
+    // Shared with you by a friend (instead of, or as well as, coming up in your reflections).
+    for (const gift of p.shared || []) {
+      const from = document.createElement("div");
+      from.className = "kept-shared";
+      const line = document.createElement("p");
+      line.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18v4H3zM5 13h14v8H5zM12 9v12M12 9c-1.5-3-5-4-6-2s2 2 6 2zM12 9c1.5-3 5-4 6-2s-2 2-6 2z"/></svg>';
+      line.append(document.createTextNode(`${p.own === false ? "Shared with you" : "Also shared with you"} by ${gift.by} · `
+        + fmtDate(gift.at, { month: "short", day: "numeric", year: "numeric" })));
+      from.append(line);
+      if (gift.note) {
+        const note = document.createElement("p");
+        note.className = "kept-shared-note";
+        note.textContent = `“${gift.note}”`;
+        from.append(note);
+      }
+      fig.append(from);
+    }
+    if (p.own === false) fig.classList.add("kept-gift");
     if (p.entries.length) {
       const from = document.createElement("p");
       from.className = "kept-entries";
@@ -945,9 +963,12 @@
     return b;
   }
 
-  function sharedText(q) {
-    return `“${q.quote}”\n— ${citeText(q)}${q.url ? `\n${passageUrl(q.url, q.quote)}` : ""}`;
+  // The passage's own page in the app (/p/<id>) when there is one; the source otherwise (your own computer).
+  function sharedText(q, link) {
+    const url = link || (q.url ? passageUrl(q.url, q.quote) : "");
+    return `“${q.quote}”\n— ${citeText(q)}${url ? `\n${url}` : ""}`;
   }
+  let sharingPreview = Promise.resolve({});
 
   function openSharePassage(q) {
     if (!CFG.hosted) {                                         // on your own computer: the share sheet only
@@ -963,8 +984,10 @@
     drawing.hidden = true;
     $("share-passage-dialog").showModal();
     $("share-to").focus();
-    // The passage's own drawing (its theme is chosen the first time it's shared, then saved).
-    api("POST", "/api/share/preview", { work: q.work, location: q.location, quote: q.quote }, { passive: true })
+    // The passage's own drawing (its theme is chosen the first time it's shared, then saved), and its link.
+    sharingPreview = api("POST", "/api/share/preview", { work: q.work, location: q.location, quote: q.quote }, { passive: true })
+      .catch(() => ({}));
+    sharingPreview
       .then((res) => {
         if (sharing !== q || !res.drawing) return;
         drawing.style.setProperty("--vignette", `url('${res.drawing}')`);
@@ -978,9 +1001,11 @@
     $("share-passage-cancel").addEventListener("click", () => $("share-passage-dialog").close());
     $("share-other-btn").addEventListener("click", async () => {
       const note = $("share-note").value.trim();
+      const { link } = await sharingPreview;
       try {
-        await navigator.share({ text: `${note ? `${note}\n\n` : ""}${sharedText(sharing)}` });
+        await navigator.share({ text: `${note ? `${note}\n\n` : ""}${sharedText(sharing, link)}` });
         $("share-passage-dialog").close();
+        if (link) api("POST", "/api/share/other", { link }, { passive: true }).catch(() => {});   // counted, never who
       } catch (_) { /* closed the share sheet */ }
     });
     $("share-passage-form").addEventListener("submit", async (e) => {
@@ -1878,6 +1903,7 @@
         box.checked = chosen === undefined ? box.dataset.default === "1" : !!chosen;
       }
       syncPhotoControls();
+      if ($("admin-digest")) $("admin-digest").checked = settings.admin_digest !== false;
     } catch (err) {
       $("settings-state").textContent = `Couldn't load settings: ${err.message}`;
     }
@@ -2381,18 +2407,38 @@
     try { items = await api("GET", "/api/admin/invites"); } catch (_) { return; }
     const showAll = $("invites-show-all").checked;
     const shown = items.filter((i) => showAll || i.status === "requested");
+    const waiting = items.filter((i) => i.status === "requested").length;
+    $("invite-count").hidden = !waiting;
+    $("invite-count").textContent = waiting;
     ul.replaceChildren();
     for (const i of shown) {
+      // A card per request: who, who asked and when, their notes, then the buttons.
       const li = document.createElement("li");
-      li.className = i.status === "requested" ? "" : "done";
-      const meta = document.createElement("div");
-      meta.className = "feedback-meta";
-      meta.textContent = `${longDate(i.created_at)} · asked by ${i.requester_email || i.requester_name || "someone"}`;
-      const body = document.createElement("p");
-      body.className = "feedback-body";
-      body.textContent = (i.name ? `${i.name}, ${i.email}` : i.email)
-        + (i.message ? `\nPersonal note: “${i.message}”` : "")
-        + (i.note ? `\nNote to you: “${i.note}”` : "");
+      li.className = `invite-card${i.status === "requested" ? "" : " done"}`;
+      const who = document.createElement("p");
+      who.className = "invite-who";
+      const name = document.createElement("strong");
+      name.textContent = i.name || i.email;
+      who.append(name);
+      if (i.name) {
+        const addr = document.createElement("span");
+        addr.className = "invite-addr";
+        addr.textContent = i.email;
+        who.append(" ", addr);
+      }
+      const asked = document.createElement("p");
+      asked.className = "invite-asked";
+      asked.textContent = `Asked by ${i.requester_name || i.requester_email || "someone"} · ${longDate(i.created_at)}`;
+      li.append(who, asked);
+      for (const [label, text] of [["For them", i.message], ["To you", i.note]]) {
+        if (!text) continue;
+        const note = document.createElement("p");
+        note.className = "invite-note";
+        const tag = document.createElement("span");
+        tag.textContent = `${label}: `;
+        note.append(tag, `“${text}”`);
+        li.append(note);
+      }
       const actions = document.createElement("div");
       actions.className = "invite-actions";
       const status = document.createElement("span");
@@ -2415,6 +2461,7 @@
       const send = document.createElement("button");
       send.type = "button";
       send.textContent = i.status !== "added" ? "Invite" : i.emailed_at ? "Email again" : "Send email";
+      if (i.status === "requested") send.className = "primary";
       send.addEventListener("click", async () => {
         send.disabled = true;
         try {
@@ -2440,18 +2487,62 @@
         });
         actions.append(flip);
       }
-      li.append(meta, body, actions);
+      li.append(actions);
       ul.append(li);
     }
     if (!shown.length) {
       const li = document.createElement("li");
-      li.className = "subtle";
+      li.className = "subtle invite-none";
       li.textContent = items.length ? "No requests waiting." : "No invitation requests yet.";
       ul.append(li);
     }
     refreshUsage();
+    refreshThemeGaps();
   }
   if ($("invites-show-all")) $("invites-show-all").addEventListener("change", refreshInviteRequests);
+
+  // Admin → "Email me when there's new work": outside the settings form, so it saves as it's clicked.
+  if ($("admin-digest")) {
+    $("admin-digest").addEventListener("change", async () => {
+      const box = $("admin-digest");
+      try {
+        await api("PUT", "/api/settings", { admin_digest: box.checked });
+        showNotice(box.checked ? "You'll get an email when there's new work." : "No more new-work emails.", 3000);
+      } catch (err) {
+        box.checked = !box.checked;
+        state.clientError = `Couldn't save that: ${sentence(err.message)}`; renderBanner();
+      }
+    });
+  }
+
+  // Settings → Passages that need a theme (only for whoever runs the app).
+  async function refreshThemeGaps() {
+    const ul = $("theme-gaps");
+    if (!ul) return;
+    let items;
+    try { items = await api("GET", "/api/admin/passages/themes"); } catch (_) { return; }
+    ul.replaceChildren();
+    for (const p of items) {
+      const li = document.createElement("li");
+      const meta = document.createElement("div");
+      meta.className = "feedback-meta";
+      meta.textContent = [p.work + (p.location ? ` ${p.location}` : ""), plural(p.shares, "share"),
+        p.theme ? `given “${p.theme}”` : p.theme_problem ? "the pick failed" : "no theme fitted"].join(" · ");
+      const body = document.createElement("p");
+      body.className = "feedback-body";
+      body.textContent = `“${p.quote}”`
+        + (p.missing_theme ? `\nA theme that would fit: ${p.missing_theme}` : "")
+        + (p.theme_problem ? `\nWhy: ${p.theme_problem}` : "");
+      li.append(meta, body);
+      ul.append(li);
+    }
+    if (!items.length) {
+      const li = document.createElement("li");
+      li.className = "subtle";
+      li.textContent = "None yet: every shared passage has a theme that fits.";
+      ul.append(li);
+    }
+  }
 
   // Settings → Usage (only on the page for whoever runs the app).
   function daysAgo(n) {
@@ -3155,6 +3246,15 @@
     } catch (_) { return asked; }
   })();
 
+  // The admin email's "Open Admin" button links to /?settings=admin.
+  const SETTINGS_ON_START = (() => {
+    const asked = new URLSearchParams(location.search).get("settings");
+    try {
+      if (asked) sessionStorage.setItem("journal.settingsOnStart", asked);
+      return asked || sessionStorage.getItem("journal.settingsOnStart");
+    } catch (_) { return asked; }
+  })();
+
   let started = false, statusTimer = null, clockTimer = null;
   function startJournal() {
     state.unlocked = true;
@@ -3183,6 +3283,12 @@
       history.replaceState(null, "", "/");
       $("feedback-text").value = $("feedback-text").value || FEEDBACK_TOPICS[FEEDBACK_ON_START];
       setTimeout(openFeedback, 400);
+    }
+    if (!started && SETTINGS_ON_START && $(`tab-${SETTINGS_ON_START}`)) {
+      try { sessionStorage.removeItem("journal.settingsOnStart"); } catch (_) {}
+      history.replaceState(null, "", "/");
+      state.settingsTab = SETTINGS_ON_START;
+      setTimeout(showSettings, 400);
     }
     started = true;
     // Keep the date and streak right if the page stays open past midnight.

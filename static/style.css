@@ -1032,6 +1032,20 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .invite-status.added { background: #e3f1df; border-color: #8fbf82; color: #2d5a22; }
 .invite-status.declined { text-decoration: line-through; }
 .invite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Admin → Invitation requests: one card each, at the top of the tab. */
+.invite-count { display: inline-block; min-width: 1.5em; margin-left: 6px; padding: 0 7px; border-radius: 999px;
+  background: var(--accent); color: #fff; font-size: 0.8rem; line-height: 1.6; text-align: center; vertical-align: 0.2em; }
+.invite-cards { list-style: none; padding: 0; margin: 0 0 10px; display: grid; gap: 10px; }
+.invite-card { padding: 12px 14px; border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 8px;
+  background: var(--field); }
+.invite-card.done { opacity: 0.6; border-left-color: var(--rule); }
+.invite-card p { margin: 0 0 4px; }
+.invite-who strong { font-size: 1.05rem; }
+.invite-addr, .invite-asked { color: var(--muted); font-size: 0.88rem; overflow-wrap: anywhere; }
+.invite-note { font-style: italic; font-size: 0.92rem; }
+.invite-note span { font-style: normal; color: var(--muted); }
+.invite-card .invite-actions { margin-top: 10px; }
+.invite-none { padding: 4px 0 10px; }
 .invite-emailed { font-size: 0.8rem; color: var(--muted); }
 .usage-table tr.no-access td { color: var(--muted); }
 .checkbox-hint { display: block; margin: -6px 0 12px 26px; }   /* under a checkbox, lined up with its words */
@@ -1064,6 +1078,17 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   border: 1px solid var(--rule); border-radius: 999px; color: var(--accent); text-decoration: none; font-size: 1rem;
 }
 .info-back:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+/* A passage's own page (/p/<id>): the shared passage, a button on to its source. */
+.passage-page .page { padding-top: 40px; }
+.passage-page .reflection-vignette { max-width: 360px; }
+.passage-quote { margin: 0 0 22px; padding: 4px 0 4px 20px; border-left: 3px solid var(--accent); }
+.passage-quote p { margin: 0 0 10px; font-size: 1.45rem; line-height: 1.5; font-style: italic; }
+.passage-quote footer { color: var(--muted); }
+.passage-source { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0 0 30px; }
+.passage-source-btn { display: inline-block; padding: 10px 20px; border-radius: 8px; background: var(--accent); color: #fff; text-decoration: none; }
+.passage-source-btn:hover { filter: brightness(1.1); }
+.passage-about { border-top: 1px solid var(--rule); padding-top: 16px; }
+.passage-about p { margin: 0 0 6px; }
 .info-tabs { display: flex; flex-wrap: wrap; gap: 4px 2px; margin: 0 0 22px; border-bottom: 1px solid var(--rule); }
 .info-tabs a {
   padding: 6px 12px; margin-bottom: -1px; border-bottom: 2px solid transparent;
@@ -1521,6 +1546,12 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .kept-passage blockquote { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.08em; line-height: var(--lh, 1.6); color: var(--ink); }
 .kept-passage .kept-where { margin: 4px 0 0; font-size: 0.88rem; color: var(--muted); }
 .kept-passage .kept-where a { text-underline-offset: 2px; }
+/* Kept passages a friend shared with you: who, when and their note, with a small gift mark. */
+.kept-shared { margin: 6px 0 0; font-size: 0.88rem; color: var(--accent); }
+.kept-shared p { margin: 0; }
+.kept-shared svg { width: 1em; height: 1em; margin-right: 6px; vertical-align: -0.12em; fill: none; stroke: currentColor;
+  stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; }
+.kept-shared .kept-shared-note { margin: 2px 0 0 1.4em; font-style: italic; color: var(--muted); }
 /* Share: beside "Read the passage" in a reflection, at the right on Kept passages. */
 .share-link, .share-link:hover:not(:disabled) {
   padding: 0; border: none; background: none; font: inherit; color: inherit;

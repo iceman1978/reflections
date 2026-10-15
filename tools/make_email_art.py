@@ -7,6 +7,8 @@
                                                drawing, in the theme's blue
   static/email-vignettes/<theme>.png           every theme's drawing, the same
                                                way (a shared passage's drawing)
+  static/brands/<edition>/og/<theme>.jpg       a passage link's preview card
+                                               (and _default.jpg)
 
 Email programs can't load the app's fonts or recolour a drawing (the app paints
 its drawings in the theme colour through a mask), so these go in as finished
@@ -16,6 +18,7 @@ Run after changing an edition's name or its email drawing:
   .venv/Scripts/python.exe tools/make_email_art.py
 """
 import json
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -56,6 +59,47 @@ def vignette(slug, out):
     return img.size
 
 
+PAGE = (241, 245, 249)        # the email's page colour, #f1f5f9
+COVER = (34, 54, 77)          # the cover, #22364d
+
+
+def og_image(slug, out, logo, wordmark):
+    """The picture for a passage link's preview card (Messages, WhatsApp...): 1200x630,
+    the theme's drawing on the page, and the cover's band with the logo and name."""
+    img = Image.new("RGB", (1200, 630), PAGE)
+    mask = Image.open(ROOT / "static" / "vignettes" / f"{slug}.png").convert("RGBA").getchannel("A")
+    mask = mask.resize((880, 440), Image.LANCZOS).point(lambda a: round(a * 0.85))
+    img.paste(Image.new("RGB", mask.size, BLUE), (160, 20), mask)
+    band = 150
+    img.paste(Image.new("RGB", (1200, band), COVER), (0, 630 - band))
+    mark = logo.resize((96, 96), Image.LANCZOS)
+    words = wordmark.resize((round(wordmark.width * 100 / wordmark.height), 100), Image.LANCZOS)
+    left = (1200 - (96 + 24 + words.width)) // 2
+    img.paste(mark, (left, 630 - band + (band - 96) // 2))
+    img.paste(words, (left + 96 + 24, 630 - band + (band - 100) // 2), words)
+    img.save(out, quality=82, optimize=True)
+
+
+def og_images(folder, edition):
+    """One preview picture per theme of the edition, and one for the edition's own drawing."""
+    brand = ROOT / "static" / "brands" / folder.name
+    out = brand / "og"
+    out.mkdir(exist_ok=True)
+    logo = Image.open(brand / "logo.png").convert("RGB")
+    wordmark = Image.open(brand / "email-wordmark.png").convert("RGBA")
+    names = [l.strip() for l in (folder / "themes.txt").read_text(encoding="utf-8").splitlines()
+             if l.strip() and not l.startswith("#")] if (folder / "themes.txt").exists() else []
+    made = 0
+    for name in names:
+        slug = re.sub(r"[^a-z0-9]+", "-", re.sub(r"['’]", "", name.lower()).replace("&", " and ")).strip("-")
+        if (ROOT / "static" / "vignettes" / f"{slug}.png").exists():
+            og_image(slug, out / f"{slug}.jpg", logo, wordmark)
+            made += 1
+    if edition.get("email_vignette"):
+        og_image(edition["email_vignette"], out / "_default.jpg", logo, wordmark)
+    return made
+
+
 out_dir = ROOT / "static" / "email-vignettes"
 out_dir.mkdir(exist_ok=True)
 for drawing in sorted((ROOT / "static" / "vignettes").glob("*.png")):
@@ -68,3 +112,4 @@ for folder in sorted((ROOT / "editions").iterdir()):
     print(folder.name, "name", wordmark(edition["app_name"], brand / "email-wordmark.png"))
     if edition.get("email_vignette"):
         print(folder.name, edition["email_vignette"], vignette(edition["email_vignette"], brand / "email-vignette.png"))
+    print(folder.name, "link previews", og_images(folder, edition))

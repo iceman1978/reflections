@@ -132,7 +132,7 @@ def _guard():
     g.token = request.cookies.get(SESSION_COOKIE)
     if request.path.startswith("/static/backgrounds/") and HOSTED and not g.user_id:
         return jsonify(error="Sign in first."), 403  # personal photos are for signed-in family only
-    if request.path in PUBLIC_PATHS or request.path.startswith("/static/"):
+    if request.path in PUBLIC_PATHS or request.path.startswith(("/static/", "/p/", "/passage/")):
         return None
     if not g.user_id:
         return jsonify(error="Please sign in.", signed_out=True), 401
@@ -488,6 +488,16 @@ def vault_state():
     )
 
 
+def _take_shared():
+    """Passages shared with this person while they were away: into their kept list. Never raises."""
+    if not HOSTED:
+        return
+    try:
+        kept.take_shared((users.get(g.user_id) or {}).get("email"))
+    except Exception:
+        log.exception("Couldn't move shared passages into a kept list")
+
+
 def _import_legacy_if_any():
     """Local only: bring entries from the old unencrypted storage into the
     database, verify them, then delete the old files.
@@ -518,6 +528,7 @@ def vault_setup():
     except vault.VaultError as e:
         return jsonify(error=str(e)), 400
     vault.use(vault.session(token))
+    _take_shared()
     imported, problem, cleanup_failed = _import_legacy_if_any()
     activity.seen(g.user_id)
     return _with_session({"recovery_key": recovery_key, "imported": imported,
@@ -535,6 +546,7 @@ def vault_unlock():
         return jsonify(error=str(e)), 400
     _lock_own_session("replaced by a new unlock")  # this browser's previous session, if any
     vault.use(vault.session(token))
+    _take_shared()
     imported, problem, cleanup_failed = _import_legacy_if_any()
     activity.seen(g.user_id)
     return _with_session({"ok": True, "imported": imported, "import_problem": problem,
@@ -564,6 +576,7 @@ def vault_unlock_passkey():
         return jsonify(error=str(e)), 400
     _lock_own_session("replaced by a new unlock")
     vault.use(vault.session(token))
+    _take_shared()
     activity.seen(g.user_id)
     return _with_session({"ok": True}, token)
 
@@ -848,13 +861,20 @@ def kept_set():
     data = request.get_json(silent=True) or {}
     if not data.get("keep"):
         kept.release(str(data.get("key") or ""))
+        if HOSTED:
+            from journal import passages
+            passages.released(str(data.get("key") or ""))       # an anonymous count
         return jsonify(key=data.get("key"), kept=False)
     try:
         entry = _visible(str(data.get("entry_id") or ""))
         citation = (entry.get("quotes") or [])[int(data.get("index"))]
     except (KeyError, IndexError, TypeError, ValueError):
         return jsonify(error="That quotation wasn't found."), 404
-    return jsonify(key=kept.keep(citation, store.now().isoformat()), kept=True)
+    key = kept.keep(citation, store.now().isoformat())
+    if HOSTED:
+        from journal import passages
+        passages.kept_count(citation, +1)                       # an anonymous count: never who
+    return jsonify(key=key, kept=True)
 
 
 @app.post("/api/entries/<entry_id>/hide")
@@ -1197,12 +1217,62 @@ def share_preview():
         return resp
     data = request.get_json(silent=True) or {}
     try:
-        found = share.preview(data.get("work"), data.get("location"), data.get("quote"))
+        found = share.preview(data.get("work"), data.get("location"), data.get("quote"), _site_url())
     except share.ShareProblem as e:
         return jsonify(error=str(e)), 400
     if found["drawing"]:
         found["drawing"] = f"/static/{found['drawing']}"
     return jsonify(found)
+
+
+@app.get("/api/admin/passages/themes")
+def passages_needing_themes():
+    """Shared passages with no theme, or a better one the list is missing (Admin)."""
+    if (resp := _need_admin()):
+        return resp
+    from journal import passages
+    return jsonify(passages.needing_themes())
+
+
+@app.post("/api/share/other")
+def shared_another_way():
+    """Count a share through the phone's share sheet (anonymously)."""
+    if not HOSTED:
+        return jsonify(ok=True)
+    if (resp := _need_user()):
+        return resp
+    from journal import passages
+    found = passages.by_short(((request.get_json(silent=True) or {}).get("link") or "").rstrip("/").rsplit("/", 1)[-1])
+    if found:
+        passages.shared(found["key"], by_email=False)
+    return jsonify(ok=True)
+
+
+@app.get("/p/<code>")
+@app.get("/passage/<code>")
+def passage_page(code):
+    """A passage's own page: what's shared, with a button on to the source. Public."""
+    from journal import passages
+    found = passages.by_short(code) if HOSTED else None
+    if not found:
+        return render_template("passage.html", found=None), 404
+    if not found["title"]:                                    # saved before titles were kept
+        work = sources.works().get(found["work"]) or {}
+        found.update(title=sources._cite_title(work) if work else found["work"], author=work.get("author"),
+                     translation=work.get("translation"))
+    found["cite"] = share.where(found)
+    found["source_url"] = share.passage_url(found["url"], found["quote"]) if found["url"] else None
+    found["source_name"] = _source_name(found["url"])
+    found["drawing"] = passages.drawing(found["theme"])
+    image = passages.drawing(found["theme"], f"brands/{config.EDITION_NAME}/og", "jpg")
+    return render_template("passage.html", found=found, page_url=f"{_site_url()}p/{passages.short(found['key'])}",
+                           og_image=f"{_site_url()}static/{image or f'brands/{config.EDITION_NAME}/og/_default.jpg'}")
+
+
+def _source_name(url):
+    host = (urllib.parse.urlparse(url or "").hostname or "").removeprefix("www.")
+    return {"biblehub.com": "BibleHub", "en.wikisource.org": "Wikisource", "ccel.org": "the Christian Classics Ethereal Library",
+            "gutenberg.org": "Project Gutenberg"}.get(host, host)
 
 
 @app.route("/share/stop", methods=["GET", "POST"])

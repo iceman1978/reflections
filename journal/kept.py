@@ -5,6 +5,12 @@ own copy of the source), so a kept passage is always the source's exact
 wording, with its work, place and link. They're stored as one encrypted list
 per person (table `kept`), apart from the entries: the same passage can come
 up in several reflections, and it stays kept if one of those entries is deleted.
+
+A passage someone shares with you (journal/share.py) waits, unencrypted, in
+`shared_inbox` under your email address (the server can't add to your list
+while you're away: only you hold its key), and moves into your list, with who
+shared it and their note, the next time you unlock. A shared passage you didn't
+keep yourself has "own": false; a passage kept before this has no "own".
 """
 import hashlib
 import json
@@ -77,6 +83,45 @@ def keep(citation, when):
             current.append({**{f: citation.get(f) or "" for f in FIELDS}, "key": key, "kept_at": when})
             _save(current)
     return key
+
+
+def take_shared(email):
+    """Move passages shared with this address into the current person's kept
+    list, then delete them from the waiting list. Returns how many."""
+    if not email:
+        return 0
+    con = db.connect()
+    try:
+        rows = con.execute("SELECT id, passage, sharer, note, shared_at FROM shared_inbox WHERE email = ?",
+                           (email.lower(),)).fetchall()
+    finally:
+        con.close()
+    if not rows:
+        return 0
+    with db.write_lock:
+        current = _load()
+        by_key = {p["key"]: p for p in current}
+        for _, passage, sharer, note, at in rows:
+            citation = json.loads(passage)
+            key = key_of(citation)
+            gift = {"by": sharer or "A friend", "note": note or "", "at": at}
+            if key in by_key:
+                shared = by_key[key].setdefault("shared", [])
+                if gift not in shared:
+                    shared.append(gift)
+            else:
+                by_key[key] = {**{f: citation.get(f) or "" for f in FIELDS}, "key": key, "kept_at": at,
+                               "own": False, "shared": [gift]}
+                current.append(by_key[key])
+        _save(current)
+        con = db.connect()
+        try:
+            with con:
+                con.executemany("DELETE FROM shared_inbox WHERE id = ?", [(r[0],) for r in rows])
+        finally:
+            con.close()
+    log.info("%d shared passage(s) moved into a kept list", len(rows))
+    return len(rows)
 
 
 def release(key):

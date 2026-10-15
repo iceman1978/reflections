@@ -56,6 +56,9 @@ CREATE TABLE IF NOT EXISTS access   (email TEXT PRIMARY KEY, added_at TEXT NOT N
 CREATE TABLE IF NOT EXISTS shares   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT NOT NULL,
                                     sent_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS share_blocks (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS mail_failures (at TEXT NOT NULL, sender TEXT);
+CREATE TABLE IF NOT EXISTS shared_inbox (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, passage TEXT NOT NULL,
+                                    sharer TEXT, note TEXT, shared_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS passages (key TEXT PRIMARY KEY, work TEXT NOT NULL, location TEXT, quote TEXT NOT NULL,
                                     url TEXT, theme TEXT, created_at TEXT NOT NULL, shares INTEGER NOT NULL DEFAULT 0,
                                     last_shared_at TEXT);
@@ -72,7 +75,10 @@ CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
 
 # Columns added to existing tables after they were first made (CREATE TABLE IF
 # NOT EXISTS leaves an old table as it was): (table, column, type).
-ADDED_COLUMNS = (("invites", "message", "TEXT"), ("invites", "emailed_at", "TEXT"), ("access", "shared_at", "TEXT"))
+ADDED_COLUMNS = (("invites", "message", "TEXT"), ("invites", "emailed_at", "TEXT"), ("access", "shared_at", "TEXT"),
+                 ("passages", "missing_theme", "TEXT"), ("passages", "theme_problem", "TEXT"),
+                 ("passages", "keeps", "INTEGER NOT NULL DEFAULT 0"), ("passages", "other_shares", "INTEGER NOT NULL DEFAULT 0"),
+                 ("passages", "title", "TEXT"), ("passages", "author", "TEXT"), ("passages", "translation", "TEXT"))
 
 LOCAL_USER = "local"
 
