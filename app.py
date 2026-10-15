@@ -1128,21 +1128,6 @@ def _invited(inv, problem):
     return jsonify(ok=True, invite=inv)
 
 
-@app.post("/api/admin/invites")
-def invite_directly():
-    """Let someone in and email them an invitation, without a request first."""
-    if (resp := _need_admin()):
-        return resp
-    data = request.get_json(silent=True) or {}
-    user = users.get(g.user_id) or {}
-    try:
-        inv, problem = invites.invite(g.user_id, user.get("email"), users.prefs(g.user_id)["user_name"] or user.get("name"),
-                                      data.get("email"), data.get("name"), data.get("message"), _site_url())
-    except invites.InviteProblem as e:
-        return jsonify(error=str(e)), 400
-    return _invited(inv, problem)
-
-
 @app.post("/api/admin/invites/<int:invite_id>/invite")
 def invite_request(invite_id):
     """Let the person in a request in, and email them (again, if they were)."""
@@ -1155,11 +1140,17 @@ def invite_request(invite_id):
     return _invited(inv, problem)
 
 
-@app.get("/api/admin/access")
-def who_has_access():
+@app.post("/api/admin/access")
+def give_access():
+    """Let someone (back) in, without an email."""
     if (resp := _need_admin()):
         return resp
-    return jsonify(invites.people())
+    try:
+        invites.grant((request.get_json(silent=True) or {}).get("email"))
+    except invites.InviteProblem as e:
+        return jsonify(error=str(e)), 400
+    log.info("Access given back to an address")
+    return jsonify(ok=True)
 
 
 @app.delete("/api/admin/access")
@@ -1200,6 +1191,16 @@ def usage_stats():
         return resp
     stats = activity.summary()
     stats["invited"] = len(invites.access_list()) if HOSTED else None
+    if HOSTED:
+        # Who can sign in, in the same table: a Remove (or Let back in) button
+        # on each person, and a row for anyone invited who hasn't signed in yet.
+        allowed = invites.access_list()
+        me = ((users.get(g.user_id) or {}).get("email") or "").lower()
+        for r in stats["rows"]:
+            r["access"], r["me"] = r["email"] in allowed, r["email"] == me
+        joined = {r["email"] for r in stats["rows"]}
+        stats["rows"] += [{"who": e, "email": e, "access": True, "me": e == me, "invited_only": True,
+                           "joined": "", "set_up": False} for e in sorted(allowed - joined)]
     stats["tokens"] = tokens.summary()                 # average tokens per call to Claude, last 30 days
     return jsonify(stats)
 

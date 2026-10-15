@@ -485,7 +485,7 @@ class InviteTests(unittest.TestCase):
     def test_invite_lets_them_in_and_emails_them(self):
         from unittest import mock
         from journal import invites
-        req = invites.add("u-ann", "ann@example.com", "Ann", "sam@gmail.com", "Sam", "my cousin, keep this between us")
+        req = invites.add("u-ann", "ann@example.com", "Ann", "sam@gmail.com", "Sam", "You'll love this")
         self.assertFalse(invites.allowed("sam@gmail.com"))
         with mock.patch("journal.mail.send") as send:
             inv, problem = invites.admit(req["id"], "https://inhissteps.app/")
@@ -497,7 +497,8 @@ class InviteTests(unittest.TestCase):
         self.assertEqual(to, "sam@gmail.com")
         self.assertIn("Ann invited you", subject)
         self.assertIn("https://inhissteps.app/", text)
-        self.assertNotIn("cousin", text + html)                             # the note was for whoever runs the app
+        self.assertIn("You&#39;ll love this", html)                          # the personal note goes in
+        self.assertIn("— Ann", html)
 
     def test_invite_directly_with_a_message(self):
         from unittest import mock
@@ -538,13 +539,13 @@ class InviteTests(unittest.TestCase):
         self.assertFalse(invites.allowed("stranger@gmail.com"))
         self.assertTrue(invites.remove("friend-in@example.com"))
         self.assertFalse(invites.allowed("friend-in@example.com"))
-        self.assertEqual([p["email"] for p in invites.people()], ["ann@example.com"])
+        invites.grant("friend-in@example.com")                                 # let back in
+        self.assertTrue(invites.allowed("friend-in@example.com"))
 
     def test_removing_someone_still_on_the_server_list_says_so(self):
         from journal import invites
         invites.import_allowed()
         self.assertFalse(invites.remove("ann@example.com"))
-        self.assertTrue(next(p for p in invites.people() if p["email"] == "ann@example.com")["on_server"])
 
 
 def mock_env(**values):

@@ -76,6 +76,7 @@ def summary(days=30):
         active_days, entries_recent = recent.get(uid, (0, 0))
         rows.append({
             "who": email or name or uid,
+            "email": (email or "").lower() or None,
             "joined": (created or "")[:10],
             "set_up": bool(has_passphrase),
             "first_seen": first,

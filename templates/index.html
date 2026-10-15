@@ -567,7 +567,8 @@
       {% if is_admin %}
       <div id="panel-admin" role="tabpanel" aria-labelledby="tab-admin" class="settings-panel" hidden>
       <h2>Usage</h2>
-      <p class="hint">Counts only, never what anyone writes. Last 30 days unless noted{% if hosted %}; only you can see this{% endif %}.
+      <p class="hint">Counts only, never what anyone writes. Last 30 days unless noted{% if hosted %}; only you can see this.
+        <em>Remove</em> takes away someone's access (their journal stays, should you let them back in){% endif %}.
         <span id="usage-since"></span></p>
       <div id="usage-tiles" class="usage-tiles"></div>
       <div id="usage-chart" class="usage-chart" role="img" aria-label="People using the app each day, last 30 days"></div>
@@ -575,27 +576,12 @@
       <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
 
       {% if hosted %}
-      <h2>Invitations</h2>
-      <p class="hint"><em>Invite</em> lets someone sign in straight away and sends them an invitation email from
-        {{ app_name }}{% if not mail_ready %} (once <code>RESEND_API_KEY</code> is set on Render; until then they're let in
-        without an email){% endif %}. The note on a request is for you and isn't passed on. If the Google sign-in is
-        still in testing, add them to Google's <em>Test users</em> too.</p>
-      <form id="invite-direct-form" class="invite-direct" autocomplete="off">
-        <input id="invite-direct-name" class="invite-input" type="text" maxlength="80" placeholder="Their name (optional)">
-        <input id="invite-direct-email" class="invite-input" type="email" required placeholder="Their Google address">
-        <textarea id="invite-direct-message" class="invite-input" rows="2" maxlength="1000"
-                  placeholder="A short message for the email (optional)"></textarea>
-        <button type="submit" id="invite-direct-btn">Invite</button>
-        <p id="invite-direct-result" class="subtle" role="status"></p>
-      </form>
+      <h2>Invitation requests</h2>
+      <p class="hint">People others would like to invite. <em>Invite</em> lets them sign in and sends them an invitation
+        email{% if not mail_ready %} (once <code>RESEND_API_KEY</code> is set on Render){% endif %}, with the personal
+        note from whoever asked.</p>
       <div class="key-test"><label class="checkbox"><input id="invites-show-all" type="checkbox"> Show ones that have access or were declined</label></div>
       <ul id="invite-requests" class="feedback-list"></ul>
-
-      <h2>Who can sign in</h2>
-      <p class="hint">Everyone who can sign in. <em>Remove</em> takes away someone's access; their journal stays,
-        should you let them back in. Addresses still in <code>ALLOWED_EMAILS</code> on Render are marked: they've
-        been copied here, so that list can now be emptied.</p>
-      <ul id="access-list" class="feedback-list"></ul>
       {% endif %}
 
       <h2>Feedback received</h2>
@@ -724,10 +710,10 @@
       <input id="invite-email" class="invite-input" type="email" autocomplete="off" spellcheck="false" placeholder="name@gmail.com">
       <label class="feedback-label" for="invite-name">Their name <span class="subtle">(optional)</span></label>
       <input id="invite-name" class="invite-input" type="text" maxlength="80" autocomplete="off">
-      <label class="feedback-label" for="invite-note">A note <span class="subtle">(optional)</span></label>
-      <textarea id="invite-note" class="feedback-text" maxlength="1000" rows="2" placeholder="Anything that would help, e.g. how you know them"></textarea>
-      <p class="subtle feedback-note">Your request goes to the person who runs {{ app_name }}, who adds people by hand for now.
-        You'll see it change to <em>Has access</em> below once they're in; then send them the link.</p>
+      <label class="feedback-label" for="invite-note">A personal note <span class="subtle">(optional)</span></label>
+      <textarea id="invite-note" class="feedback-text" maxlength="1000" rows="2" placeholder="A few words for them, e.g. why you thought of them"></textarea>
+      <p class="subtle feedback-note">Once they're let in, they'll get an invitation email from {{ app_name }}, with your
+        note and your name. It shows <em>Has access</em> below when they're in.</p>
       <p id="invite-error" class="wipe-error" hidden></p>
       <div class="dialog-buttons">
         <button type="button" id="invite-cancel-btn">Close</button>

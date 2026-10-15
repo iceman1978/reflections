@@ -2315,7 +2315,9 @@
       meta.textContent = `${longDate(i.created_at)} · asked by ${i.requester_email || i.requester_name || "someone"}`;
       const body = document.createElement("p");
       body.className = "feedback-body";
-      body.textContent = (i.name ? `${i.name}, ${i.email}` : i.email) + (i.note ? `\n“${i.note}”` : "");
+      body.textContent = (i.name ? `${i.name}, ${i.email}` : i.email)
+        + (i.message ? `\nPersonal note: “${i.message}”` : "")
+        + (i.note ? `\nNote to you: “${i.note}”` : "");
       const actions = document.createElement("div");
       actions.className = "invite-actions";
       const status = document.createElement("span");
@@ -2372,69 +2374,9 @@
       li.textContent = items.length ? "No requests waiting." : "No invitation requests yet.";
       ul.append(li);
     }
-    refreshAccessList();
-  }
-
-  // Settings → Who can sign in (only for whoever runs the app).
-  async function refreshAccessList() {
-    const ul = $("access-list");
-    if (!ul) return;
-    let people;
-    try { people = await api("GET", "/api/admin/access"); } catch (_) { return; }
-    ul.replaceChildren();
-    for (const p of people) {
-      const li = document.createElement("li");
-      li.className = "access-row";
-      const who = document.createElement("span");
-      who.textContent = p.email;
-      const when = document.createElement("span");
-      when.className = "invite-emailed";
-      when.textContent = [p.added_at ? `since ${longDate(p.added_at)}` : "", p.on_server ? "also in ALLOWED_EMAILS" : ""]
-        .filter(Boolean).join(" · ");
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.textContent = "Remove";
-      remove.addEventListener("click", async () => {
-        if (!confirm(`Remove access for ${p.email}? Their journal stays, should you let them back in.`)) return;
-        try {
-          const res = await api("DELETE", "/api/admin/access", { email: p.email });
-          if (res.warning) showNotice(res.warning, 8000);
-          refreshInviteRequests();
-        } catch (err) { state.clientError = `Couldn't remove them: ${sentence(err.message)}`; renderBanner(); }
-      });
-      li.append(who, when, remove);
-      ul.append(li);
-    }
-    if (!people.length) {
-      const li = document.createElement("li");
-      li.className = "subtle";
-      li.textContent = "No list yet: anyone with a Google account can sign in.";
-      ul.append(li);
-    }
+    refreshUsage();
   }
   if ($("invites-show-all")) $("invites-show-all").addEventListener("change", refreshInviteRequests);
-  // Settings → Invitations: invite someone directly (no request first).
-  if ($("invite-direct-form")) {
-    $("invite-direct-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = $("invite-direct-btn"), result = $("invite-direct-result");
-      btn.disabled = true;
-      result.textContent = "Sending…";
-      try {
-        const res = await api("POST", "/api/admin/invites", {
-          email: $("invite-direct-email").value, name: $("invite-direct-name").value,
-          message: $("invite-direct-message").value,
-        });
-        result.textContent = res.warning || `Invitation sent to ${res.invite.email}. They can sign in now.`;
-        $("invite-direct-form").reset();
-        refreshInviteRequests();
-      } catch (err) {
-        result.textContent = sentence(err.message);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  }
 
   // Settings → Usage (only on the page for whoever runs the app).
   function daysAgo(n) {
@@ -2487,21 +2429,45 @@
     const table = $("usage-table");
     table.replaceChildren();
     const head = table.createTHead().insertRow();
-    for (const h of ["Person", "Last visit", "Days active", "Entries (all)", "Reflections", "Joined"]) {
+    const access = u.rows.some((r) => r.access != null);   // on the web: who can sign in, with Remove
+    for (const h of ["Person", "Last visit", "Days active", "Entries (all)", "Reflections", "Joined", ...(access ? [""] : [])]) {
       const th = document.createElement("th"); th.textContent = h; head.append(th);
     }
     const body = table.createTBody();
     for (const r of u.rows) {
       const tr = body.insertRow();
+      if (r.access === false) tr.className = "no-access";
+      const note = r.invited_only ? " (invited, not joined yet)" : r.access === false ? " (no access)" : r.set_up ? "" : " (not set up)";
       const cells = [
-        r.who.replace("@", "@​") + (r.set_up ? "" : " (not set up)"),  // long emails break after the @
-        daysAgo(r.days_since),
-        String(r.active_days),
-        `${r.entries_recent} (${r.entries_total})`,
-        String(r.reflections_recent),
+        r.who.replace("@", "@​") + note,  // long emails break after the @
+        r.invited_only ? "" : daysAgo(r.days_since),
+        r.invited_only ? "" : String(r.active_days),
+        r.invited_only ? "" : `${r.entries_recent} (${r.entries_total})`,
+        r.invited_only ? "" : String(r.reflections_recent),
         r.joined,
       ];
       for (const c of cells) tr.insertCell().textContent = c;
+      if (!access) continue;
+      const cell = tr.insertCell();
+      if (r.me || !r.email) continue;                        // never yourself
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "usage-access-btn";
+      btn.textContent = r.access ? "Remove" : "Let back in";
+      btn.addEventListener("click", async () => {
+        if (r.access && !confirm(`Remove access for ${r.email}? Their journal stays, should you let them back in.`)) return;
+        btn.disabled = true;
+        try {
+          const res = await api(r.access ? "DELETE" : "POST", "/api/admin/access", { email: r.email });
+          if (res.warning) showNotice(res.warning, 8000);
+          refreshUsage();
+          refreshInviteRequests();
+        } catch (err) {
+          btn.disabled = false;
+          state.clientError = `Couldn't change their access: ${sentence(err.message)}`; renderBanner();
+        }
+      });
+      cell.append(btn);
     }
   }
 

@@ -26,8 +26,7 @@
   <!-- The page -->
   <tr><td bgcolor="#f1f5f9" style="background:#f1f5f9;padding:34px 38px 30px;border-left:6px solid #dfe5ec;font-family:Georgia,'Times New Roman',serif;font-size:17px;line-height:1.6;color:#2a3038;">
     <p style="margin:0 0 14px;">{{ hello }}</p>
-    <p style="margin:0 0 18px;">{{ opening }}</p>
-    {% if lead %}<p style="margin:0 0 22px;font-size:20px;line-height:1.45;font-style:italic;color:#2c5180;">{{ lead }}</p>{% endif %}
+    <p style="margin:0 0 22px;">{{ opening }}{% if lead %} — <em style="font-style:italic;color:#2c5180;">{{ lead }}</em>{% endif %}</p>
 
     {% if message %}
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">

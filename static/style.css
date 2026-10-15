@@ -1032,15 +1032,10 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .invite-status.added { background: #e3f1df; border-color: #8fbf82; color: #2d5a22; }
 .invite-status.declined { text-decoration: line-through; }
 .invite-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-/* Settings → Invitations: invite someone directly. */
-.invite-direct { display: grid; gap: 8px; margin: 0 0 14px; }
-.invite-direct textarea.invite-input { resize: vertical; font: inherit; }
-.invite-direct button { justify-self: start; }
-.invite-direct .subtle { margin: 0; }
 .invite-emailed { font-size: 0.8rem; color: var(--muted); }
-.feedback-list li.access-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; }
-.access-row span:first-child { overflow-wrap: anywhere; }
-.access-row button { margin-left: auto; }
+.usage-table tr.no-access td { color: var(--muted); }
+.usage-table td:last-child { text-align: right; }
+.usage-access-btn, .usage-access-btn:hover:not(:disabled) { padding: 1px 10px; font-size: 0.8rem; }
 .invite-actions button { font-size: 0.85rem; padding: 2px 10px; }
 
 /* test-web.bat only: makes the test copy unmistakable */

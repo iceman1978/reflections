@@ -31,6 +31,12 @@
      "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
+  "email_points": [
+    "Build a journaling habit. A few lines are enough.",
+    "A well-stocked library of Christian wisdom, including Scripture and devotional writers",
+    "Grow in His Steps — a thoughtful reflection to carry with you",
+    "Private and encrypted — never used to train AI"
+  ],
   "welcome_quote": {
     "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
     "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"

@@ -67,16 +67,13 @@ def import_allowed():
             con.close()
 
 
-def people():
-    """Everyone who can sign in, for Settings: address, when added, and whether
-    ALLOWED_EMAILS on the server still lists them (which Remove can't undo)."""
-    con = db.connect()
-    try:
-        rows = dict(con.execute("SELECT email, added_at FROM access").fetchall())
-    finally:
-        con.close()
-    return [{"email": e, "added_at": rows.get(e), "on_server": e in config.ALLOWED_EMAILS}
-            for e in sorted(set(rows) | config.ALLOWED_EMAILS)]
+def grant(email):
+    """Let someone sign in (again), without sending anything."""
+    email = (email or "").strip().lower()
+    if not EMAIL.match(email):
+        raise InviteProblem("That doesn't look like an email address.")
+    _write("INSERT OR IGNORE INTO access (email, added_at) VALUES (?, ?)",
+           (email, datetime.now(TZ).isoformat(timespec="seconds")))
 
 
 def remove(email):
@@ -111,7 +108,11 @@ def _row(r, everyone=None):
 
 
 def add(user_id, requester_email, requester_name, email, name=None, note=None):
-    """Record a request. Returns it. Raises InviteProblem."""
+    """Record a request. Returns it. Raises InviteProblem.
+
+    The note is a personal note for the person invited, kept as the request's
+    `message` and put in their invitation email. (Requests from before
+    2026-10-15 kept a note for whoever runs the app in `note`, never sent.)"""
     email = (email or "").strip().lower()
     if not EMAIL.match(email):
         raise InviteProblem("That doesn't look like an email address. Use their Google (Gmail) address.")
@@ -133,7 +134,7 @@ def add(user_id, requester_email, requester_name, email, name=None, note=None):
                 raise InviteProblem("That's plenty of invitations for one day. Please send more tomorrow.")
             with con:
                 cur = con.execute(
-                    "INSERT INTO invites (user_id, requester_email, requester_name, email, name, note, created_at) "
+                    "INSERT INTO invites (user_id, requester_email, requester_name, email, name, message, created_at) "
                     "VALUES (?, ?, ?, ?, ?, ?, ?)",
                     (user_id, requester_email, requester_name, email, name, note, now.isoformat(timespec="seconds")))
             row = con.execute(f"SELECT {', '.join(COLUMNS)} FROM invites WHERE id = ?", (cur.lastrowid,)).fetchone()
@@ -234,25 +235,28 @@ def invite(user_id, inviter_email, inviter_name, email, name=None, message=None,
 def invitation(inv, site_url):
     """The invitation email for a request: (subject, text, html).
 
-    The note on a request was written to whoever runs the app, so it's never
-    passed on; only a message written for the invitation itself is."""
+    Only the message (a personal note written for them) goes in; the older
+    `note`, written to whoever runs the app, never does."""
     edition = config.EDITION
     app, lead = config.APP_NAME, edition.get("lead", "")
     who = (inv.get("requester_name") or "").strip()
     subject = f"{who} invited you to {app}" if who else f"You're invited to {app}"
     hello = f"Hi {inv['name']}," if inv.get("name") else "Hi,"
-    opening = f"{who} has invited you to {app}." if who else f"You're invited to {app}."
-    sign_in = (f"Sign in with Google using this address ({inv['email']}). "
+    opening = f"{who} has invited you to {app}" if who else f"You're invited to {app}"   # then " — " and the welcome line
+    # Whoever asked may not know which address someone uses with Google.
+    ask = f"ask {who} to invite" if who else "ask for an invitation for"
+    sign_in = (f"Sign in with your Google account. If {inv['email']} isn't the address you use with Google, "
+               f"{ask} the one you do (only Google sign-in is available while {app} is being tested). "
                "The first time, you'll choose a passphrase that keeps your journal private: "
                "only you can read what you write.")
     no_reply = ("This address doesn't receive replies. If you have a question, use the Feedback "
                 "button (the speech bubble) once you're signed in.")
     message = inv.get("message")
-    points = [p["title"] for p in edition.get("points", [])]
+    points = edition.get("email_points") or [p["title"] for p in edition.get("points", [])]
     quote = edition.get("welcome_quote") or {}
     quote_cite = re.sub(r"<[^>]+>", "", quote.get("cite_html", ""))
     text = "\n\n".join(p for p in (
-        hello, opening, lead, f"“{message}”" if message else None,
+        hello, f"{opening} — {lead}" if lead else f"{opening}.", f"“{message}”" if message else None,
         "\n".join(f"- {p}" for p in points) or None,
         f"Open {app}: {site_url}", sign_in,
         f"{quote['text']}\n{quote_cite}" if quote else None, no_reply) if p)
@@ -260,10 +264,10 @@ def invitation(inv, site_url):
     brand = f"{site}static/brands/{config.EDITION_NAME}"
     wordmark = ROOT / "static" / "brands" / config.EDITION_NAME / "email-wordmark.png"
     page = EMAILS.get_template("invitation.html").render(
-        subject=subject, preview=f"{opening} {lead}".strip(), app=app, tagline=edition.get("tagline"),
+        subject=subject, preview=f"{opening} — {lead}" if lead else f"{opening}.", app=app, tagline=edition.get("tagline"),
         logo_url=f"{brand}/logo.png", wordmark_url=f"{brand}/email-wordmark.png",
         wordmark_width=_png_width(wordmark) // 2 if wordmark.exists() else 300,
-        hello=hello, opening=opening, lead=lead, message=message, who=f"— {who}" if who else "",
+        hello=hello, opening=opening if lead else f"{opening}.", lead=lead, message=message, who=f"— {who}" if who else "",
         points=points, site_url=site, sign_in=sign_in, quote=quote.get("text"), quote_cite=quote_cite,
         no_reply=no_reply)
     return subject, text, page
