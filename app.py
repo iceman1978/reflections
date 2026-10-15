@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, reminders, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -77,7 +77,7 @@ else:
 
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
-PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz", "/reminders/off",
+PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz", "/reminders/off", "/share/stop",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/vault/passkey-options", "/api/vault/unlock-passkey",
@@ -124,7 +124,7 @@ def _guard():
     if host not in ALLOWED_HOSTS:
         return jsonify(error="Forbidden"), 403
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get(CLIENT_HEADER) != "1" \
-            and request.path not in ("/logout", "/reminders/off"):   # the reminder email's own form and one-click link
+            and request.path not in ("/logout", "/reminders/off", "/share/stop"):   # the emails' own forms and one-click link
         return jsonify(error="Forbidden"), 403
 
     vault.use(None)
@@ -1165,6 +1165,57 @@ def reminders_off():
         reminders.turn_off(uid)
         return render_template("reminders_off.html", state="off")
     return render_template("reminders_off.html", state="ask", token=request.args.get("t"))
+
+
+@app.post("/api/share")
+def share_passage():
+    """Email a passage (word for word, checked against the library) and a note to a friend."""
+    if not HOSTED:
+        return jsonify(error="Not available here."), 404
+    if (resp := _need_user()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    user = users.get(g.user_id) or {}
+    try:
+        share.send(g.user_id, user.get("email"), users.prefs(g.user_id)["user_name"] or (user.get("name") or "").split(" ")[0],
+                   data.get("to"), data.get("name"), data.get("note"), data.get("work"), data.get("location"),
+                   data.get("quote"), _site_url(), app.secret_key)
+    except share.ShareProblem as e:
+        return jsonify(error=str(e)), 400
+    except mail.MailProblem as e:
+        return jsonify(error=f"The email couldn't be sent. {e}"), 502
+    log.info("A passage was shared by email (%s)", g.user_id)
+    return jsonify(ok=True)
+
+
+@app.post("/api/share/preview")
+def share_preview():
+    """The passage's theme and drawing, for the share pop-up (chosen once per passage)."""
+    if not HOSTED:
+        return jsonify(error="Not available here."), 404
+    if (resp := _need_user()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    try:
+        found = share.preview(data.get("work"), data.get("location"), data.get("quote"))
+    except share.ShareProblem as e:
+        return jsonify(error=str(e)), 400
+    if found["drawing"]:
+        found["drawing"] = f"/static/{found['drawing']}"
+    return jsonify(found)
+
+
+@app.route("/share/stop", methods=["GET", "POST"])
+def share_stop():
+    """The link in every shared passage: stop passages being shared with this address."""
+    email = share.email_from_token(request.args.get("t"), app.secret_key) if HOSTED else None
+    if not email:
+        return render_template("share_stop.html", state="invalid"), 400
+    if request.method == "POST":
+        share.block(email)
+        log.info("An address asked not to receive shared passages")
+        return render_template("share_stop.html", state="off")
+    return render_template("share_stop.html", state="ask", token=request.args.get("t"))
 
 
 @app.post("/api/admin/share")

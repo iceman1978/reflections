@@ -723,6 +723,30 @@
     </form>
   </dialog>
   {% endif %}
+  {% if hosted %}
+  <!-- Share a passage: the passage (word for word) and a note, by email or the phone's share sheet -->
+  <dialog id="share-passage-dialog" class="dialog feedback-dialog" aria-labelledby="share-passage-title">
+    <form id="share-passage-form" novalidate>
+      <h2 id="share-passage-title">Share this passage</h2>
+      <div id="share-passage-drawing" class="reflection-vignette share-drawing" aria-hidden="true" hidden></div>
+      <blockquote class="share-preview"><p id="share-passage-quote"></p><footer id="share-passage-cite" class="subtle"></footer></blockquote>
+      <label class="feedback-label" for="share-to">Their email address</label>
+      <input id="share-to" class="invite-input" type="email" autocomplete="email" spellcheck="false" placeholder="name@example.com">
+      <label class="feedback-label" for="share-name">Their name <span class="subtle">(optional)</span></label>
+      <input id="share-name" class="invite-input" type="text" maxlength="80" autocomplete="off">
+      <label class="feedback-label" for="share-note">A personal note <span class="subtle">(optional)</span></label>
+      <textarea id="share-note" class="feedback-text" maxlength="1000" rows="3" placeholder="I thought you'd find this passage meaningful."></textarea>
+      <p class="subtle feedback-note">Only this passage and your note are sent, never your entries or reflections.
+        Replies go to you.</p>
+      <p id="share-passage-error" class="wipe-error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="share-other-btn" class="share-other" hidden>Share another way…</button>
+        <button type="button" id="share-passage-cancel">Cancel</button>
+        <button type="submit" id="share-passage-send" class="primary">Send</button>
+      </div>
+    </form>
+  </dialog>
+  {% endif %}
   <dialog id="invite-dialog" class="dialog feedback-dialog" aria-labelledby="invite-title">
     <form id="invite-form" novalidate>
       <h2 id="invite-title">Invite someone</h2>

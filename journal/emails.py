@@ -37,15 +37,17 @@ def quote():
 
 def page(site_url, **words):
     """The email's HTML. `words` are the template's own parts: subject, preview,
-    hello, opening, lead, paragraphs, message, who, prompt, points, button_text,
-    button_url, sign_in, unsubscribe_url."""
+    hello, opening, lead, paragraphs, message, who, prompt, passage, passage_cite,
+    points, button_text, button_url, sign_in, unsubscribe_url, block_url, reply_note
+    (in place of the no-reply line), vignette_url (in place of the edition's drawing)."""
     edition, home = config.EDITION, site(site_url)
     brand = f"{home}static/brands/{config.EDITION_NAME}"
     wordmark = ROOT / "static" / "brands" / config.EDITION_NAME / "email-wordmark.png"
     text, cite = quote()
+    drawing = words.pop("vignette_url", None) or (f"{brand}/email-vignette.png" if edition.get("email_vignette") else None)
     return _ENV.get_template("app.html").render(
         app=config.APP_NAME, tagline=edition.get("tagline"), site_url=home,
         logo_url=f"{brand}/logo.png", wordmark_url=f"{brand}/email-wordmark.png",
         wordmark_width=_png_width(wordmark) // 2 if wordmark.exists() else 300,
-        vignette_url=f"{brand}/email-vignette.png" if edition.get("email_vignette") else None,
+        vignette_url=drawing,
         quote=text, quote_cite=cite, no_reply=NO_REPLY, **words)

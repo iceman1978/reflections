@@ -5,6 +5,8 @@
                                                cream, on a clear background
   static/brands/<edition>/email-vignette.png   the edition's email_vignette
                                                drawing, in the theme's blue
+  static/email-vignettes/<theme>.png           every theme's drawing, the same
+                                               way (a shared passage's drawing)
 
 Email programs can't load the app's fonts or recolour a drawing (the app paints
 its drawings in the theme colour through a mask), so these go in as finished
@@ -53,6 +55,12 @@ def vignette(slug, out):
     img.save(out, optimize=True)
     return img.size
 
+
+out_dir = ROOT / "static" / "email-vignettes"
+out_dir.mkdir(exist_ok=True)
+for drawing in sorted((ROOT / "static" / "vignettes").glob("*.png")):
+    vignette(drawing.stem, out_dir / drawing.name)
+print("themes", len(list(out_dir.glob("*.png"))), "drawings in", out_dir.relative_to(ROOT))
 
 for folder in sorted((ROOT / "editions").iterdir()):
     edition = json.loads((folder / "edition.json").read_text(encoding="utf-8"))

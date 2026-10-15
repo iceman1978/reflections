@@ -12,7 +12,7 @@ from . import db
 from .config import TZ
 
 log = logging.getLogger(__name__)
-KINDS = {"reflection": "Reflection", "prompt": "Writing prompt", "themes": "Theme tagging"}
+KINDS = {"reflection": "Reflection", "prompt": "Writing prompt", "themes": "Theme tagging", "passage": "Passage theme"}
 
 
 def _counts(usage):

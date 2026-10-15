@@ -38,8 +38,9 @@ def ready():
     return bool(os.environ.get("RESEND_API_KEY") and sender())
 
 
-def send(to, subject, text, html, local="invitations", headers=None):
-    """Send one message from <local>@<domain>. Raises MailProblem if it can't be sent."""
+def send(to, subject, text, html, local="invitations", headers=None, reply_to=None):
+    """Send one message from <local>@<domain> (replies to reply_to, if given, and
+    otherwise nowhere). Raises MailProblem if it can't be sent."""
     key = os.environ.get("RESEND_API_KEY")
     if not key:
         raise MailProblem("No email service is set up yet (RESEND_API_KEY on Render).")
@@ -48,6 +49,8 @@ def send(to, subject, text, html, local="invitations", headers=None):
     body = {"from": sender(local), "to": [to], "subject": subject, "text": text, "html": html}
     if headers:
         body["headers"] = headers
+    if reply_to:
+        body["reply_to"] = reply_to
     try:
         r = requests.post(API_URL, timeout=TIMEOUT, json=body,
                           headers={"Authorization": f"Bearer {key}", "User-Agent": f"{config.APP_NAME} journal"})

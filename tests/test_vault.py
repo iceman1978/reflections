@@ -687,6 +687,79 @@ class ReminderTests(unittest.TestCase):
         self.assertIn("first entry", subject)
 
 
+class ShareTests(unittest.TestCase):
+    """Sharing a passage by email: checked against the library, limited, and stoppable."""
+
+    def setUp(self):
+        fresh_journal()
+        from journal import invites, sources
+        invites.grant("ann@example.com")                                          # a sign-in list, without Cole
+        self.work = next(iter(sources.works()))
+        self.found = {"work": self.work, "author": "", "title": "Psalms", "translation": "Berean Standard Bible",
+                      "location": "23:1", "quote": "The LORD is my shepherd; I shall not want.",
+                      "url": "https://biblehub.com/bsb/psalms/23.htm"}
+
+    def send(self, to="cole@gmail.com", note="Thought of you", found=True):
+        from unittest import mock
+        from journal import share
+        with mock.patch("journal.sources.cite", return_value=self.found if found else None), \
+                mock.patch("journal.passages._theme_of", return_value="Trust & surrender") as self.picked, \
+                mock.patch("journal.mail.send") as send:
+            share.send("u-ann", "ann@example.com", "Ann", to, "Cole", note, self.work, "23:1",
+                       "The LORD is my shepherd", "https://inhissteps.app/", "secret")
+        return send
+
+    def test_the_email(self):
+        send = self.send()
+        to, subject, text, html = send.call_args.args
+        self.assertEqual(to, "cole@gmail.com")
+        self.assertIn("Ann shared a passage with you", subject)
+        self.assertIn("The LORD is my shepherd; I shall not want.", text)          # the source's wording
+        self.assertIn("Psalms 23:1 (BSB)", text)
+        self.assertIn("ask Ann for an invitation", text)                          # not invited yet
+        self.assertIn("#:~:text=", html)
+        self.assertEqual(send.call_args.kwargs["reply_to"], "ann@example.com")
+        self.assertEqual(send.call_args.kwargs["local"], "share")
+
+    def test_only_passages_from_the_library(self):
+        from journal import share
+        with self.assertRaises(share.ShareProblem):
+            self.send(found=False)
+
+    def test_limits_and_refusals(self):
+        from journal import share
+        for bad in ("not an email", "ann@example.com"):
+            with self.assertRaises(share.ShareProblem):
+                self.send(to=bad)
+        self.send(), self.send()
+        with self.assertRaises(share.ShareProblem):
+            self.send()                                                           # a couple per address a day
+        for i in range(share.PER_DAY - 2):
+            self.send(to=f"p{i}@x.com")
+        with self.assertRaises(share.ShareProblem):
+            self.send(to="one-more@x.com")                                        # plenty for one day
+
+    def test_passages_are_saved_with_a_theme_and_counted(self):
+        from journal import passages
+        self.send()
+        html = self.send(to="pat@x.com").call_args.args[3]
+        self.assertIn("static/email-vignettes/trust-and-surrender.png", html)   # the passage's own drawing
+        top = passages.most_shared()
+        self.assertEqual([(p["quote"], p["theme"], p["shares"]) for p in top],
+                         [("The LORD is my shepherd; I shall not want.", "Trust & surrender", 2)])
+        self.picked.assert_not_called()                                         # chosen once, then saved
+        self.assertNotIn("cole", json.dumps(top).lower())                      # never who it went to
+
+    def test_asking_not_to_receive_them(self):
+        from journal import share
+        token = share.stop_token("cole@gmail.com", "secret")
+        self.assertEqual(share.email_from_token(token, "secret"), "cole@gmail.com")
+        self.assertIsNone(share.email_from_token(token, "other"))
+        share.block("Cole@gmail.com")
+        with self.assertRaises(share.ShareProblem):
+            self.send()
+
+
 class UpgradeTests(unittest.TestCase):
     """A single-person encrypted journal (before accounts) becomes the 'local' user."""
 

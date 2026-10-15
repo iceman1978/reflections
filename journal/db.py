@@ -53,6 +53,12 @@ CREATE TABLE IF NOT EXISTS invites  (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
                                     note TEXT, created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'requested',
                                     message TEXT, emailed_at TEXT);
 CREATE TABLE IF NOT EXISTS access   (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS shares   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT NOT NULL,
+                                    sent_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS share_blocks (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS passages (key TEXT PRIMARY KEY, work TEXT NOT NULL, location TEXT, quote TEXT NOT NULL,
+                                    url TEXT, theme TEXT, created_at TEXT NOT NULL, shares INTEGER NOT NULL DEFAULT 0,
+                                    last_shared_at TEXT);
 CREATE TABLE IF NOT EXISTS reminders (user_id TEXT PRIMARY KEY, baseline TEXT, stage INTEGER NOT NULL DEFAULT 0,
                                     sent_on TEXT, setup_sent INTEGER NOT NULL DEFAULT 0, ever INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, label TEXT NOT NULL,

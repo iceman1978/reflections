@@ -1,0 +1,33 @@
+<!doctype html>
+{#- The link at the bottom of every shared passage (journal/share.py).
+    state: "ask" (a button, since mail programs open links to check them),
+    "off" (done), or "invalid" (an old or broken link). -#}
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Shared passages · {{ app_name }}</title>
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy">
+    <section class="page">
+      <a class="info-back" href="/">← {{ app_name }}</a>
+      <h1 class="prompt-heading">Shared passages</h1>
+      {% if state == "ask" %}
+      <p>People who use {{ app_name }} can email a passage they found meaningful to a friend. Would you like to stop
+        receiving these?</p>
+      <form method="post" action="/share/stop?t={{ token | urlencode }}">
+        <button type="submit" class="primary">Stop these emails</button>
+      </form>
+      {% elif state == "off" %}
+      <p>Done. Nobody will be able to share passages with this address through {{ app_name }}.</p>
+      {% else %}
+      <p>This link doesn't work any more.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

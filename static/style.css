@@ -1358,7 +1358,7 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .footer-name { font-family: var(--hand); font-size: 1.35em; line-height: 1; vertical-align: -0.05em; padding-right: 0.15em; word-spacing: 0.25em; }   /* spacing: the swashes otherwise close the gaps */
 .book-footer {
   width: fit-content;
-  margin: 18px auto 0;
+  margin: calc(18px + 15px) auto 0;   /* clear of the page edges and cover below the page (its box-shadow) */
   padding: 5px 16px;
   border-radius: 14px;
   text-align: center;
@@ -1521,6 +1521,17 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 .kept-passage blockquote { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.08em; line-height: var(--lh, 1.6); color: var(--ink); }
 .kept-passage .kept-where { margin: 4px 0 0; font-size: 0.88rem; color: var(--muted); }
 .kept-passage .kept-where a { text-underline-offset: 2px; }
+/* Share: beside "Read the passage" in a reflection, at the right on Kept passages. */
+.share-link, .share-link:hover:not(:disabled) {
+  padding: 0; border: none; background: none; font: inherit; color: inherit;
+  text-decoration: underline; text-underline-offset: 2px; cursor: pointer;
+}
+.share-link:hover:not(:disabled) { color: var(--accent); }
+.kept-passage .kept-where .share-link { float: right; }
+.dialog .share-drawing { max-width: 260px; margin: 0 auto 10px; }
+.share-preview { margin: 0 0 14px; padding: 2px 0 2px 14px; border-left: 2px solid var(--accent); }
+.share-preview p { margin: 0 0 4px; font-style: italic; }
+.dialog-buttons .share-other { margin-right: auto; }
 .kept-passage .kept-entries { margin: 3px 0 0; font-size: 0.85rem; color: var(--muted); }
 .kept-passage .kept-entries button { padding: 0; border: none; background: none; border-radius: 0; font-size: inherit; color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
 .kept-passage .kept-entries button:hover { background: none; }

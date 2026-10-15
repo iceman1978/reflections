@@ -30,6 +30,14 @@
     <p style="margin:0 0 22px;">{{ opening }}{% if lead %} — <em style="font-style:italic;color:#2c5180;">{{ lead }}</em>{% endif %}</p>
     {% for p in paragraphs or [] %}<p style="margin:-8px 0 22px;">{{ p }}</p>{% endfor %}
 
+    {% if passage %}
+    <!-- A shared passage, as the source has it -->
+    <div style="margin:0 0 24px;padding:4px 0 4px 18px;border-left:3px solid #2c5180;">
+      <div style="font-size:20px;line-height:1.5;font-style:italic;color:#2a3038;">“{{ passage }}”</div>
+      <div style="margin-top:8px;font-size:14px;color:#5b6673;">{{ passage_cite }}</div>
+    </div>
+    {% endif %}
+
     {% if prompt %}
     <!-- A question to start with (reminders) -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
@@ -82,7 +90,8 @@
   <tr><td align="center" style="padding:20px 24px 0;font-family:Georgia,serif;font-size:12px;line-height:1.55;color:#5b6673;">
     {% if unsubscribe_url %}You're getting this because email reminders are on.
     <a href="{{ unsubscribe_url }}" style="color:#5b6673;">Turn off reminders</a>, or change it in Settings → Basic.<br>{% endif %}
-    {{ no_reply }}<br>
+    {% if block_url %}Don't want passages shared with you? <a href="{{ block_url }}" style="color:#5b6673;">Stop these emails</a>.<br>{% endif %}
+    {{ reply_note or no_reply }}<br>
     <a href="{{ site_url }}privacy" style="color:#5b6673;">How your writing is kept private</a>
   </td></tr>
 

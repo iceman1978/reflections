@@ -763,6 +763,7 @@
           a.title = (q.kind === "idea" ? `Paraphrased${q.idea ? `: ${q.idea}` : ""}. ` : "")
             + `${q.translation.charAt(0).toUpperCase()}${q.translation.slice(1)}, on ${siteName(q.url)}`;
           li.append(a);
+          if (q.kind === "quote" && q.quote) li.append(document.createTextNode(" · "), shareLink(q));
         }
         ul.append(li);
       }
@@ -904,6 +905,7 @@
       a.textContent = "Read the passage ↗";
       where.append(a);
     }
+    where.append(shareLink(p));
     fig.append(quote, where);
     if (p.entries.length) {
       const from = document.createElement("p");
@@ -921,6 +923,86 @@
       fig.append(from);
     }
     return fig;
+  }
+
+  // ---- Sharing a passage -----------------------------------------------------
+  // By email (the passage and a note, never anything they wrote; the server checks
+  // the passage against the library), or on phones through the share sheet.
+  const citeText = (q) => {
+    const where = !q.location ? "" : /^[\p{L}§]/u.test(q.location) ? `, ${q.location}` : ` ${q.location}`;
+    return `${q.author ? `${q.author}, ` : ""}${q.title}${where}`;
+  };
+  let sharing = null;
+
+  function shareLink(q) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "share-link";
+    b.textContent = "Share";
+    b.title = "Share this passage with someone";
+    b.hidden = !CFG.hosted && !navigator.share;
+    b.addEventListener("click", () => openSharePassage(q));
+    return b;
+  }
+
+  function sharedText(q) {
+    return `“${q.quote}”\n— ${citeText(q)}${q.url ? `\n${passageUrl(q.url, q.quote)}` : ""}`;
+  }
+
+  function openSharePassage(q) {
+    if (!CFG.hosted) {                                         // on your own computer: the share sheet only
+      navigator.share({ text: sharedText(q) }).catch(() => {});
+      return;
+    }
+    sharing = q;
+    $("share-passage-quote").textContent = `“${q.quote}”`;
+    $("share-passage-cite").textContent = `— ${citeText(q)}`;
+    $("share-passage-error").hidden = true;
+    $("share-other-btn").hidden = !navigator.share;
+    const drawing = $("share-passage-drawing");
+    drawing.hidden = true;
+    $("share-passage-dialog").showModal();
+    $("share-to").focus();
+    // The passage's own drawing (its theme is chosen the first time it's shared, then saved).
+    api("POST", "/api/share/preview", { work: q.work, location: q.location, quote: q.quote }, { passive: true })
+      .then((res) => {
+        if (sharing !== q || !res.drawing) return;
+        drawing.style.setProperty("--vignette", `url('${res.drawing}')`);
+        drawing.title = res.theme;
+        drawing.hidden = false;
+      })
+      .catch(() => {});
+  }
+
+  if ($("share-passage-form")) {
+    $("share-passage-cancel").addEventListener("click", () => $("share-passage-dialog").close());
+    $("share-other-btn").addEventListener("click", async () => {
+      const note = $("share-note").value.trim();
+      try {
+        await navigator.share({ text: `${note ? `${note}\n\n` : ""}${sharedText(sharing)}` });
+        $("share-passage-dialog").close();
+      } catch (_) { /* closed the share sheet */ }
+    });
+    $("share-passage-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("share-passage-send"), error = $("share-passage-error");
+      btn.disabled = true;
+      error.hidden = true;
+      try {
+        await api("POST", "/api/share", {
+          to: $("share-to").value, name: $("share-name").value, note: $("share-note").value,
+          work: sharing.work, location: sharing.location, quote: sharing.quote,
+        });
+        $("share-passage-dialog").close();
+        showNotice(`Shared with ${$("share-to").value.trim()}.`, 4000);
+        $("share-to").value = $("share-name").value = $("share-note").value = "";
+      } catch (err) {
+        error.textContent = sentence(err.message);
+        error.hidden = false;
+      } finally {
+        btn.disabled = false;
+      }
+    });
   }
 
   // A drawing for the entry's themes, if there is one: a pencil sketch painted in the
