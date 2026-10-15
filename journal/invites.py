@@ -106,7 +106,7 @@ def add(user_id, requester_email, requester_name, email, name=None, note=None):
     2026-10-15 kept a note for whoever runs the app in `note`, never sent.)"""
     email = (email or "").strip().lower()
     if not EMAIL.match(email):
-        raise InviteProblem("That doesn't look like an email address. Use their Google (Gmail) address.")
+        raise InviteProblem("That doesn't look like an email address.")
     if email == (requester_email or "").lower():
         raise InviteProblem("That's your own address.")
     if has_access(email):
@@ -242,12 +242,9 @@ def invitation(inv, site_url, joined=False):
     else:
         subject = f"{who} invited you to {app}" if who else f"You're invited to {app}"
         opening = f"{who} has invited you to {app}" if who else f"You're invited to {app}"   # then " — " and the welcome line
-        # Whoever asked may not know which address someone uses with Google.
-        ask = f"ask {who} to invite" if who else "ask for an invitation for"
-        sign_in = (f"Sign in with your Google account. If {inv['email']} isn't the address you use with Google, "
-                   f"{ask} the one you do (only Google sign-in is available while {app} is being tested). "
-                   "The first time, you'll choose a passphrase that keeps your journal private: "
-                   "only you can read what you write.")
+        sign_in = (f"Sign in with Google, or choose “Continue with email” and use this address ({inv['email']}) "
+                   "to get a sign-in code. The first time, you'll choose a passphrase that keeps your journal "
+                   "private: only you can read what you write.")
     message = inv.get("message")
     points = edition.get("email_points") or [p["title"] for p in edition.get("points", [])]
     quote, quote_cite = emails.quote()

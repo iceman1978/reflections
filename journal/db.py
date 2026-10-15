@@ -57,6 +57,9 @@ CREATE TABLE IF NOT EXISTS shares   (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
                                     sent_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS share_blocks (email TEXT PRIMARY KEY, added_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS mail_failures (at TEXT NOT NULL, sender TEXT);
+CREATE TABLE IF NOT EXISTS signin_codes (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, code_hash TEXT NOT NULL,
+                                    link_hash TEXT NOT NULL, created_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+                                    tries INTEGER NOT NULL DEFAULT 0, used INTEGER NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS shared_inbox (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL, passage TEXT NOT NULL,
                                     sharer TEXT, note TEXT, shared_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS passages (key TEXT PRIMARY KEY, work TEXT NOT NULL, location TEXT, quote TEXT NOT NULL,

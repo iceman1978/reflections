@@ -38,7 +38,7 @@ def quote():
 def page(site_url, **words):
     """The email's HTML. `words` are the template's own parts: subject, preview,
     hello, opening, lead, paragraphs, message, who, prompt, passage, passage_cite,
-    points, button_text, button_url, sign_in, unsubscribe_url, block_url, reply_note
+    points, code, button_text, button_url, sign_in, unsubscribe_url, block_url, reply_note
     (in place of the no-reply line), vignette_url (in place of the edition's drawing)."""
     edition, home = config.EDITION, site(site_url)
     brand = f"{home}static/brands/{config.EDITION_NAME}"

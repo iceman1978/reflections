@@ -30,6 +30,11 @@
     <p style="margin:0 0 22px;">{{ opening }}{% if lead %} — <em style="font-style:italic;color:#2c5180;">{{ lead }}</em>{% endif %}</p>
     {% for p in paragraphs or [] %}<p style="margin:-8px 0 22px;">{{ p }}</p>{% endfor %}
 
+    {% if code %}
+    <!-- A sign-in code, big and easy to copy -->
+    <div style="margin:0 0 24px;text-align:center;font-family:'Courier New',monospace;font-size:34px;letter-spacing:8px;font-weight:bold;color:#2c5180;">{{ code }}</div>
+    {% endif %}
+
     {% if passage %}
     <!-- A shared passage, as the source has it -->
     <div style="margin:0 0 24px;padding:4px 0 4px 18px;border-left:3px solid #2c5180;">

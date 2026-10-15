@@ -1059,6 +1059,16 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 .tone-options input { position: absolute; opacity: 0; pointer-events: none; }
 .tone-options label:has(input:checked) { background: var(--accent); color: #fff; }
 .tone-options label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: -4px; }
+/* The sign-in card: "or", then signing in with an emailed code. */
+.email-signin { margin: 4px 0 8px; }
+.signin-or { display: flex; align-items: center; gap: 10px; margin: 8px 0; color: var(--muted); font-size: 0.85rem; }
+.signin-or::before, .signin-or::after { content: ""; flex: 1; border-top: 1px solid var(--rule); }
+.email-signin-open, .email-signin-open:hover:not(:disabled) { width: 100%; border-radius: 999px; padding: 9px 16px; }
+#email-signin-form, #email-code-form { display: grid; gap: 8px; }
+#email-signin-form[hidden], #email-code-form[hidden] { display: none; }
+#email-code { font-size: 1.4rem; letter-spacing: 0.3em; text-align: center; }
+.link-button, .link-button:hover:not(:disabled) { padding: 0; border: none; background: none; color: var(--muted);
+  text-decoration: underline; font-size: 0.85rem; justify-self: start; }
 .checkbox-hint { display: block; margin: -6px 0 12px 26px; }   /* under a checkbox, lined up with its words */
 .usage-table td:last-child { text-align: right; }
 .usage-access-btn, .usage-access-btn:hover:not(:disabled) { padding: 1px 10px; font-size: 0.8rem; }

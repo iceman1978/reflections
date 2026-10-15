@@ -44,12 +44,24 @@ def ensure_local():
 
 
 def from_google(sub, email, name):
-    """Find or create the user for a Google account. Returns the user ID."""
+    """Find or create the user for a Google account. Returns the user ID.
+    Someone who first signed in with an emailed code gets the same account."""
     con = db.connect()
     try:
         row = con.execute("SELECT id FROM users WHERE google_sub = ?", (sub,)).fetchone()
+        by_email = None if row else con.execute(
+            "SELECT id FROM users WHERE google_sub IS NULL AND lower(email) = ?", ((email or "").lower(),)).fetchone()
     finally:
         con.close()
+    if by_email:
+        with db.write_lock:
+            con = db.connect()
+            try:
+                with con:
+                    con.execute("UPDATE users SET google_sub = ? WHERE id = ?", (sub, by_email[0]))
+            finally:
+                con.close()
+        row = by_email
     if row:
         set_identity(row[0], email, name)
         return row[0]
@@ -62,6 +74,29 @@ def from_google(sub, email, name):
                 con.execute("INSERT INTO users (id, google_sub, email, name, created_at, prefs) VALUES (?, ?, ?, ?, ?, ?)",
                             (user_id, sub, email, name, datetime.now(timezone.utc).isoformat(),
                              json.dumps({"user_name": first_name})))
+        finally:
+            con.close()
+    return user_id
+
+
+def from_email(email):
+    """Find or create the user for an address that signed in with an emailed code.
+    Someone who already signed in with Google at this address gets the same account."""
+    email = email.lower()
+    con = db.connect()
+    try:
+        row = con.execute("SELECT id FROM users WHERE lower(email) = ? ORDER BY created_at LIMIT 1", (email,)).fetchone()
+    finally:
+        con.close()
+    if row:
+        return row[0]
+    user_id = secrets.token_hex(8)
+    with db.write_lock:
+        con = db.connect()
+        try:
+            with con:
+                con.execute("INSERT INTO users (id, email, created_at, prefs) VALUES (?, ?, ?, ?)",
+                            (user_id, email, datetime.now(timezone.utc).isoformat(), json.dumps({"user_name": ""})))
         finally:
             con.close()
     return user_id

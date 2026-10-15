@@ -23,7 +23,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, email_signin, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -78,6 +78,7 @@ else:
 # Reachable without an unlocked journal: the page and its files, signing in,
 # the lock screen's requests, and a few harmless odds and ends.
 PUBLIC_PATHS = {"/", "/login", "/auth/callback", "/auth/test-login", "/logout", "/privacy", "/sources", "/terms", "/healthz", "/reminders/off", "/share/stop",
+                "/auth/email", "/auth/email/start", "/auth/email/verify",
                 "/favicon.ico", "/manifest.webmanifest", "/sw.js",
                 "/api/status", "/api/vault", "/api/vault/setup", "/api/vault/unlock", "/api/vault/recover",
                 "/api/vault/passkey-options", "/api/vault/unlock-passkey",
@@ -124,7 +125,7 @@ def _guard():
     if host not in ALLOWED_HOSTS:
         return jsonify(error="Forbidden"), 403
     if request.method not in ("GET", "HEAD", "OPTIONS") and request.headers.get(CLIENT_HEADER) != "1" \
-            and request.path not in ("/logout", "/reminders/off", "/share/stop"):   # the emails' own forms and one-click link
+            and request.path not in ("/logout", "/reminders/off", "/share/stop", "/auth/email"):   # the emails' own forms and one-click link
         return jsonify(error="Forbidden"), 403
 
     vault.use(None)
@@ -401,6 +402,60 @@ def auth_callback():
     if not info.get("email_verified"):
         return redirect("/?signin=failed")
     return _sign_in(info["sub"], info.get("email"), info.get("name"))
+
+
+# ---- Signing in with an emailed code (journal/email_signin.py) ----------------
+
+def _device():
+    return (request.headers.get("X-Forwarded-For") or request.remote_addr or "?").split(",")[0].strip()
+
+
+@app.post("/auth/email/start")
+def email_signin_start():
+    """Email a sign-in code, if the address is invited. The answer is the same either way."""
+    if not HOSTED:
+        return jsonify(error="Not available here."), 404
+    try:
+        email_signin.request((request.get_json(silent=True) or {}).get("email"), _device(), app.secret_key, _site_url())
+    except email_signin.SignInProblem as e:
+        return jsonify(error=str(e)), 400
+    return jsonify(ok=True)
+
+
+@app.post("/auth/email/verify")
+def email_signin_verify():
+    if not HOSTED:
+        return jsonify(error="Not available here."), 404
+    data = request.get_json(silent=True) or {}
+    try:
+        email = email_signin.check_code(data.get("email"), data.get("code"), app.secret_key)
+    except email_signin.SignInProblem as e:
+        return jsonify(error=str(e)), 400
+    _start_session(users.from_email(email))
+    return jsonify(ok=True)
+
+
+@app.route("/auth/email", methods=["GET", "POST"])
+def email_signin_link():
+    """The link in the sign-in email. GET asks first (mail programs open links to
+    check them, which would use it up); POST signs in."""
+    if not HOSTED:
+        return redirect("/")
+    token = request.args.get("t", "")
+    if request.method == "GET":
+        return render_template("email_signin.html", token=token)
+    email = email_signin.check_link(token, app.secret_key)
+    if not email:
+        return render_template("email_signin.html", token=None), 400
+    _start_session(users.from_email(email))
+    return redirect("/")
+
+
+def _start_session(uid):
+    session.clear()
+    session.permanent = True
+    session["user_id"] = uid
+    log.info("Signed in with an emailed code (%s)", uid)
 
 
 @app.get("/auth/test-login")
@@ -706,9 +761,12 @@ def _has_reflection(entry):
 
 
 def _can_reflect_again(entry):
-    """A new reflection on an entry that has one only after a material edit of its text."""
+    """A new reflection on an entry that has one only after a material edit of its text
+    (or any time for whoever runs the app on the web, to try settings like the tone)."""
     if not _has_reflection(entry):
         return False
+    if HOSTED and _is_admin(g.user_id):
+        return True
     before = entry.get("reflected_text")
     return before is not None and store.materially_changed(before, entry.get("text"))
 
@@ -720,6 +778,7 @@ def _for_page(entry, reflecting=None):
     out = dict(entry, reflecting=reflecting)
     out.pop("reflected_text", None)            # the text as it was when reflected on: only the server needs it
     out["can_reflect_again"] = _can_reflect_again(entry)
+    out["admin_reflect_again"] = bool(out["can_reflect_again"] and HOSTED and _is_admin(g.user_id))   # the button's words
     if entry.get("quotes"):                    # which of its quotations are kept (the stars in the reflection)
         starred = kept.keys()
         out["quotes"] = [dict(q, key=kept.key_of(q), kept=kept.key_of(q) in starred) for q in entry["quotes"]]

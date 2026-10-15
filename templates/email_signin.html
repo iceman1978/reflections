@@ -1,0 +1,30 @@
+<!doctype html>
+{#- The sign-in email's link (/auth/email?t=...). A button, since mail programs
+    open links to check them and would otherwise use it up. token is None for a
+    link that's used or expired. -#}
+<html lang="en" data-theme="day" data-palette="lake" data-photo="off">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Sign in · {{ app_name }}</title>
+  {% include "_icons.html" %}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
+</head>
+<body>
+  <main class="book privacy">
+    <section class="page">
+      <a class="info-back" href="/">← {{ app_name }}</a>
+      <h1 class="prompt-heading">Sign in to {{ app_name }}</h1>
+      {% if token %}
+      <form method="post" action="/auth/email?t={{ token | urlencode }}">
+        <button type="submit" class="primary">Sign in</button>
+      </form>
+      {% else %}
+      <p>This link has already been used, or it's more than 10 minutes old.
+        <a href="/">Ask for a new code →</a></p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

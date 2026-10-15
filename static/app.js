@@ -732,7 +732,8 @@
         reasons[status] || "This entry doesn't have a reflection yet.";
       $("reflect-btn").textContent = status === "Failed" ? "Try reflection again" : "Reflect on this entry";
     }
-    $("reflect-again-btn").hidden = busy || !entry.can_reflect_again;   // one reflection per entry, unless it's been rewritten
+    $("reflect-again-btn").hidden = busy || !entry.can_reflect_again;
+    $("reflect-again-btn").textContent = entry.admin_reflect_again ? "Reflect again (admin)" : "Reflect on your edited entry";   // one reflection per entry, unless it's been rewritten
     if (done) {
       renderVignette(entry);
       $("insight").replaceChildren(...entry.insight.split(/\n\s*\n/).map((t) => {
@@ -3254,6 +3255,55 @@
       return asked || sessionStorage.getItem("journal.feedbackOnStart");
     } catch (_) { return asked; }
   })();
+
+  // Signing in with an emailed code: any address that's been invited.
+  if ($("email-signin-open")) {
+    const showError = (msg) => { $("signin-error").textContent = msg; $("signin-error").hidden = !msg; };
+    $("email-signin-open").addEventListener("click", () => {
+      $("email-signin-open").hidden = true;
+      $("email-signin-form").hidden = false;
+      $("email-signin-address").focus();
+    });
+    $("email-signin-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = e.submitter || $("email-signin-form").querySelector("button");
+      const address = $("email-signin-address").value.trim();
+      btn.disabled = true;
+      showError("");
+      try {
+        await api("POST", "/auth/email/start", { email: address });
+        $("email-code-sent").textContent = `If ${address} has been invited, a code is on its way. Check your inbox (and spam). `
+          + "Not there? Make sure you used the address you were invited with.";
+        $("email-signin-form").hidden = true;
+        $("email-code-form").hidden = false;
+        $("email-code").value = "";
+        $("email-code").focus();
+      } catch (err) {
+        showError(sentence(err.message));
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    $("email-code-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = $("email-code-form").querySelector("button[type=submit]");
+      btn.disabled = true;
+      showError("");
+      try {
+        await api("POST", "/auth/email/verify", { email: $("email-signin-address").value.trim(), code: $("email-code").value });
+        location.replace("/");
+      } catch (err) {
+        showError(sentence(err.message));
+        btn.disabled = false;
+      }
+    });
+    $("email-code-back").addEventListener("click", () => {
+      $("email-code-form").hidden = true;
+      $("email-signin-form").hidden = false;
+      showError("");
+      $("email-signin-address").focus();
+    });
+  }
 
   // The admin email's "Open Admin" button links to /?settings=admin.
   const SETTINGS_ON_START = (() => {

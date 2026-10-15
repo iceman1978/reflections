@@ -889,6 +889,67 @@ class DigestTests(unittest.TestCase):
         self.assertFalse(self.run_at(17).called)
 
 
+class EmailSignInTests(unittest.TestCase):
+    """Signing in with an emailed code: invited addresses only, once, briefly."""
+
+    def setUp(self):
+        fresh_journal()
+        from journal import email_signin, invites
+        email_signin._recent.clear()
+        invites.grant("trevor@carlisletechnology.com")                           # a list, with Trevor on it
+
+    def ask(self, email="Trevor@CarlisleTechnology.com", device="1.2.3.4"):
+        from unittest import mock
+        from journal import email_signin
+        with mock.patch("journal.mail.send") as send:
+            email_signin.request(email, device, "secret", "https://inhissteps.app/")
+        return send
+
+    def code_of(self, send):
+        return send.call_args.args[1].split(" ")[0]                               # "123456 is your ... code"
+
+    def test_invited_address_gets_a_code_that_works_once(self):
+        from journal import email_signin
+        send = self.ask()
+        self.assertEqual(send.call_args.args[0], "trevor@carlisletechnology.com")
+        self.assertEqual(send.call_args.kwargs["local"], "signin")
+        code = self.code_of(send)
+        self.assertEqual(email_signin.check_code("trevor@carlisletechnology.com", code, "secret"),
+                         "trevor@carlisletechnology.com")
+        with self.assertRaises(email_signin.SignInProblem):
+            email_signin.check_code("trevor@carlisletechnology.com", code, "secret")       # used up
+
+    def test_strangers_get_nothing_and_no_hint(self):
+        send = self.ask("bob@rogers.com")
+        self.assertFalse(send.called)                                             # and no error either
+
+    def test_wrong_codes_and_limits(self):
+        from journal import email_signin
+        code = self.code_of(self.ask())
+        for _ in range(email_signin.MAX_TRIES):
+            with self.assertRaises(email_signin.SignInProblem):
+                email_signin.check_code("trevor@carlisletechnology.com", "000000" if code != "000000" else "111111", "secret")
+        with self.assertRaises(email_signin.SignInProblem):
+            email_signin.check_code("trevor@carlisletechnology.com", code, "secret")       # locked after 5 tries
+        for _ in range(email_signin.PER_ADDRESS - 1):
+            self.ask(device="5.6.7.8")
+        with self.assertRaises(email_signin.SignInProblem):
+            self.ask(device="9.9.9.9")                                            # plenty for one address
+
+    def test_the_link_works_once(self):
+        from journal import email_signin
+        html = self.ask().call_args.args[3]
+        token = html.split("auth/email?t=")[1].split('"')[0]
+        self.assertEqual(email_signin.check_link(token, "secret"), "trevor@carlisletechnology.com")
+        self.assertIsNone(email_signin.check_link(token, "secret"))
+
+    def test_one_account_per_address_whichever_way(self):
+        uid = users.from_email("trevor@carlisletechnology.com")
+        self.assertEqual(users.from_email("TREVOR@carlisletechnology.com"), uid)
+        self.assertEqual(users.from_google("g-trevor", "trevor@carlisletechnology.com", "Trevor"), uid)
+        self.assertEqual(users.from_google("g-trevor", "trevor@carlisletechnology.com", "Trevor"), uid)
+
+
 class UpgradeTests(unittest.TestCase):
     """A single-person encrypted journal (before accounts) becomes the 'local' user."""
 

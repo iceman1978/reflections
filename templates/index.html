@@ -114,9 +114,26 @@
           <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#fff" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20c11.05 0 20-8.95 20-20S35.05 4 24 4z"/><path fill="#4285F4" d="M39.6 24.4c0-1.1-.1-2.2-.3-3.2H24v6.1h8.8c-.4 2-1.5 3.7-3.2 4.8v4h5.2c3-2.8 4.8-6.9 4.8-11.7z"/><path fill="#34A853" d="M24 40c4.3 0 8-1.4 10.7-3.9l-5.2-4c-1.4 1-3.3 1.6-5.5 1.6-4.2 0-7.7-2.8-9-6.6H9.6v4.1C12.3 36.5 17.7 40 24 40z"/><path fill="#FBBC05" d="M15 27.1c-.3-1-.5-2-.5-3.1s.2-2.1.5-3.1v-4.1H9.6C8.6 18.9 8 21.4 8 24s.6 5.1 1.6 7.2l5.4-4.1z"/><path fill="#EA4335" d="M24 14.3c2.4 0 4.5.8 6.2 2.4l4.6-4.6C32 9.5 28.3 8 24 8c-6.3 0-11.7 3.5-14.4 8.8l5.4 4.1c1.3-3.8 4.8-6.6 9-6.6z"/></svg>
           Continue with Google</a></p>
         {% endif %}
+        <!-- Or any address: a code by email (journal/email_signin.py) -->
+        <div class="email-signin">
+          <p class="signin-or"><span>or</span></p>
+          <button type="button" id="email-signin-open" class="email-signin-open">Continue with email</button>
+          <form id="email-signin-form" hidden novalidate>
+            <label for="email-signin-address">Your email address</label>
+            <input id="email-signin-address" type="email" autocomplete="email" spellcheck="false" placeholder="name@example.com">
+            <button type="submit" class="primary">Email me a code</button>
+          </form>
+          <form id="email-code-form" hidden novalidate>
+            <p class="subtle" id="email-code-sent"></p>
+            <label for="email-code">Sign-in code</label>
+            <input id="email-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="123456">
+            <button type="submit" class="primary">Sign in</button>
+            <button type="button" id="email-code-back" class="link-button">Use a different address</button>
+          </form>
+        </div>
         <p id="signin-error" class="vault-error" hidden></p>
-        <p class="subtle signin-note"><strong>New here?</strong> {{ app_name }} is invitation-only for now. Signing in for the first time creates your journal, as long as your Google address has been invited.</p>
-        <p class="subtle signin-note">Google only confirms who you are. It never sees what you write.</p>
+        <p class="subtle signin-note"><strong>New here?</strong> {{ app_name }} is invitation-only for now. Signing in for the first time creates your journal, as long as your address has been invited.</p>
+        <p class="subtle signin-note">Signing in only confirms who you are. Google, and your email, never see what you write.</p>
       </div>
       <p id="vault-account" class="vault-account subtle" hidden><span id="vault-email"></span> · <a href="/logout" class="nowrap">Not you? Sign out</a></p>
       {% endif %}
@@ -793,7 +810,7 @@
     <form id="invite-form" novalidate>
       <h2 id="invite-title">Invite someone</h2>
       <p>{{ app_name }} is invitation-only while it's being tested. Who would you like to invite?</p>
-      <label class="feedback-label" for="invite-email">Their Google (Gmail) address</label>
+      <label class="feedback-label" for="invite-email">Their email address</label>
       <input id="invite-email" class="invite-input" type="email" autocomplete="off" spellcheck="false" placeholder="name@gmail.com">
       <label class="feedback-label" for="invite-name">Their name <span class="subtle">(optional)</span></label>
       <input id="invite-name" class="invite-input" type="text" maxlength="80" autocomplete="off">
