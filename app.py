@@ -8,6 +8,7 @@ import io
 import logging
 import os
 import random
+import re
 import secrets
 import socket
 import sys
@@ -1319,6 +1320,18 @@ def shared_another_way():
     if found:
         passages.shared(found["key"], by_email=False)
     return jsonify(ok=True)
+
+
+@app.get("/read")
+def read_in_translation():
+    """"Read the passage" in another translation: the chapter, with the verse highlighted (journal/verse_links.py)."""
+    from journal import verse_links
+    t, book = request.args.get("t", ""), request.args.get("b", "")
+    chapter, verse = request.args.get("c", ""), request.args.get("v", "")
+    if t not in verse_links.TRANSLATIONS or not re.fullmatch(r"[a-z0-9_]{2,30}", book) \
+            or not chapter.isdigit() or not verse.isdigit():
+        return jsonify(error="Not found"), 404
+    return redirect(verse_links.url(t, book, int(chapter), int(verse)))
 
 
 @app.get("/p/<code>")

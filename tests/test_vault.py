@@ -1012,3 +1012,30 @@ class MigrationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VerseLinkTests(unittest.TestCase):
+    """"Read the passage" in another translation: the chapter, with the verse highlighted."""
+
+    def setUp(self):
+        fresh_journal()
+
+    def test_looked_up_once_and_only_the_highlight_kept(self):
+        from unittest import mock
+        from journal import verse_links
+        page = mock.Mock(text="<title>Psalm 90:12 NIV: Teach us to number our days, that we may gain a heart of wisdom.</title>")
+        with mock.patch("journal.verse_links.requests.get", return_value=page) as get:
+            first = verse_links.url("niv", "psalms", 90, 12)
+            again = verse_links.url("niv", "psalms", 90, 12)
+        self.assertEqual(first, "https://biblehub.com/niv/psalms/90.htm#:~:text=Teach%20us%20to%20number,a%20heart%20of%20wisdom")
+        self.assertEqual(again, first)
+        self.assertEqual(get.call_count, 1)
+        con = db.connect()
+        self.assertNotIn("number our days", json.dumps(con.execute("SELECT * FROM verse_links").fetchall()))
+        con.close()
+
+    def test_without_the_words_the_chapter_still_opens(self):
+        from unittest import mock
+        from journal import verse_links
+        with mock.patch("journal.verse_links.requests.get", side_effect=verse_links.requests.RequestException):
+            self.assertEqual(verse_links.url("esv", "john", 3, 16), "https://biblehub.com/esv/john/3.htm")

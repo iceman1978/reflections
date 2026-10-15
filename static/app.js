@@ -1126,15 +1126,15 @@
 
   // BibleHub's BSB pages, in the reader's chosen translation (Settings → Basic). The words
   // to scroll to are the BSB's, so for another translation the link opens the chapter.
-  // Another translation can't be scrolled to by the BSB's words, so a verse opens on
-  // BibleHub's own page for that verse in that translation (…/niv/psalms/90-12.htm);
-  // a chapter, or a passage without a verse, opens the chapter.
+  // Another translation can't be highlighted with the BSB's words, so a verse goes
+  // through /read, which finds that translation's words and opens the chapter with the
+  // verse highlighted; a chapter, or a passage without a verse, opens the chapter.
   function inTranslation(url, location) {
     const t = CFG.bibleTranslation || "bsb";
     if (t === "bsb" || !url.includes("://biblehub.com/bsb/")) return url;
     const verse = /^\s*(\d+):(\d+)/.exec(location || "");
     const m = /^(https:\/\/biblehub\.com)\/bsb\/([^/]+)\/(\d+)\.htm/.exec(url);
-    if (verse && m && verse[1] === m[3]) return `${m[1]}/${t}/${m[2]}/${m[3]}-${verse[2]}.htm`;
+    if (verse && m && verse[1] === m[3]) return `/read?t=${t}&b=${encodeURIComponent(m[2])}&c=${m[3]}&v=${verse[2]}`;
     return url.replace("://biblehub.com/bsb/", `://biblehub.com/${t}/`).replace(/#.*$/, "");
   }
 
