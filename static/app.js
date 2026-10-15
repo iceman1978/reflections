@@ -755,7 +755,7 @@
         li.append(document.createTextNode(`— ${q.author ? `${q.author}, ` : ""}${q.title}${where} `));
         if (typeof q.url === "string" && q.url.startsWith("https://")) {
           const a = document.createElement("a");
-          a.href = q.kind === "quote" ? passageUrl(q.url, q.quote) : q.url;
+          a.href = q.kind === "quote" ? passageUrl(q.url, q.quote) : inTranslation(q.url);
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = q.kind === "quote" ? "Read the passage ↗" : "Read the source ↗";
@@ -1102,7 +1102,15 @@
              "gutenberg.org": "Project Gutenberg", "biblehub.com": "Bible Hub" }[host] || host;
   }
 
+  // BibleHub's BSB pages, in the reader's chosen translation (Settings → Basic). The words
+  // to scroll to are the BSB's, so for another translation the link opens the chapter.
+  function inTranslation(url) {
+    const t = CFG.bibleTranslation || "bsb";
+    return t === "bsb" ? url : url.replace("://biblehub.com/bsb/", `://biblehub.com/${t}/`);
+  }
+
   function passageUrl(url, quote) {
+    if ((CFG.bibleTranslation || "bsb") !== "bsb" && url.includes("://biblehub.com/bsb/")) return inTranslation(url);
     const words = String(quote || "").trim().split(/\s+/).filter(Boolean);
     if (!words.length) return url;
     words[0] = words[0].replace(/^[^\p{L}\p{N}]+/u, "");                      // no leading … or “
@@ -1937,6 +1945,7 @@
     try {
       const res = await api("PUT", "/api/settings", out);
       CFG.userName = res.settings.user_name;
+      CFG.bibleTranslation = res.settings.bible_translation || "bsb";
       $("journal-name").textContent = res.settings.journal_name || CFG.appName;
       showCoverName(res.settings.journal_name);
       CFG.autosaveSeconds = res.settings.draft_autosave_seconds;

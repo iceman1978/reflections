@@ -290,7 +290,24 @@ def recurring_note(entry, entries):
     return RECURRING["note"]
 
 
-def _user_message(entry, voices=None):
+# The reader's choice of tone (Settings → Basic). "reflect" is the reflection as
+# the instructions describe it; the other two lean one way. Whatever the tone,
+# the rules hold: never speaking for God, quotes word for word, and an entry
+# in real distress gets care, not a challenge.
+TONES = {
+    "encourage": ("Tone: this reader has asked for encouragement. Lean warm and comforting: dwell on consolation, "
+                  "hope and God's care for them (or, in a philosophical journal, on what steadies and strengthens), "
+                  "and draw on passages that console. End with a gentle question."),
+    "challenge": ("Tone: this reader has asked to be challenged. Be direct and energizing, like a good coach or a "
+                  "candid friend: name plainly what the entry seems to be avoiding or putting off, draw on the more "
+                  "bracing passages and writers in the library, and end with a concrete question that calls for "
+                  "action soon (what, and by when). Challenge, never shame: no scolding, and still never speak for "
+                  "God or say what He thinks of them. If the entry shows real distress or grief, set the challenge "
+                  "aside and respond with care."),
+}
+
+
+def _user_message(entry, voices=None, tone=None):
     when = datetime.fromisoformat(entry["created_at"]).astimezone(TZ)
     clock = when.strftime("%I:%M %p").lstrip("0")
     parts = [f"Journal entry written {when:%A, %B} {when.day}, {when.year} at {clock}."]
@@ -303,21 +320,24 @@ def _user_message(entry, voices=None):
         parts.append(variety)
     if (recurring := recurring_note(entry, store.all_entries())):
         parts.append(recurring)
+    if tone in TONES:
+        parts.append(TONES[tone])
     return "\n\n".join(parts)
 
 
 # ---- The call -----------------------------------------------------------
 
-def reflect(entry, writers=None):
+def reflect(entry, writers=None, tone=None):
     """Returns the fields to store on the entry. Raises ReflectionError.
-    `writers`: the reader's choice of writers (their "writers" preference)."""
+    `writers`: the reader's choice of writers (their "writers" preference);
+    `tone`: their "reflection_tone" (encourage / reflect / challenge)."""
     library = Library(writers)
     try:
         client = _client()
         response = client.messages.create(
             max_tokens=16000,
             system=_system_prompt(library),
-            messages=[{"role": "user", "content": _user_message(entry, library.voices())}],
+            messages=[{"role": "user", "content": _user_message(entry, library.voices(), tone)}],
             **_request_options(schema=_schema(library)),
         )
     except Exception as exc:

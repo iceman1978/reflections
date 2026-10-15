@@ -133,3 +133,26 @@ class RecurringScriptureTests(unittest.TestCase):
     def test_an_edition_without_it_never_nudges(self):
         reflection.RECURRING = None
         self.assertIsNone(reflection.recurring_note({"id": "new"}, [self.done("a", "psalms")]))
+
+
+class ToneTests(unittest.TestCase):
+    """Settings → Reflections: the tone goes in each request; the translation is a choice."""
+
+    def message(self, tone):
+        from unittest import mock
+        entry = {"id": "e1", "created_at": "2026-10-15T08:00:00-04:00", "text": "Busy week."}
+        with mock.patch("journal.store.all_entries", return_value=[]):
+            return reflection._user_message(entry, tone=tone)
+
+    def test_the_tone_is_in_the_request(self):
+        self.assertIn("asked to be challenged", self.message("challenge"))
+        self.assertIn("never shame", self.message("challenge"))
+        self.assertIn("asked for encouragement", self.message("encourage"))
+        self.assertNotIn("Tone:", self.message("reflect"))                 # the default: unchanged
+
+    def test_only_known_choices(self):
+        self.assertEqual(config.validate({"reflection_tone": "challenge", "bible_translation": "niv"}),
+                         {"reflection_tone": "challenge", "bible_translation": "niv"})
+        for bad in ({"reflection_tone": "scold"}, {"bible_translation": "message"}):
+            with self.assertRaises(ValueError):
+                config.validate(bad)

@@ -391,6 +391,32 @@
               {% endfor %}
             </select>
           </label>
+          <!-- How reflections speak, and (with Scripture) the translation "Read the passage" opens -->
+          <h2>Reflections</h2>
+          <fieldset class="tone-choice">
+            <legend>Tone</legend>
+            <div class="tone-options">
+              <label><input type="radio" name="reflection_tone" value="encourage"> Encourage me</label>
+              <label><input type="radio" name="reflection_tone" value="reflect"> Reflect with me</label>
+              <label><input type="radio" name="reflection_tone" value="challenge"> Challenge me</label>
+            </div>
+            <span class="hint">From comfort and consolation, to a push rather than a pat on the back. Change it whenever
+              your season changes. An entry written in real distress always gets care.</span>
+          </fieldset>
+          {% if has_scripture %}
+          <label>Read the passage in
+            <select name="bible_translation">
+              <option value="bsb">Berean Standard Bible (BSB)</option>
+              <option value="niv">New International Version (NIV)</option>
+              <option value="esv">English Standard Version (ESV)</option>
+              <option value="nlt">New Living Translation (NLT)</option>
+              <option value="kjv">King James Version (KJV)</option>
+              <option value="nasb">New American Standard Bible (NASB)</option>
+            </select>
+            <span class="hint">Reflections quote the BSB, word for word (it's free to quote, so every verse can be
+              checked); “Read the passage” opens your choice on BibleHub.</span>
+          </label>
+          {% endif %}
           {% if hosted %}
           <label class="checkbox">
             <input name="email_reminders" type="checkbox"> Email reminders
@@ -823,6 +849,7 @@
     vignettes: {{ vignettes | default({}) | tojson }},
     credit: {{ edition.credit | default({"one": "credit", "many": "credits"}) | tojson }},
     userName: {{ user_name | tojson }},
+    bibleTranslation: {{ bible_translation | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},
     photoBlur: {{ photo_blur | int }},

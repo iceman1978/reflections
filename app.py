@@ -253,6 +253,7 @@ def index():
         vignettes=_vignettes(),                               # a drawing for the reflection's main theme
         min_writers=library.MIN_WRITERS,
         has_scripture=any(not w["author"] for w in sources.works().values()),
+        bible_translation=prefs["bible_translation"],
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
         photo_visibility=prefs["photo_visibility"],
@@ -939,7 +940,8 @@ def reflect_entry(entry_id):
         if not had_reflection:
             store.update_entry(entry_id, reflection_status=store.PENDING, reflection_error=None)
         try:
-            fields = reflection.reflect(entry, users.prefs(g.user_id)["writers"])
+            prefs = users.prefs(g.user_id)
+            fields = reflection.reflect(entry, prefs["writers"], prefs["reflection_tone"])
         except reflection.ReflectionError as e:
             # A new reflection after an edit failing keeps the earlier one.
             status = store.DONE if had_reflection else store.FAILED
