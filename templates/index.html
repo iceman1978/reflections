@@ -929,7 +929,11 @@
       <div class="insight">
         {% for p in sample.paragraphs %}<p>{{ p | safe }}</p>{% endfor %}
       </div>
-      <ul class="citations"><li>— {{ sample.cite }} <a href="{{ sample.cite_url }}" target="_blank" rel="noopener noreferrer">Read the passage ↗</a></li></ul>
+      <ul class="citations">
+        {% for c in sample.citations or [{"text": sample.cite, "url": sample.cite_url, "label": "Read the passage"}] %}
+        <li>— {{ c.text }} <a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.label or "Read the passage" }} ↗</a></li>
+        {% endfor %}
+      </ul>
       <p class="question">{{ sample.question }}</p>
     </aside>
     <p class="subtle sample-note">{{ sample.note }}</p>

@@ -42,17 +42,29 @@
   ],
   "sample": {
     "link_text": "Read a sample reflection",
+    "image": "sample.webp",
     "title": "Ten quiet minutes",
     "entry": "I wanted ten quiet minutes with my coffee before everyone got up, but I checked my phone \"just for a second\" and the whole day came flooding in: the meeting at ten, a bill I forgot, an email I haven't answered. The coffee went cold. I'd like my mornings to feel like mine again, not like the first item on the list.",
     "theme": "habits",
     "paragraphs": [
-      "You describe the phone as an intruder that broke into your ten minutes. I'd ask whether it was more of an exit. Pascal made a famous diagnosis: <em>“all the unhappiness of men arises from one single fact, that they cannot stay quietly in their own chamber.”</em> He wasn't talking about villains or addicts. He meant ordinary people who reach for something, anything, when the quiet starts to feel a little exposed.",
-      "Notice what <em>\"just for a second\"</em> was probably doing. The meeting, the bill, and the email were already in your head before you picked up the phone. In stillness, they were going to surface anyway. The phone let you meet them as tasks, which feels busy and productive, instead of as a mood, which feels like sitting with unease. Pascal's sharper point is that we chase the hunt rather than the hare. Checking can feel like relief even when it produces none.",
-      "So guarding the ten minutes may take more than moving the phone to another room, though that helps. It may mean letting the list show up in your mind and not answering it yet. The quiet was never empty. It was crowded, and the phone only made the crowd official. What would it take to let those items stand there while your coffee is still hot?"
+      "Notice the word <em>\"flooding.\"</em> The meeting, the bill, and the email were all there before you picked up the phone. The phone only let them in before you had decided how to meet them. So the problem may be less that the day invaded your quiet than that your quiet depended on not looking at the day, and that kind of quiet breaks easily.",
+      "<strong>Marcus Aurelius</strong> also began his mornings by facing the day, but on his own terms. <em>“Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial.”</em> He pictured the difficulties ahead and then chose his stance toward them while he was still in bed. The list reached him as something he had already considered, not as an ambush.",
+      "<strong>Seneca</strong>, in <strong>On the Shortness of Life</strong>, noted how carefully people guard their property and how carelessly they hand out their time. Your ten minutes is a small version of that. You'd probably never leave your front door unlocked, yet you leave the first minutes of the day open to anyone who can send a notification. The phone didn't take them. You gave them <em>\"just for a second,\"</em> and that phrase is worth a second look.",
+      "The cold coffee is the real cost, but it points to something you can change. Quiet may need a boundary more than it needs willpower."
     ],
-    "cite": "Blaise Pascal, Pensées (Thoughts) 139",
-    "cite_url": "https://en.wikisource.org/wiki/Blaise_Pascal/Thoughts/Section_2#:~:text=the%20unhappiness%20of%20men,in%20their%20own%20chamber",
-    "question": "When your hand went to the phone, what did you feel in the seconds just before, and what were you hoping the screen would give you?",
+    "citations": [
+      {
+        "text": "Marcus Aurelius, Meditations 2.1",
+        "label": "Read the passage",
+        "url": "https://en.wikisource.org/wiki/The_Thoughts_of_the_Emperor_Marcus_Aurelius_Antoninus/Book_II#:~:text=the%20morning%20by%20saying,arrogant%2C%20deceitful%2C%20envious%2C%20unsocial"
+      },
+      {
+        "text": "Seneca, On the Shortness of Life 3",
+        "label": "Read the source",
+        "url": "https://en.wikisource.org/wiki/On_the_shortness_of_life/Chapter_III"
+      }
+    ],
+    "question": "If you looked at that list on your own terms, at a time you chose, what would you want to say to yourself about it before it reached you?",
     "note": "A real reflection from A Life Well Lived, as it was written."
   },
   "welcome_quote": {
