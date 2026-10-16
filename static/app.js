@@ -146,6 +146,31 @@
     if (textSize) document.documentElement.dataset.textSize = textSize;
   }
 
+  // The highlighter cursor over a page being read (style.css), in the theme's
+  // color, like the highlights it makes. Redrawn when the color or day/evening changes.
+  function paintHighlighterCursor() {
+    const probe = document.createElement("span");
+    probe.style.cssText = "position:absolute;visibility:hidden;color:var(--accent)";
+    document.body.append(probe);
+    const accent = getComputedStyle(probe).color;                          // "rgb(r, g, b)"
+    probe.style.color = "color-mix(in srgb, var(--accent) 35%, white)";
+    const tint = getComputedStyle(probe).color;
+    probe.remove();
+    const shapes = (attrs) => `<g ${attrs}><rect x="11" y="3" width="10" height="17.5" rx="2.5"${attrs.includes("none") ? "" : ` fill="${tint}"`}/>`
+      + `<path d="M12 20.5H20V23H12Z"${attrs.includes("none") ? "" : ' fill="#fbfbf6"'}/>`
+      + `<path d="M12.5 23H19.5L19 28L13 30Z"${attrs.includes("none") ? "" : ` fill="${accent}"`}/></g>`;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">'
+      + '<g transform="rotate(45 16 16)" stroke-linejoin="round">'
+      + shapes('fill="none" stroke="#fff" stroke-width="3.2"')
+      + shapes(`stroke="${accent}" stroke-width="1.3"`)
+      + "</g></svg>";
+    // The tip, bottom left, is where it points.
+    document.documentElement.style.setProperty("--hl-cursor", `url("data:image/svg+xml,${encodeURIComponent(svg)}") 6 26, auto`);
+  }
+  paintHighlighterCursor();
+  new MutationObserver(paintHighlighterCursor).observe(document.documentElement, { attributes: true, attributeFilter: ["data-palette", "data-theme"] });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paintHighlighterCursor);
+
   // The look as last saved. Settings previews changes live, and Back without
   // saving returns to this.
   const savedLook = {

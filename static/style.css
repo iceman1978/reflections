@@ -1705,3 +1705,8 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .library-writer .library-works { color: var(--muted); font-size: 0.88rem; font-style: italic; margin-left: 6px; }
 .library-writer .hint::first-letter { text-transform: uppercase; }
 .library-writer:has(input:not(:checked)) > span { opacity: 0.55; }
+/* A highlighter cursor over a page being read (an entry and its reflection), where
+   words can be selected and highlighted: drawn in the theme's color by app.js
+   (--hl-cursor). Not while editing, and nowhere else; buttons and links keep
+   their own pointer. Mouse and trackpad only. */
+#entry-view:not(:has(#entry-editor:not([hidden]))) { cursor: var(--hl-cursor, auto); }
