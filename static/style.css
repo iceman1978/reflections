@@ -158,11 +158,13 @@ html[data-photo="off"][data-palette] {
 /* Beside Text size: a few words on a ruled page, at the size being tried. */
 .text-size-row { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
 .text-size-row > label { flex: none; margin-bottom: 0; }
-.text-sample { flex: 1; min-width: 180px; margin: 22px 0 0; padding: 0 4px;
+.text-sample-box { flex: 1; min-width: 180px; margin-top: 22px; }
+.text-sample-box .hint { display: block; margin-top: 4px; padding: 0 4px; }
+.text-sample { margin: 0; padding: 0 4px;
   font-size: var(--text); line-height: var(--lh); color: var(--ink);
   background-image: linear-gradient(transparent calc(var(--lh) - 1px), var(--line) calc(var(--lh) - 1px));
   background-size: 100% var(--lh); }
-@media (max-width: 560px) { .text-size-row { flex-direction: column; gap: 4px; } .text-sample { margin-top: 0; width: 100%; } }
+@media (max-width: 560px) { .text-size-row { flex-direction: column; gap: 4px; } .text-sample-box { margin-top: 0; width: 100%; } }
 /* Beside the colors: a small square of the cover, in the color being tried. */
 .colour-row { display: flex; align-items: flex-start; gap: 16px; }
 .colour-row .swatches { flex: 1; }
