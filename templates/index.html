@@ -367,6 +367,20 @@
           <ul id="citations" class="citations"></ul>   <!-- the reflection's sources, right under its text -->
           <p id="question" class="question"></p>
           {% if edition.prayer_list %}<button type="button" id="question-pray" class="share-link share-pill question-pray" hidden>+ Add as a prayer</button>{% endif %}
+          <!-- Did it speak to you? And the favorite ribbon again, for when you've read to the end -->
+          <div id="reflection-rating" class="reflection-rating" hidden>
+            <div class="rating-row">
+              <span class="rating-ask">Did this speak to you?</span>
+              <button type="button" id="rate-yes" class="rating-btn" aria-pressed="false">✓ Yes</button>
+              <button type="button" id="rate-no" class="rating-btn" aria-pressed="false">Not quite</button>
+              <button type="button" id="bottom-fav" class="rating-btn rating-fav" aria-pressed="false"><span class="fav-mark" aria-hidden="true"></span><span>Favorite</span></button>
+            </div>
+            <div id="rating-reasons" class="rating-reasons" hidden>
+              <span class="rating-ask">What missed? <span class="subtle">(optional)</span></span>
+              {% for key, label in rating_reasons.items() %}<button type="button" class="rating-reason" data-reason="{{ key }}" aria-pressed="false">{{ label }}</button>{% endfor %}
+            </div>
+            <p id="rating-thanks" class="rating-thanks subtle" hidden></p>
+          </div>
           <div class="reflection-footer">
             <!-- The tone it was written in; opens Settings → Basic at the Tone switch -->
             <button id="reflection-tone" type="button" class="reflection-tone" title="Change the tone for future reflections" hidden></button>
@@ -682,6 +696,7 @@
         <em>Remove</em> takes away someone's access (their journal stays, should you let them back in){% endif %}.
         <span id="usage-since"></span></p>
       <div id="usage-tiles" class="usage-tiles"></div>
+      <div id="usage-ratings" class="usage-ratings" hidden></div>
       <div id="usage-chart" class="usage-chart" role="img" aria-label="People using the app each day, last 30 days"></div>
       <div class="usage-chart-axis subtle"><span>30 days ago</span><span>Today</span></div>
       <div class="usage-table-wrap"><table id="usage-table" class="usage-table"></table></div>
@@ -715,6 +730,7 @@
         <div class="filter" role="group" aria-label="Show">
           <button id="filter-all" type="button" class="filter-btn" aria-pressed="true">All</button>
           <button id="filter-fav" type="button" class="filter-btn" aria-pressed="false"><span class="fav-mark" aria-hidden="true"></span>Favorites</button>
+          <button id="filter-spoke" type="button" class="filter-btn" aria-pressed="false" title="Entries whose reflection spoke to you">✓ Spoke to me</button>
           <button id="calendar-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"
                   aria-haspopup="dialog" aria-controls="calendar">Calendar</button>
           {% if themes_enabled %}<button id="themes-btn" type="button" class="filter-btn" aria-pressed="false" aria-expanded="false"

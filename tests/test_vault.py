@@ -1108,3 +1108,40 @@ class HighlightAndPrayerTests(unittest.TestCase):
         blob = con.execute("SELECT data FROM prayers").fetchone()[0]
         con.close()
         self.assertNotIn(b"surgery", bytes(blob))
+
+
+class RatingTests(unittest.TestCase):
+    """Did this speak to you? Kept in the entry; an anonymous copy is counted."""
+
+    def setUp(self):
+        fresh_journal()
+        self.uid = users.from_google("g-rate", "rate@x.com", "Rate")
+        set_up_as(self.uid)
+
+    def test_ratings_are_cleaned_and_counted_anonymously(self):
+        from journal import ratings
+        self.assertEqual(ratings.clean("yes", ["long"]), ("yes", []))             # reasons only with Not quite
+        self.assertEqual(ratings.clean("no", ["long", "bogus", "missed"]), ("no", ["missed", "long"]))
+        self.assertEqual(ratings.clean("maybe", []), (None, []))
+        a = store.create_entry("A quiet morning before work.")
+        a = store.update_entry(a["id"], insight="An insight.", reflection_tone="challenge", rating="no",
+                               rating_reasons=["long"], quotes=[{"author": "Seneca", "work": "x"}])
+        ratings.record(self.uid, a, "no", ["long"])
+        ratings.record(self.uid, a, "yes", [])                                    # a change replaces, not adds
+        b = store.create_entry("Another day.")
+        b = store.update_entry(b["id"], insight="Another.", reflection_tone="encourage",
+                               quotes=[{"author": "Seneca", "work": "x"}, {"author": "Marcus Aurelius", "work": "y"}])
+        ratings.record(self.uid, b, "no", ["tone", "preachy"])
+        s = ratings.summary()
+        self.assertEqual((s["rated"], s["yes"], s["percent"]), (2, 1, 50))
+        self.assertEqual({t["tone"]: t["percent"] for t in s["by_tone"]}, {"encourage": 0, "challenge": 100})
+        self.assertEqual({w["writer"]: w["rated"] for w in s["by_writer"]}, {"Seneca": 2, "Marcus Aurelius": 1})
+        self.assertEqual({r["reason"] for r in s["reasons"]}, {"Wrong tone", "Too preachy"})
+        ratings.record(self.uid, b, None, [])                                     # taken back
+        self.assertEqual(ratings.summary()["rated"], 1)
+        con = db.connect()                                                        # nothing that points back to who
+        row = con.execute("SELECT * FROM reflection_ratings").fetchone()
+        con.close()
+        self.assertNotIn(self.uid, " ".join(str(x) for x in row))
+        self.assertNotIn(a["id"], " ".join(str(x) for x in row))
+        self.assertEqual(store.get_entry(a["id"])["rating_reasons"], ["long"])   # the entry keeps its own copy

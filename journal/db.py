@@ -74,6 +74,8 @@ CREATE TABLE IF NOT EXISTS passkeys (id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
                                     prf_salt TEXT NOT NULL, key_wrapped TEXT NOT NULL,
                                     created_at TEXT NOT NULL, last_used_at TEXT);
 CREATE INDEX IF NOT EXISTS passkeys_by_user ON passkeys (user_id);
+CREATE TABLE IF NOT EXISTS reflection_ratings (key TEXT PRIMARY KEY, day TEXT NOT NULL, rating TEXT NOT NULL,
+                                    tone TEXT, writers TEXT, reasons TEXT);
 CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, email TEXT,
                                     name TEXT, created_at TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL,
                                     screen TEXT, device TEXT, done INTEGER NOT NULL DEFAULT 0);

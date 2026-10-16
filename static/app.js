@@ -331,9 +331,9 @@
 
   const when = (e) => Date.parse(e.created_at);
   // Entries passing the favorites filter (what the calendar shades).
-  const favShown = () => (state.favOnly
-    ? (state.allEntries || []).filter((e) => e.favourite)
-    : (state.allEntries || []));
+  const favShown = () => (state.allEntries || [])
+    .filter((e) => !state.favOnly || e.favourite)
+    .filter((e) => !state.spokeOnly || e.rating === "yes");
   // Entries passing every filter (the list and Older / Newer).
   const inRange = (e) => !state.range || (e.date >= state.range.start && e.date <= state.range.end);
   const inTheme = (e) => !state.theme || (e.themes || []).includes(state.theme);
@@ -342,6 +342,7 @@
   function filterDescription() {
     const parts = [];
     if (state.favOnly) parts.push("favorites");
+    if (state.spokeOnly) parts.push("that spoke to you");
     if (state.range) parts.push(`${state.range.prep} ${state.range.label}`);
     if (state.theme) parts.push(`about “${state.theme}”`);
     return parts.join(" ");
@@ -751,7 +752,7 @@
     const TONE_WORDS = { encourage: "Written to encourage", reflect: "Written to reflect", challenge: "Written to challenge" };
     $("reflection-tone").hidden = !done || !TONE_WORDS[entry.reflection_tone];
     $("reflection-tone").textContent = TONE_WORDS[entry.reflection_tone] || "";
-    $("reflect-again-btn").textContent = entry.admin_reflect_again ? "Reflect again (admin)" : "Reflect on your edited entry";   // one reflection per entry, unless it's been rewritten
+    $("reflect-again-btn").textContent = "Reflect on your edited entry";   // one reflection per entry, unless it's been rewritten
     if (done) {
       renderVignette(entry);
       $("insight").replaceChildren(...entry.insight.split(/\n\s*\n/).map((t) => {
@@ -793,8 +794,80 @@
     if (entry.reflecting) pollWhileReflecting(entry.id);
     if ($("question-pray")) $("question-pray").hidden = !done || !entry.question;
     applyHighlights(entry);
+    if (done) renderEntryThemes(entry);       // the themes arrive with the reflection: show them now, not on reload
+    renderRating(entry);
+    $("rating-thanks").hidden = true;
     if (done) maybeStartTour(entry);
   }
+
+  // ---- Did this speak to you? -------------------------------------------------
+  // At the end of a reflection: Yes / Not quite (with optional reasons), and the
+  // favorite ribbon again. Tapping the chosen answer again takes it back.
+
+  function renderRating(entry) {
+    const box = $("reflection-rating");
+    const done = entry && entry.reflection_status === "Done" && !!entry.insight && !entry.reflecting;
+    box.hidden = !done;
+    if (!done) return;
+    $("rate-yes").setAttribute("aria-pressed", String(entry.rating === "yes"));
+    $("rate-no").setAttribute("aria-pressed", String(entry.rating === "no"));
+    $("rating-reasons").hidden = entry.rating !== "no";
+    const reasons = entry.rating_reasons || [];
+    for (const b of document.querySelectorAll(".rating-reason")) {
+      b.setAttribute("aria-pressed", String(reasons.includes(b.dataset.reason)));
+    }
+    renderBottomFav(!!entry.favourite);
+  }
+
+  function renderBottomFav(on) {
+    const b = $("bottom-fav");
+    b.setAttribute("aria-pressed", String(on));
+    b.lastElementChild.textContent = on ? "Favorite ✓" : "Favorite";
+    b.title = on ? "Remove from favorites" : "Add to favorites";
+  }
+
+  async function saveRating(rating, reasons) {
+    const entry = state.current;
+    if (!entry) return;
+    const before = { rating: entry.rating, rating_reasons: entry.rating_reasons };
+    Object.assign(entry, { rating, rating_reasons: reasons });
+    renderRating(entry);                               // straight away; undone if saving fails
+    const thanks = $("rating-thanks");
+    thanks.hidden = !rating;
+    thanks.textContent = rating === "yes" ? "Thank you. You'll find it under “✓ Spoke to me” in your journal."
+      : rating === "no" ? "Thank you. That helps the reflections get better." : "";
+    try {
+      const res = await api("POST", `/api/entries/${entry.id}/rating`, { rating, reasons });
+      if (state.current && state.current.id === entry.id) {
+        state.current.rating = res.entry.rating;
+        state.current.rating_reasons = res.entry.rating_reasons;
+      }
+      refreshList();
+    } catch (err) {
+      Object.assign(entry, before);
+      thanks.hidden = true;
+      if (state.current && state.current.id === entry.id) renderRating(entry);
+      showNotice(`Couldn't save that: ${err.message}`, 5000);
+    }
+  }
+
+  $("rate-yes").addEventListener("click", () => {
+    saveRating(state.current && state.current.rating === "yes" ? null : "yes", []);
+  });
+  $("rate-no").addEventListener("click", () => {
+    const e = state.current;
+    saveRating(e && e.rating === "no" ? null : "no", e && e.rating === "no" ? [] : (e && e.rating_reasons) || []);
+  });
+  for (const b of document.querySelectorAll(".rating-reason")) {
+    b.addEventListener("click", () => {
+      const e = state.current;
+      if (!e) return;
+      const now = new Set(e.rating_reasons || []);
+      if (now.has(b.dataset.reason)) now.delete(b.dataset.reason); else now.add(b.dataset.reason);
+      saveRating("no", [...now]);
+    });
+  }
+  $("bottom-fav").addEventListener("click", toggleFavourite);
 
   // ---- Kept passages -------------------------------------------------------
   // A star after a quotation keeps it; the book with a star in the header opens the page
@@ -1697,6 +1770,7 @@
     const label = on ? "Remove from favorites" : "Add to favorites";
     b.title = label;
     b.setAttribute("aria-label", label);
+    if ($("bottom-fav")) renderBottomFav(on);
   }
 
   async function toggleFavourite() {
@@ -1723,9 +1797,11 @@
 
   const FILTER_KEY = "journal.filter";
   state.favOnly = (() => { try { return localStorage.getItem(FILTER_KEY) === "fav"; } catch (_) { return false; } })();
+  state.spokeOnly = false;                 // Spoke to me: until All, like a date range
 
   function showAll() {
     state.favOnly = false;
+    state.spokeOnly = false;
     state.range = null;
     state.theme = null;
     applyFilters();
@@ -1738,12 +1814,13 @@
 
   function applyFilters() {
     try { localStorage.setItem(FILTER_KEY, state.favOnly ? "fav" : "all"); } catch (_) {}
-    $("filter-all").setAttribute("aria-pressed", String(!state.favOnly && !state.range && !state.theme));
+    $("filter-all").setAttribute("aria-pressed", String(!state.favOnly && !state.spokeOnly && !state.range && !state.theme));
     if ($("themes-btn")) {
       $("themes-btn").setAttribute("aria-pressed", String(!!state.theme));
       $("themes-btn").textContent = state.theme ? `Theme: ${state.theme}` : "Themes";
     }
     $("filter-fav").setAttribute("aria-pressed", String(state.favOnly));
+    $("filter-spoke").setAttribute("aria-pressed", String(state.spokeOnly));
     $("calendar-btn").setAttribute("aria-pressed", String(!!state.range));
     $("calendar-btn").textContent = state.range ? `Calendar: ${state.range.label}` : "Calendar";
     state.listLimit = LIST_FIRST;
@@ -1840,8 +1917,9 @@
     const entries = shown().slice();
     const n = entries.length;
     const noun = state.favOnly ? (n === 1 ? "favorite" : "favorites") : (n === 1 ? "entry" : "entries");
-    $("filter-note").hidden = !state.favOnly && !state.range && !state.theme;
-    $("filter-note").textContent = `Showing ${n} ${noun}${state.range ? ` ${state.range.prep} ${state.range.label}` : ""}`
+    $("filter-note").hidden = !state.favOnly && !state.spokeOnly && !state.range && !state.theme;
+    $("filter-note").textContent = `Showing ${n} ${noun}${state.spokeOnly ? " that spoke to you" : ""}`
+      + `${state.range ? ` ${state.range.prep} ${state.range.label}` : ""}`
       + (state.theme ? ` about “${state.theme}”` : "");
     {
       const ul = $("entry-list");
@@ -3063,6 +3141,29 @@
     return n === 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
   }
 
+  // Admin → Usage: did reflections speak to people (anonymous counts).
+  function renderRatingStats(r) {
+    const box = $("usage-ratings");
+    if (!box) return;
+    box.hidden = false;
+    const pct = (g) => (g.percent == null ? "–" : `${g.percent}% yes`);
+    const line = (text) => { const p = document.createElement("p"); p.textContent = text; return p; };
+    const head = (text) => { const h = document.createElement("h3"); h.textContent = text; return h; };
+    if (!r || !r.rated) {
+      box.replaceChildren(head("Did reflections speak to people?"), line("No reflections rated in the last 30 days."));
+      return;
+    }
+    const TONES = { encourage: "Encourage", reflect: "Reflect", challenge: "Challenge", unknown: "Tone not recorded" };
+    box.replaceChildren(
+      head("Did reflections speak to people?"),
+      line(`${pct(r)} of ${plural(r.rated, "rated reflection")}, last 30 days.`),
+      head("By tone"),
+      ...r.by_tone.map((t) => line(`${TONES[t.tone] || t.tone}: ${pct(t)} of ${t.rated}`)),
+      ...(r.by_writer.length ? [head("By writer quoted"), ...r.by_writer.map((w) => line(`${w.writer}: ${pct(w)} of ${w.rated}`))] : []),
+      ...(r.reasons.length ? [head("Not quite, because…"), ...r.reasons.map((x) => line(`${x.reason}: ${x.count}`))] : []),
+    );
+  }
+
   async function refreshUsage() {
     if (!$("usage-tiles")) return;
     let u;
@@ -3089,6 +3190,7 @@
       ...(u.tokens || []).map((t) => tile(`${t.label} tokens`, `${t.avg_input.toLocaleString()} / ${t.avg_output.toLocaleString()}`,
         `average in / out over ${plural(t.calls, "call")}, last 30 days`)),
     );
+    renderRatingStats(u.ratings);
     $("usage-since").textContent = u.tracking_since
       ? `Visits counted since ${longDate(u.tracking_since + "T12:00:00")}.` : "No visits counted yet.";
 
@@ -3229,6 +3331,7 @@
   $("dismiss-prompt-btn").addEventListener("click", dismissPrompt);
   $("filter-all").addEventListener("click", showAll);
   $("filter-fav").addEventListener("click", toggleFavourites);
+  $("filter-spoke").addEventListener("click", () => { state.spokeOnly = !state.spokeOnly; applyFilters(); });
   applyFilters();
   $("prev-btn").addEventListener("click", goOlder);
   $("write-older-btn").addEventListener("click", olderFromWritingPage);

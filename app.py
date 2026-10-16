@@ -24,7 +24,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, email_signin, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, ratings, email_signin, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -257,6 +257,7 @@ def index():
         has_scripture=any(not w["author"] for w in sources.works().values()),
         bible_translation=prefs["bible_translation"],
         tour_done=prefs["tour_done"],
+        rating_reasons=ratings.REASONS,                       # "Not quite": what missed
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
         photo_visibility=prefs["photo_visibility"],
@@ -728,6 +729,7 @@ def _summary(e):
         "title": e.get("title"),
         "date": stats.local_date(e["created_at"]).isoformat(),  # local calendar day
         "favourite": bool(e.get("favourite")),
+        "rating": e.get("rating"),                      # did its reflection speak to them: "yes" / "no" / None
         "themes": e.get("themes"),                      # None until tagged
         "snippet": " ".join(e["text"].split())[:120],
         "reflection_status": e["reflection_status"],
@@ -763,12 +765,9 @@ def _has_reflection(entry):
 
 
 def _can_reflect_again(entry):
-    """A new reflection on an entry that has one only after a material edit of its text
-    (or any time for whoever runs the app on the web, to try settings like the tone)."""
+    """A new reflection on an entry that has one only after a material edit of its text."""
     if not _has_reflection(entry):
         return False
-    if HOSTED and _is_admin(g.user_id):
-        return True
     before = entry.get("reflected_text")
     return before is not None and store.materially_changed(before, entry.get("text"))
 
@@ -780,7 +779,6 @@ def _for_page(entry, reflecting=None):
     out = dict(entry, reflecting=reflecting)
     out.pop("reflected_text", None)            # the text as it was when reflected on: only the server needs it
     out["can_reflect_again"] = _can_reflect_again(entry)
-    out["admin_reflect_again"] = bool(out["can_reflect_again"] and HOSTED and _is_admin(g.user_id))   # the button's words
     if entry.get("quotes"):                    # which of its quotations are kept (the stars in the reflection)
         starred = kept.keys()
         out["quotes"] = [dict(q, key=kept.key_of(q), kept=kept.key_of(q) in starred) for q in entry["quotes"]]
@@ -1011,6 +1009,26 @@ def favourite_entry(entry_id):
     return jsonify(entry=_for_page(entry))
 
 
+@app.post("/api/entries/<entry_id>/rating")
+def rate_reflection(entry_id):
+    """Did the reflection speak to you? "yes" or "no" (Not quite), with optional
+    reasons; null takes the rating back. Kept in the entry, and counted anonymously."""
+    data = request.get_json(silent=True) or {}
+    rating, reasons = ratings.clean(data.get("rating"), data.get("reasons"))
+    try:
+        entry = _visible(entry_id)
+        if not _has_reflection(entry):
+            return jsonify(error="This entry has no reflection to rate yet."), 400
+        entry = store.update_entry(entry_id, touch=False, rating=rating, rating_reasons=reasons)
+    except KeyError:
+        return jsonify(error="Entry not found."), 404
+    try:
+        ratings.record(g.user_id, entry, rating, reasons)
+    except Exception:
+        log.exception("Couldn't count a reflection rating")
+    return jsonify(entry=_for_page(entry))
+
+
 # ---- Kept passages (quotations starred in reflections) ----------------------
 
 @app.get("/api/kept")
@@ -1137,6 +1155,7 @@ def reflect_entry(entry_id):
             return jsonify(error=str(e), entry=_for_page(entry, reflecting=False)), 502
         usage.record(g.user_id, "reflection")
         fields["reflection_tone"] = prefs["reflection_tone"]       # shown under it: "Written to challenge"
+        fields.update(rating=None, rating_reasons=[])               # a new reflection hasn't been rated yet
         suggested = store.clean_title(fields.pop("suggested_title", None))
         current = store.get_entry(entry_id)  # may have been renamed while Claude was thinking
         if suggested and not current.get("title"):
@@ -1563,6 +1582,7 @@ def usage_stats():
             r["shared_at"] = shared.get(r["email"])
         stats["mail_ready"] = mail.ready()
     stats["tokens"] = tokens.summary()                 # average tokens per call to Claude, last 30 days
+    stats["ratings"] = ratings.summary()               # did reflections speak to people (anonymous)
     return jsonify(stats)
 
 
