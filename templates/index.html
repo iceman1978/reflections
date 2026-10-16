@@ -546,24 +546,35 @@
         </div>
 
         <div id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" class="settings-panel" hidden>
-          <label>Text size
-            <select name="text_size">
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-              <option value="xlarge">Extra large</option>
-            </select>
-            <span class="hint">For your entries and their reflections.</span>
-          </label>
+          <div class="text-size-row">
+            <label>Text size
+              <select name="text_size">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+                <option value="xlarge">Extra large</option>
+              </select>
+              <span class="hint">For your entries and their reflections.</span>
+            </label>
+            <!-- A few words on a ruled page, at the size being tried -->
+            <p class="text-sample" aria-hidden="true">A few honest lines about today.</p>
+          </div>
           <fieldset class="colour-field">
             <legend>Color</legend>
-            <div class="swatches" role="radiogroup">
-              {% for key, name in colour_themes %}
-              <label class="swatch" data-palette="{{ key }}">
-                <input type="radio" name="colour_theme" value="{{ key }}">
-                <span>{{ name }}</span>
-              </label>
-              {% endfor %}
+            <div class="colour-row">
+              <div class="swatches" role="radiogroup">
+                {% for key, name in colour_themes %}
+                <label class="swatch" data-palette="{{ key }}">
+                  <input type="radio" name="colour_theme" value="{{ key }}">
+                  <span>{{ name }}</span>
+                </label>
+                {% endfor %}
+              </div>
+              <!-- The journal's cover in the color being tried (it's only seen when the book is closed) -->
+              <figure class="cover-sample" title="Your journal's cover in this color">
+                <div class="cover-swatch" aria-hidden="true"></div>
+                <figcaption>Cover</figcaption>
+              </figure>
             </div>
           </fieldset>
           <label>Day or evening
