@@ -386,9 +386,9 @@
       <p id="kept-intro" class="subtle kept-intro"></p>
       <div id="kept-sort" class="kept-sort" role="group" aria-label="Sort" hidden>
         <span class="subtle">Sort:</span>
-        <button type="button" data-sort="in_order" title="Scripture in Bible order, then writers by when they lived">In order</button>
+        <button type="button" data-sort="in_order" title="{% if has_scripture %}Scripture in Bible order, then writers{% else %}The writers{% endif %} by when they lived">In order</button>
         <button type="button" data-sort="recent" title="One list, the passages you kept most recently first">Recently kept</button>
-        <button type="button" data-sort="az" title="Books of the Bible, then writers, alphabetically">A–Z</button>
+        <button type="button" data-sort="az" title="{% if has_scripture %}Books of the Bible, then writers,{% else %}The writers{% endif %} alphabetically">A–Z</button>
         <button type="button" data-sort="popular" title="The books and writers people keep most, first">Most kept</button>
       </div>
       <div id="kept-list" class="kept-list"></div>
@@ -431,13 +431,14 @@
             </div>
             <button type="button" id="tour-again-btn" class="primary">Start</button>
           </div>
+          <h2>Account</h2>
           {% if hosted %}
-        <h2>Account</h2>
-        <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
+          <p class="account-line">Signed in as <span id="account-email"></span> · <a href="/logout">Sign out</a> · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a></p>
           {% endif %}
           <label>Your name
             <input name="user_name" type="text" maxlength="40" placeholder="Used in the greeting">
           </label>
+          <h2>Journal</h2>
           <label>Journal name
             <input name="journal_name" type="text" maxlength="30" placeholder="{{ app_name }}">
             <span class="hint">The title at the top of your journal. Leave blank for “{{ app_name }}”.</span>
@@ -452,6 +453,12 @@
               {% endfor %}
             </select>
           </label>
+          {% if hosted %}
+          <label class="checkbox">
+            <input name="email_reminders" type="checkbox"> Email reminders
+          </label>
+          <span class="hint checkbox-hint">A gentle email if you haven't written for a few days.</span>
+          {% endif %}
           <!-- How reflections speak, and (with Scripture) the translation "Read the passage" opens -->
           <h2>Reflections</h2>
           <fieldset class="tone-choice">
@@ -478,12 +485,6 @@
             <span class="hint">Reflections quote the BSB, word for word (it's free to quote, so every verse can be
               checked); “Read the passage” opens your choice on BibleHub.</span>
           </label>
-          {% endif %}
-          {% if hosted %}
-          <label class="checkbox">
-            <input name="email_reminders" type="checkbox"> Email reminders
-          </label>
-          <span class="hint checkbox-hint">A gentle email if you haven't written for a few days.</span>
           {% endif %}
           <div id="install-section" class="install-section" hidden>
             <h2>Install as an app</h2>
@@ -531,13 +532,6 @@
         </div>
 
         <div id="panel-theme" role="tabpanel" aria-labelledby="tab-theme" class="settings-panel" hidden>
-          <label>Day or evening
-            <select name="theme">
-              <option value="day">Day</option>
-              <option value="evening">Evening</option>
-              <option value="auto">Automatic (follows your device)</option>
-            </select>
-          </label>
           <label>Text size
             <select name="text_size">
               <option value="small">Small</option>
@@ -558,6 +552,13 @@
               {% endfor %}
             </div>
           </fieldset>
+          <label>Day or evening
+            <select name="theme">
+              <option value="day">Day</option>
+              <option value="evening">Evening</option>
+              <option value="auto">Automatic (follows your device)</option>
+            </select>
+          </label>
           <label class="checkbox">
             <input name="background_photo" type="checkbox"> Background photo
           </label>
@@ -968,6 +969,7 @@
     userName: {{ user_name | tojson }},
     bibleTranslation: {{ bible_translation | tojson }},
     prayerList: {{ (edition.prayer_list or false) | tojson }},
+    hasScripture: {{ has_scripture | tojson }},
     tourDone: {{ tour_done | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},

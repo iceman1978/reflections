@@ -850,9 +850,9 @@
   for (const b of document.querySelectorAll("#kept-sort [data-sort]")) b.addEventListener("click", () => showKept(b.dataset.sort));
 
   const KEPT_INTRO = {
-    in_order: "Scripture in Bible order, then the writers by when they lived.",
+    in_order: CFG.hasScripture ? "Scripture in Bible order, then the writers by when they lived." : "The writers by when they lived.",
     recent: "The passages you kept most recently, first.",
-    az: "Books of the Bible, then the writers, alphabetically.",
+    az: CFG.hasScripture ? "Books of the Bible, then the writers, alphabetically." : "The writers, alphabetically by surname.",
     popular: "The books and writers people keep most, first.",
   };
 

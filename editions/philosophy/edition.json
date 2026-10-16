@@ -22,7 +22,7 @@
     {"icon": "question", "title": "Easily explore past entries",
      "text": "Every reflection ends with a question to carry forward. Browse your favorites, search, or explore a theme."},
     {"icon": "lock", "title": "Private, and never used to train AI",
-     "text": "Entries are encrypted with a passphrase <em>only you know</em>. Your entry is only used to write your daily reflection, and isn’t used to train AI.",
+     "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "email_vignette": "meditation-and-stillness",
@@ -40,6 +40,21 @@
     "What have you learned about yourself recently?",
     "What's a small kindness you could offer someone today?"
   ],
+  "sample": {
+    "link_text": "Read a sample reflection",
+    "title": "Ten quiet minutes",
+    "entry": "I wanted ten quiet minutes with my coffee before everyone got up, but I checked my phone \"just for a second\" and the whole day came flooding in: the meeting at ten, a bill I forgot, an email I haven't answered. The coffee went cold. I'd like my mornings to feel like mine again, not like the first item on the list.",
+    "theme": "habits",
+    "paragraphs": [
+      "You describe the phone as an intruder that broke into your ten minutes. I'd ask whether it was more of an exit. Pascal made a famous diagnosis: <em>“all the unhappiness of men arises from one single fact, that they cannot stay quietly in their own chamber.”</em> He wasn't talking about villains or addicts. He meant ordinary people who reach for something, anything, when the quiet starts to feel a little exposed.",
+      "Notice what <em>\"just for a second\"</em> was probably doing. The meeting, the bill, and the email were already in your head before you picked up the phone. In stillness, they were going to surface anyway. The phone let you meet them as tasks, which feels busy and productive, instead of as a mood, which feels like sitting with unease. Pascal's sharper point is that we chase the hunt rather than the hare. Checking can feel like relief even when it produces none.",
+      "So guarding the ten minutes may take more than moving the phone to another room, though that helps. It may mean letting the list show up in your mind and not answering it yet. The quiet was never empty. It was crowded, and the phone only made the crowd official. What would it take to let those items stand there while your coffee is still hot?"
+    ],
+    "cite": "Blaise Pascal, Pensées (Thoughts) 139",
+    "cite_url": "https://en.wikisource.org/wiki/Blaise_Pascal/Thoughts/Section_2#:~:text=the%20unhappiness%20of%20men,in%20their%20own%20chamber",
+    "question": "When your hand went to the phone, what did you feel in the seconds just before, and what were you hoping the screen would give you?",
+    "note": "A real reflection from A Life Well Lived, as it was written."
+  },
   "welcome_quote": {
     "text": "“The unexamined life is not worth living.”",
     "cite_html": "Socrates, in Plato’s <cite>Apology</cite>"

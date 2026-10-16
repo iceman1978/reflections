@@ -665,7 +665,11 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
 .settings-form .checkbox { display: flex; align-items: center; gap: 8px; }
 .settings-form input[type="checkbox"] { accent-color: var(--accent); width: 1.05rem; height: 1.05rem; }
 .settings-form .hint { display: block; font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-.settings-page h2 { font-weight: 500; font-size: 1.05rem; color: var(--muted); margin: 28px 0 12px; }
+/* Section headings in Settings: small capitals in the theme colour over a thin rule, with room
+   above, so they read as dividers between groups and not as one more setting. */
+.settings-page h2 { margin: 34px 0 14px; padding-top: 14px; border-top: 1px solid var(--rule);
+  font-weight: 600; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.settings-page .tour-card + h2, .settings-page .settings-panel > h2:first-child { margin-top: 8px; }
 .data-actions { display: flex; flex-direction: column; gap: 14px; }
 .data-actions > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .data-actions .hint { font-size: 0.85rem; color: var(--muted); }
@@ -1198,11 +1202,14 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   padding: 0;
 }
 .vault.landing .vault-card { align-self: center; justify-self: center; width: calc(100% - 48px); max-width: 420px; margin: 40px 0; }
-/* The welcome column is often taller than the window: keep the sign-in card in
-   the middle of the window as it scrolls, not the middle of the column. (translate,
+/* The welcome column is often taller than the window: the sign-in card stays fixed in
+   the middle of the window (and of its third of the page) while the welcome scrolls
+   beside it. Only where the window is tall enough to hold the whole card. (translate,
    not transform, so the card's own animations still work.) */
-@media (min-width: 861px) and (min-height: 640px) {
-  .vault.landing .vault-card { align-self: start; position: sticky; top: 50vh; translate: 0 -50%; margin: 0; }
+@media (min-width: 861px) and (min-height: 720px) {
+  .vault.landing .vault-card { position: fixed; top: 50%; left: calc(65% + 17.5%); translate: -50% -50%;
+    width: min(420px, calc(35% - 48px)); margin: 0; }
+  .vault.landing .vault-card.page { box-shadow: 0 1px 3px var(--shadow), 0 30px 80px -20px rgba(0, 0, 0, 0.45); }
 }
 .landing-intro {
   --deep: hsl(var(--hue) calc(var(--sat) * 0.8) 17%);
@@ -1301,7 +1308,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 /* The picture of the sample page, centred, fading out at the bottom. The fade is on the
    picture and the shadow on its frame, so the shadow fades with it. Not tilted: a turned
    picture's edges go jagged. */
-.sample-card:has(.sample-shot), .sample-card:has(.sample-shot):hover:not(:disabled) { align-self: center; align-items: center; text-align: center; }
+.sample-card, .sample-card:hover:not(:disabled) { align-self: center; align-items: center; text-align: center; }   /* picture or little page alike */
 .sample-shot {
   display: block; width: min(100%, 340px); aspect-ratio: 720 / 550;
   filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.4));
@@ -1358,7 +1365,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   border: 1px solid var(--rule);
   border-radius: 16px;
   padding: 40px 40px 28px;
-  box-shadow: 0 1px 2px var(--shadow), 0 18px 48px -18px var(--shadow);
+  box-shadow: 0 1px 3px var(--shadow), 0 26px 70px -18px rgba(0, 0, 0, 0.4);   /* lifted clear of the page */
 }
 :is(.vault, .cover-view) .vault-card.page::before, :is(.vault, .cover-view) .vault-card.page::after { content: none; }
 :is(.vault, .cover-view) .vault-card input, :is(.vault, .cover-view) .vault-card button { font-family: inherit; }
