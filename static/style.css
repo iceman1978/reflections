@@ -392,7 +392,7 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
   --leaf: var(--page-edge);
   --leaf-line: color-mix(in srgb, var(--page-edge) 82%, var(--ink));
   --cover: hsl(var(--hue) calc(var(--sat) * 0.7) 24%);
-  box-shadow:
+  --book-edges:
     1px 1px 0 var(--leaf),
     2px 2px 0 var(--leaf-line),
     3px 3px 0 var(--leaf),
@@ -405,9 +405,15 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
     10px 10px 0 var(--leaf),
     11px 11px 0 var(--leaf-line),
     12px 12px 0 var(--leaf),
-    14px 14px 0 1px var(--cover),          /* the cover board */
-    0 1px 2px var(--shadow),
-    16px 24px 48px -10px var(--shadow);    /* the book's shadow on the desk */
+    14px 14px 0 1px var(--cover);          /* the cover board */
+  --book-shadow: 0 1px 2px var(--shadow), 16px 24px 48px -10px var(--shadow);    /* its shadow on the desk */
+  box-shadow: var(--book-edges), var(--book-shadow);
+}
+/* The journal itself (not the other pages that share its paper) floats above the
+   desk: a deeper, wider shadow, falling further below it. */
+#book > .page {
+  --book-shadow: 0 2px 4px var(--shadow), 20px 34px 60px -12px var(--shadow),
+    26px 70px 110px -30px rgba(0, 0, 0, 0.38);
 }
 /* The page edges and cover stick out past the paper (see box-shadow above), so
    the journal's pages are that much narrower: the cover's outer edge then lines
@@ -764,7 +770,7 @@ button.danger-outline:hover:not(:disabled) { background: color-mix(in srgb, var(
 
 /* ---- Past entries: a translucent card on the desk ---- */
 .past {
-  margin-top: 30px;
+  margin-top: 64px;     /* clear of the book's shadow */
   padding: 14px 22px 8px;
   border-radius: 8px;
   background: var(--panel);
@@ -1579,11 +1585,14 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   .book { margin-top: 16px; }
   .page {
     padding: 24px 20px 16px 30px;
-    box-shadow:  /* a slimmer book on small screens */
+    --book-edges:  /* a slimmer book on small screens */
       1px 1px 0 var(--leaf), 2px 2px 0 var(--leaf-line), 3px 3px 0 var(--leaf),
       4px 4px 0 var(--leaf), 5px 5px 0 var(--leaf-line), 6px 6px 0 var(--leaf),
-      8px 8px 0 1px var(--cover), 0 1px 2px var(--shadow), 10px 18px 36px -10px var(--shadow);
+      8px 8px 0 1px var(--cover);
+    --book-shadow: 0 1px 2px var(--shadow), 10px 18px 36px -10px var(--shadow);
   }
+  #book > .page { --book-shadow: 0 2px 4px var(--shadow), 12px 22px 40px -10px var(--shadow), 14px 44px 70px -24px rgba(0, 0, 0, 0.32); }
+  .past { margin-top: 44px; }
   .page::before { width: 16px; }
   .page { --spine: 9px; }   /* the slimmer book's cover sits 8px out */
   .book { --book-edge: 9px; }
