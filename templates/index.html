@@ -29,7 +29,8 @@
   <div id="banner" class="banner" hidden></div>
 
   <!-- The lock screen: nothing from the journal is on the page until it's unlocked -->
-  <div id="vault" class="vault" hidden>
+  <div id="vault" class="vault{% if welcome_photo %} has-photo{% endif %}" hidden
+       {% if welcome_photo %}style="--welcome-photo: url('{{ welcome_photo }}')"{% endif %}>
     {% if hosted %}
     <!-- Welcome page (signed out): what the app is, on the left; sign-in on the right -->
     <section id="landing" class="landing-intro{% if hero_url %} has-hero{% endif %}" hidden

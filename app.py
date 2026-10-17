@@ -132,8 +132,8 @@ def _guard():
     vault.use(None)
     g.user_id = _signed_in_user()
     g.token = request.cookies.get(SESSION_COOKIE)
-    if request.path.startswith("/static/backgrounds/") and HOSTED and not g.user_id:
-        return jsonify(error="Sign in first."), 403  # personal photos are for signed-in family only
+    if request.path.startswith("/static/backgrounds/") and HOSTED and not g.user_id and not _welcome_photo_path(request.path):
+        return jsonify(error="Sign in first."), 403  # only the welcome page's photos are public
     if request.path in PUBLIC_PATHS or request.path.startswith(("/static/", "/p/", "/passage/")):
         return None
     if not g.user_id:
@@ -239,6 +239,7 @@ def index():
     return render_template(
         "index.html",
         hosted=HOSTED,
+        welcome_photo=_welcome_photo_url() if HOSTED and not uid else None,   # beside the sign-in card
         is_admin=_is_admin(uid),
         mail_ready=mail.ready(),
         user_name=prefs["user_name"],
@@ -491,6 +492,30 @@ def background_photos():
     folders = [BACKGROUNDS_DIR, BACKGROUNDS_DIR / config.EDITION_NAME]
     return sorted(p for folder in folders for p in folder.glob("*")
                   if p.is_file() and p.suffix.lower() in PHOTO_TYPES)
+
+
+def welcome_photos():
+    """The photos the welcome page may show beside the sign-in card: the edition's
+    chosen few ("welcome_photos" in edition.json, file names in static/backgrounds/),
+    or until then every photo directly in static/backgrounds/ (not the editions' own folders)."""
+    chosen = config.EDITION.get("welcome_photos")
+    photos = [p for p in BACKGROUNDS_DIR.glob("*") if p.is_file() and p.suffix.lower() in PHOTO_TYPES]
+    return sorted(p for p in photos if not chosen or p.name in chosen)
+
+
+def _welcome_photo_path(path):
+    """Whether a /static/backgrounds/ path is one of the welcome page's photos (public)."""
+    name = urllib.parse.unquote(path.removeprefix("/static/backgrounds/"))
+    return "/" not in name and any(p.name == name for p in welcome_photos())
+
+
+def _welcome_photo_url():
+    """A different photo on each visit."""
+    photos = welcome_photos()
+    if not photos:
+        return None
+    photo = random.choice(photos)
+    return f"/static/backgrounds/{urllib.parse.quote(photo.name)}?v={int(photo.stat().st_mtime)}"
 
 
 @app.get("/api/background")
