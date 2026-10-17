@@ -607,13 +607,14 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
   animation: fade-in 0.5s ease-out;
 }
 .insight p { margin: 0 0 1em; }
-/* A drawing in the top right of Kept passages and the Prayer list, like the reflection's. */
+/* A drawing in the top right of Kept passages and the Prayer list, like the reflection's;
+   the heading and the words below it wrap around it. */
 .page-vignette {
-  position: absolute; top: 26px; right: 40px; width: 190px; aspect-ratio: 2 / 1; pointer-events: none;
+  float: right; width: min(340px, 45%); aspect-ratio: 2 / 1; margin: -10px -12px 10px 20px; pointer-events: none;
   background: var(--accent); opacity: 0.85;
   -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
 }
-@media (max-width: 640px) { .page-vignette { top: 14px; right: 18px; width: 120px; } }
+@media (max-width: 640px) { .page-vignette { width: 42%; margin: -6px -6px 8px 12px; } }
 /* The main theme's pencil drawing, at the top of the reflection, in the theme's color. */
 .reflection-vignette {
   width: 100%; max-width: 400px; aspect-ratio: 2 / 1; margin: 0 auto 16px;   /* a wide strip across the reflection */
@@ -1077,6 +1078,16 @@ textarea.feedback-text:focus { border-color: var(--accent); }
 .feedback-list li.done { opacity: 0.55; }
 .feedback-meta { font-size: 0.8rem; color: var(--muted); }
 .feedback-body { margin: 4px 0 6px; white-space: pre-wrap; }
+/* Filing feedback (Admin): Now / Later / Think, a private note, and Done. */
+.feedback-filter { margin: 4px 0 8px; }
+.feedback-file { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.feedback-file .rating-btn { font-size: 0.82rem; padding: 2px 10px; }
+.feedback-file .checkbox { margin: 0 0 0 auto; font-size: 0.9rem; }
+.feedback-note { width: 100%; margin-top: 6px; padding: 5px 8px; font: inherit; font-size: 0.9rem; color: var(--ink);
+  background: var(--field); border: 1px solid var(--rule); border-radius: 6px; }
+.feedback-note:placeholder-shown { background: transparent; border-style: dashed; }
+.feedback-tag { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 999px; font-size: 0.75rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
 
 /* ---- Invitations ---- */
 input.invite-input {

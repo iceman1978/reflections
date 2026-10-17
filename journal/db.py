@@ -86,7 +86,8 @@ CREATE TABLE IF NOT EXISTS feedback (id INTEGER PRIMARY KEY AUTOINCREMENT, user_
 ADDED_COLUMNS = (("invites", "message", "TEXT"), ("invites", "emailed_at", "TEXT"), ("access", "shared_at", "TEXT"),
                  ("passages", "missing_theme", "TEXT"), ("passages", "theme_problem", "TEXT"),
                  ("passages", "keeps", "INTEGER NOT NULL DEFAULT 0"), ("passages", "other_shares", "INTEGER NOT NULL DEFAULT 0"),
-                 ("passages", "title", "TEXT"), ("passages", "author", "TEXT"), ("passages", "translation", "TEXT"))
+                 ("passages", "title", "TEXT"), ("passages", "author", "TEXT"), ("passages", "translation", "TEXT"),
+                 ("feedback", "priority", "TEXT"), ("feedback", "note", "TEXT"))
 
 LOCAL_USER = "local"
 

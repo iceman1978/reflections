@@ -1198,9 +1198,12 @@ def reflect_entry(entry_id):
 def writing_prompt():
     data = request.get_json(silent=True) or {}
     shown = [str(p)[:500] for p in (data.get("already_suggested") or [])][:10]
+    if (starter := writing_prompts.starter(shown)):          # just starting out: a hand-written question, free
+        return jsonify(starter)
     try:
         usage.check(g.user_id, "prompt")
-        result = writing_prompts.suggest(shown, users.prefs(g.user_id)["writers"])
+        result = writing_prompts.suggest(shown, users.prefs(g.user_id)["writers"],
+                                         avoid_entry=str(data.get("previous_entry") or "")[:64] or None)
     except usage.LimitReached as e:
         return jsonify(error=str(e), limit=True), 429
     except reflection.ReflectionError as e:
@@ -1325,6 +1328,20 @@ def feedback_done(feedback_id):
         return resp
     try:
         feedback.set_done(feedback_id, bool((request.get_json(silent=True) or {}).get("done")))
+    except KeyError:
+        return jsonify(error="Not found"), 404
+    return jsonify(ok=True)
+
+
+@app.post("/api/feedback/<int:feedback_id>/file")
+def feedback_file(feedback_id):
+    """Admin: file it as Now / Later / Think (or back to New), and/or set a private note."""
+    if (resp := _need_admin()):
+        return resp
+    data = request.get_json(silent=True) or {}
+    try:
+        feedback.file_under(feedback_id, priority=data["priority"] if "priority" in data else ...,
+                            note=data["note"] if "note" in data else ...)
     except KeyError:
         return jsonify(error="Not found"), 404
     return jsonify(ok=True)

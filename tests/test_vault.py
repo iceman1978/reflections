@@ -340,6 +340,22 @@ class FeedbackTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             feedback.set_done(9999, True)
 
+    def test_filing_and_notes(self):
+        fid = feedback.add("u1", None, "Ann", "feature", "Weekly summaries")
+        self.assertIsNone(feedback.all_feedback()[0]["priority"])                 # new until filed
+        feedback.file_under(fid, priority="later", note="  after   50 users ")
+        f = feedback.all_feedback()[0]
+        self.assertEqual((f["priority"], f["note"]), ("later", "after 50 users"))
+        feedback.file_under(fid, priority="soonish")                              # not one of the three: back to new
+        self.assertEqual((feedback.all_feedback()[0]["priority"], feedback.all_feedback()[0]["note"]), (None, "after 50 users"))
+        feedback.file_under(fid, note="")
+        self.assertEqual(feedback.all_feedback()[0]["note"], "")
+        feedback.file_under(fid, priority="now")
+        row = list(csv.reader(io.StringIO(feedback.as_csv()[1:])))[1]
+        self.assertEqual(row[7:9], ["Now", ""])
+        with self.assertRaises(KeyError):
+            feedback.file_under(9999, priority="now")
+
     def test_refuses_bad_input(self):
         for kind, text in [("fix", "   "), ("praise", "hello"), ("feature", "x" * (feedback.MAX_CHARS + 1))]:
             with self.assertRaises(feedback.FeedbackProblem):
@@ -1145,3 +1161,66 @@ class RatingTests(unittest.TestCase):
         self.assertNotIn(self.uid, " ".join(str(x) for x in row))
         self.assertNotIn(a["id"], " ".join(str(x) for x in row))
         self.assertEqual(store.get_entry(a["id"])["rating_reasons"], ["long"])   # the entry keeps its own copy
+
+
+class StarterPromptTests(unittest.TestCase):
+    """Someone just starting gets the edition's hand-written questions, until they've written a few entries."""
+
+    def setUp(self):
+        fresh_journal()
+        set_up_as(users.from_google("g-start", "start@x.com", "Start"))
+
+    def test_starters_until_a_few_entries(self):
+        from journal import writing_prompts
+        listed = config.EDITION.get("reminder_prompts") or []
+        if not listed:
+            self.skipTest("This edition has no hand-written questions.")
+        first = writing_prompts.starter()
+        self.assertIn(first["prompt"], listed)
+        self.assertEqual(first["approach"], "starter")
+        self.assertNotEqual(writing_prompts.starter([first["prompt"]] * 1)["prompt"] if len(listed) > 1 else None,
+                            first["prompt"])                                    # never the one just shown
+        self.assertIsNone(writing_prompts.starter(listed))                      # all seen: Claude's turn
+        e = store.create_entry("Answering a question.")
+        store.update_entry(e["id"], prompt=first["prompt"])
+        for _ in range(10):                                                     # an answered one doesn't come back
+            self.assertNotEqual(writing_prompts.starter()["prompt"], first["prompt"])
+        for _ in range(writing_prompts.STARTER_UNDER - 1):
+            store.create_entry("Another day.")
+        self.assertIsNone(writing_prompts.starter())                            # enough history now
+
+
+class PromptContextTests(unittest.TestCase):
+    """What "Give me a prompt" sends Claude: the last two months, favoring a week to three
+    weeks ago; today's entries as context only; highlights; the prayer list."""
+
+    def setUp(self):
+        fresh_journal()
+        set_up_as(users.from_google("g-ctx", "ctx@x.com", "Ctx"))
+
+    def test_window_weighting_highlights_and_prayers(self):
+        from datetime import timedelta
+        from journal import prayers, writing_prompts
+        from journal.config import TZ
+        now = datetime.now(TZ)
+        made = {}
+        for days in (0, 3, 10, 14, 40, 90, 400):
+            e = store.create_entry(f"Written {days} days ago.")
+            made[days] = store.update_entry(e["id"], created_at=(now - timedelta(days=days)).isoformat())
+        store.add_highlight(made[14]["id"], "entry", "Written 14", 0)
+        store.update_entry(made[10]["id"], favourite=True, rating="yes")
+        prayers.add("For Dad's surgery", (now - timedelta(days=12)).isoformat())
+        entries = store.visible_entries()
+        text = writing_prompts._context(entries, [], now=now)
+        self.assertNotIn("Written 90", text)                       # older than two months: left out
+        self.assertNotIn("Written 400", text)
+        self.assertIn('just_written="yes', text)                   # today's: context only
+        self.assertLess(text.index("Written 40"), text.index("Just written"))
+        self.assertIn('"Written 14" (in their entry, 14 days ago', text)
+        self.assertIn('favorite="yes" reflection="spoke to them"', text)
+        if config.EDITION.get("prayer_list"):
+            self.assertIn("For Dad's surgery\" (added 12 days ago, still open)", text)
+        avoided = writing_prompts._context(entries, [], avoid_entry=made[10]["id"], now=now)
+        self.assertNotIn("Written 10 days ago.", avoided)          # the last prompt's thread
+        lapsed = writing_prompts._context([made[400], made[90]], [], now=now)   # oldest first
+        self.assertIn("their last entry was 90 days ago", lapsed)

@@ -730,6 +730,14 @@
       <h2>Feedback received</h2>
       <p class="hint">What people have sent with the Feedback button (the lightbulb at the top){% if hosted %} (only you can see this){% endif %}.
         <a class="button-link" href="/api/feedback/export" download>Download (CSV)</a></p>
+      <!-- Filed loosely: Now (soon), Later (once there are users), Think (not sure yet); New until filed -->
+      <div id="feedback-filter" class="kept-sort feedback-filter" role="group" aria-label="Show">
+        <button type="button" data-filter="new">New</button>
+        <button type="button" data-filter="now">Now</button>
+        <button type="button" data-filter="later">Later</button>
+        <button type="button" data-filter="think">Think</button>
+        <button type="button" data-filter="all">All</button>
+      </div>
       <div class="key-test"><label class="checkbox"><input id="feedback-show-done" type="checkbox"> Show ones marked done</label></div>
       <ul id="feedback-list" class="feedback-list"></ul>
       </div>

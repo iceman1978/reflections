@@ -61,8 +61,9 @@
 
       <h2>When something leaves the journal</h2>
       <ul>
-        <li><strong>Reflections and writing prompts:</strong> the text of the entry (or, for prompts, a few recent
-          entries) is sent to Claude, the AI model made by Anthropic that {{ app_name }} uses to write reflections.
+        <li><strong>Reflections and writing prompts:</strong> the text of the entry (or, for prompts, entries from the
+          last two months, with what you highlighted, favorited or rated{% if edition.prayer_list %}, and your prayer
+          list{% endif %}) is sent to Claude, the AI model made by Anthropic that {{ app_name }} uses to write reflections.
           Anthropic doesn't use this data to train its models by default.</li>
         <li><strong>Export (CSV):</strong> downloads an unencrypted copy to your device, only when you ask for it.</li>
         <li><strong>Feedback:</strong> what you send with the Feedback button (the lightbulb) is <em>not</em> encrypted,

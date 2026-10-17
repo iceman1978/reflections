@@ -13,9 +13,12 @@ from . import db
 from .config import TZ
 
 KINDS = {"fix": "Fix or improvement", "feature": "New feature"}
+# How the admin has filed it (Settings → Admin), loosely; unfiled is "new".
+PRIORITIES = {"now": "Now", "later": "Later", "think": "Think"}
+MAX_NOTE = 500
 MAX_CHARS = 5000
 PER_DAY = 20   # per person, to keep a runaway script from filling the disk
-COLUMNS = ("id", "user_id", "email", "name", "created_at", "kind", "text", "screen", "device", "done")
+COLUMNS = ("id", "user_id", "email", "name", "created_at", "kind", "text", "screen", "device", "done", "priority", "note")
 
 
 class FeedbackProblem(Exception):
@@ -66,7 +69,12 @@ def all_feedback():
         rows = con.execute(f"SELECT {', '.join(COLUMNS)} FROM feedback ORDER BY id DESC").fetchall()
     finally:
         con.close()
-    return [dict(zip(COLUMNS, r), done=bool(r[-1]), kind_label=KINDS.get(r[5], r[5])) for r in rows]
+    out = []
+    for r in rows:
+        f = dict(zip(COLUMNS, r))
+        f.update(done=bool(f["done"]), kind_label=KINDS.get(f["kind"], f["kind"]), note=f["note"] or "")
+        out.append(f)
+    return out
 
 
 def set_done(feedback_id, done):
@@ -82,14 +90,39 @@ def set_done(feedback_id, done):
         raise KeyError(feedback_id)
 
 
+def file_under(feedback_id, priority=..., note=...):
+    """Set how it's filed ("now" / "later" / "think", or None for new) and/or the
+    admin's private note. Leaves out whichever isn't given. Raises KeyError."""
+    sets, values = [], []
+    if priority is not ...:
+        sets.append("priority = ?")
+        values.append(priority if priority in PRIORITIES else None)
+    if note is not ...:
+        sets.append("note = ?")
+        values.append(" ".join(str(note or "").split())[:MAX_NOTE] or None)
+    if not sets:
+        return
+    with db.write_lock:
+        con = db.connect()
+        try:
+            with con:
+                changed = con.execute(f"UPDATE feedback SET {', '.join(sets)} WHERE id = ?",
+                                      (*values, feedback_id)).rowcount
+        finally:
+            con.close()
+    if not changed:
+        raise KeyError(feedback_id)
+
+
 def as_csv():
     """All feedback as a CSV that opens cleanly in Excel."""
     out = io.StringIO()
     w = csv.writer(out, lineterminator="\r\n")
-    w.writerow(["Date", "Time", "From", "Type", "Feedback", "Screen", "Device", "Done"])
+    w.writerow(["Date", "Time", "From", "Type", "Feedback", "Screen", "Device", "Priority", "Note", "Done"])
     for f in all_feedback():
         when = datetime.fromisoformat(f["created_at"])
         who = f["email"] or f["name"] or f["user_id"]
         w.writerow([when.strftime("%Y-%m-%d"), when.strftime("%H:%M"), who, f["kind_label"], f["text"],
-                    f["screen"] or "", f["device"] or "", "Yes" if f["done"] else ""])
+                    f["screen"] or "", f["device"] or "", PRIORITIES.get(f["priority"], "New"), f["note"],
+                    "Yes" if f["done"] else ""])
     return "﻿" + out.getvalue()

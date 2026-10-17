@@ -1446,19 +1446,34 @@
     { el: () => $("question"), title: "To sit with",
       text: prayersOn ? "A question to carry through your day, or to pray about." : "A question to carry through your day." },
     { el: () => $("past"), title: "Your journal",
-      text: prayersOn ? "Every entry is kept here. Mark favourites with the ribbon on the page; your kept passages and prayer list are at the top."
-                      : "Every entry is kept here. Mark favourites with the ribbon on the page; your kept passages are at the top." },
+      text: "Every entry is kept here. Mark favorites with the ribbon on the page, and find them again with the filters." },
+    // Where kept passages (and the prayer list) live: the icons at the top, or the menu on a phone.
+    { el: () => (isShown($("kept-btn")) ? [$("kept-btn"), prayersOn && $("prayers-btn")].filter(isShown) : $("menu-btn")),
+      title: prayersOn ? "Kept passages and prayers" : "Kept passages",
+      text: () => (prayersOn
+        ? "The passages you star are gathered in Kept passages (the book with a star), to return to and share. "
+          + "Your prayer list is beside it (the candle): what you're praying for, and the prayers you've marked answered."
+        : "The passages you star are gathered in Kept passages (the book with a star), to return to and share.")
+        + (isShown($("kept-btn")) ? "" : prayersOn ? " Both are in the menu." : " It's in the menu.") },
     { el: () => (isShown($("settings-btn")) ? $("settings-btn") : $("menu-btn")), title: "Make it yours",
       text: "In Settings, choose the tone of your reflections and the writers on your bookshelf." },
   ];
   const isShown = (el) => !!(el && el.offsetParent !== null && el.getBoundingClientRect().width);
   let tourStep = -1, tourShownThisVisit = false;
 
+  // The area a step points at: one element, or several side by side (their combined box).
+  function tourRect(el) {
+    const rects = (Array.isArray(el) ? el : [el]).map((x) => x.getBoundingClientRect());
+    const left = Math.min(...rects.map((r) => r.left)), top = Math.min(...rects.map((r) => r.top));
+    const right = Math.max(...rects.map((r) => r.right)), bottom = Math.max(...rects.map((r) => r.bottom));
+    return { left, top, width: right - left, height: bottom - top };
+  }
+
   function placeTour() {
     const step = TOUR[tourStep];
     const el = step && step.el();
-    if (!el) return;
-    const r = el.getBoundingClientRect(), pad = 8;
+    if (!el || (Array.isArray(el) && !el.length)) return;
+    const r = tourRect(el), pad = 8;
     const spot = $("tour-spot");
     const top = Math.max(4, r.top - pad), height = Math.min(r.height + pad * 2, window.innerHeight - top - 4);
     Object.assign(spot.style, { top: `${top}px`, left: `${Math.max(4, r.left - pad)}px`, width: `${r.width + pad * 2}px`, height: `${height}px` });
@@ -1477,10 +1492,10 @@
     tourStep = i;
     const step = TOUR[i];
     $("tour-title").textContent = step.title;
-    $("tour-text").textContent = step.text;
+    $("tour-text").textContent = typeof step.text === "function" ? step.text() : step.text;
     $("tour-next").textContent = i === TOUR.length - 1 ? "Done" : "Next";
     $("tour-dots").replaceChildren(...TOUR.map((_, j) => { const d = document.createElement("i"); if (j === i) d.className = "on"; return d; }));
-    const el = step.el();
+    const el = [step.el()].flat()[0];
     if (el) el.scrollIntoView({ block: el === $("past") ? "start" : "center", behavior: "instant" });
     placeTour();
     setTimeout(placeTour, 400);                          // after the scroll settles
@@ -1520,8 +1535,14 @@
       if (e.key === "Escape") endTour();
       else if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); $("tour-next").click(); }
       else if (e.key === "ArrowLeft" && tourStep > 0) showTourStep(tourStep - 1);
+      else if ([" ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown"].includes(e.key)) e.preventDefault();
       e.stopPropagation();
     }, true);
+    // The page stays put during the tour (each step scrolls to what it shows), so the
+    // bubble can't be scrolled away from what it points at. The tour's own buttons still work.
+    const holdStill = (e) => { if (!$("tour").hidden) e.preventDefault(); };
+    window.addEventListener("wheel", holdStill, { passive: false });
+    window.addEventListener("touchmove", holdStill, { passive: false });
     window.addEventListener("resize", () => { if (!$("tour").hidden) placeTour(); });
     window.addEventListener("scroll", () => { if (!$("tour").hidden) placeTour(); }, { passive: true });
     // Settings → Take the tour: on the newest entry that has a reflection.
@@ -2258,7 +2279,10 @@
     buttons.forEach((b) => { b.disabled = true; });
     setPromptStatus("Thinking of a prompt…");
     try {
-      const res = await api("POST", "/api/writing-prompt", { already_suggested: state.promptsShown });
+      const res = await api("POST", "/api/writing-prompt", {
+        already_suggested: state.promptsShown,
+        previous_entry: state.prompt && state.prompt.based_on ? state.prompt.based_on.id : null,   // find another thread
+      });
       state.prompt = res;
       state.promptsShown.push(res.prompt);
       setPromptStatus("");
@@ -2789,13 +2813,39 @@
   }
 
   // Settings → Feedback received (only on the page for whoever reads feedback).
+  // Filing feedback in Admin, loosely. Unfiled is New.
+  const FEEDBACK_FILES = { new: "New", now: "Now", later: "Later", think: "Think", all: "All" };
+  const FILE_HINTS = { now: "High priority: worth doing soon", later: "A good idea, once there are users",
+    think: "Not sure yet: come back to it" };
+  let feedbackFilter = "new";
+
+  async function fileFeedback(id, change, refresh = true) {
+    try {
+      await api("POST", `/api/feedback/${id}/file`, change);
+      if (refresh) refreshFeedbackList();
+    } catch (err) {
+      state.clientError = `Couldn't update that: ${sentence(err.message)}`; renderBanner();
+    }
+  }
+
   async function refreshFeedbackList() {
     const ul = $("feedback-list");
     if (!ul) return;
     let items;
     try { items = await api("GET", "/api/feedback"); } catch (_) { return; }
     const showDone = $("feedback-show-done").checked;
-    const shown = items.filter((f) => showDone || !f.done);
+    const open = items.filter((f) => showDone || !f.done);
+    const filed = (f) => f.priority || "new";
+    // The counts on the filter buttons: "Now (4)".
+    for (const b of $("feedback-filter").querySelectorAll("button")) {
+      const n = b.dataset.filter === "all" ? open.length : open.filter((f) => filed(f) === b.dataset.filter).length;
+      b.textContent = `${FEEDBACK_FILES[b.dataset.filter]} (${n})`;
+      b.setAttribute("aria-pressed", String(b.dataset.filter === feedbackFilter));
+    }
+    const ORDER = { now: 0, new: 1, think: 2, later: 3 };
+    const shown = feedbackFilter === "all"
+      ? open.slice().sort((a, b) => ORDER[filed(a)] - ORDER[filed(b)] || b.id - a.id)
+      : open.filter((f) => filed(f) === feedbackFilter);
     ul.replaceChildren();
     for (const f of shown) {
       const li = document.createElement("li");
@@ -2805,9 +2855,37 @@
       const who = f.email || f.name || "You";
       meta.textContent = `${longDate(f.created_at)}, ${timeOf(f.created_at)} · ${who} · ${f.kind_label}`
         + (f.screen ? ` · on the ${f.screen} page` : "");
+      if (feedbackFilter === "all") {
+        const tag = document.createElement("span");
+        tag.className = "feedback-tag";
+        tag.textContent = FEEDBACK_FILES[filed(f)];
+        meta.append(tag);
+      }
       const text = document.createElement("p");
       text.className = "feedback-body";
       text.textContent = f.text;
+      // Now / Later / Think: one tap files it, a second tap takes it back to New.
+      const row = document.createElement("div");
+      row.className = "feedback-file";
+      for (const p of ["now", "later", "think"]) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "rating-btn";
+        b.textContent = FEEDBACK_FILES[p];
+        b.title = FILE_HINTS[p];
+        b.setAttribute("aria-pressed", String(f.priority === p));
+        b.addEventListener("click", () => fileFeedback(f.id, { priority: f.priority === p ? null : p }));
+        row.append(b);
+      }
+      // A private note, saved when you leave the box.
+      const note = document.createElement("input");
+      note.type = "text";
+      note.className = "feedback-note";
+      note.maxLength = 500;
+      note.placeholder = "Add a note (only you see it)";
+      note.value = f.note || "";
+      note.addEventListener("change", () => fileFeedback(f.id, { note: note.value }, false));
+      note.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); note.blur(); } });
       const done = document.createElement("label");
       done.className = "checkbox";
       const box = document.createElement("input");
@@ -2823,17 +2901,25 @@
         }
       });
       done.append(box, document.createTextNode(" Done"));
-      li.append(meta, text, done);
+      row.append(done);
+      li.append(meta, text, row, note);
       ul.append(li);
     }
     if (!shown.length) {
       const li = document.createElement("li");
       li.className = "subtle";
-      li.textContent = items.length ? "Everything is marked done." : "No feedback yet.";
+      li.textContent = !items.length ? "No feedback yet."
+        : feedbackFilter === "new" ? "Nothing new: everything has been filed."
+        : feedbackFilter === "all" ? "Everything is marked done." : `Nothing filed under ${FEEDBACK_FILES[feedbackFilter]}.`;
       ul.append(li);
     }
   }
   if ($("feedback-show-done")) $("feedback-show-done").addEventListener("change", refreshFeedbackList);
+  if ($("feedback-filter")) {
+    for (const b of $("feedback-filter").querySelectorAll("button")) {
+      b.addEventListener("click", () => { feedbackFilter = b.dataset.filter; refreshFeedbackList(); });
+    }
+  }
 
   // ---- Install as an app ----------------------------------------------------
   // Chrome and Edge (computers, Android) let the page offer their install
