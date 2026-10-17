@@ -1224,3 +1224,44 @@ class PromptContextTests(unittest.TestCase):
         self.assertNotIn("Written 10 days ago.", avoided)          # the last prompt's thread
         lapsed = writing_prompts._context([made[400], made[90]], [], now=now)   # oldest first
         self.assertIn("their last entry was 90 days ago", lapsed)
+
+
+class ExpungeTests(unittest.TestCase):
+    """Admin → Delete everything: one person gone from the database and its backups, nobody else touched."""
+
+    def setUp(self):
+        fresh_journal()
+
+    def test_one_person_gone_everywhere(self):
+        from journal import backup, expunge, invites, prayers, reminders  # noqa: F401
+        gone = users.from_google("g-gone", "gone@x.com", "Gone")
+        set_up_as(gone)
+        store.create_entry("Mine, and soon gone.")
+        prayers.add("A prayer", "2026-10-01T09:00:00-04:00")
+        feedback.add(gone, "gone@x.com", "Gone", "fix", "Feedback from someone leaving")
+        invites.grant("gone@x.com")
+        stay = users.from_google("g-stay", "stay@x.com", "Stay")
+        set_up_as(stay)
+        kept_entry = store.create_entry("Someone else's entry.")
+        feedback.add(stay, "stay@x.com", "Stay", "fix", "Feedback that stays")
+        for old in config.BACKUP_DIR.glob("*.db"):                              # today's, taken with both people in it
+            old.unlink()
+        backup.daily()
+
+        found, failed = expunge.expunge(gone)
+        self.assertEqual((found, failed), (True, []))
+        self.assertIsNone(users.get(gone))
+        self.assertEqual([f["text"] for f in feedback.all_feedback()], ["Feedback that stays"])
+        self.assertFalse(invites.has_access("gone@x.com"))
+        self.assertEqual(store.get_entry(kept_entry["id"])["text"], "Someone else's entry.")
+        for path in [config.DB_PATH, *config.BACKUP_DIR.glob("*.db")]:
+            con = sqlite3.connect(path)
+            try:
+                for table in ("users", "entries", "prayers", "feedback"):
+                    self.assertEqual(con.execute(f"SELECT COUNT(*) FROM {table} WHERE "
+                                                 + ("id" if table == "users" else "user_id") + " = ?", (gone,)).fetchone()[0], 0,
+                                     (path.name, table))
+                self.assertEqual(con.execute("SELECT COUNT(*) FROM users WHERE id = ?", (stay,)).fetchone()[0], 1)
+            finally:
+                con.close()
+        self.assertEqual(expunge.expunge(gone), (False, []))                   # already gone

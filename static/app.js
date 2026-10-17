@@ -302,12 +302,49 @@
     return copy;
   }
 
+  // A soft rustle of paper as a page turns (Settings → Theme → Page-turn sound).
+  // Made in the browser from a burst of filtered noise, so there's no sound file:
+  // a quick lift, the sweep of the sheet, and a faint settle as it lands.
+  let audio = null;
+  function pageSound(direction) {
+    if (!CFG.pageSound || reducedMotion()) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+      const t = audio.currentTime, length = 0.45;
+      const noise = audio.createBuffer(1, Math.ceil(audio.sampleRate * length), audio.sampleRate);
+      const data = noise.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (0.6 + 0.4 * Math.random());
+      const src = audio.createBufferSource();
+      src.buffer = noise;
+      const band = audio.createBiquadFilter();             // paper: a breathy band that falls as the sheet slows
+      band.type = "bandpass";
+      band.Q.value = 0.8;
+      band.frequency.setValueAtTime(direction < 0 ? 2600 : 3200, t);
+      band.frequency.exponentialRampToValueAtTime(700, t + length);
+      const soft = audio.createBiquadFilter();             // take the hiss off the top
+      soft.type = "lowpass";
+      soft.frequency.value = 5000;
+      const gain = audio.createGain();
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.05, t + 0.03);      // the lift
+      gain.gain.exponentialRampToValueAtTime(0.11, t + 0.16);      // the sweep
+      gain.gain.exponentialRampToValueAtTime(0.03, t + 0.32);
+      gain.gain.exponentialRampToValueAtTime(0.06, t + 0.36);      // it lands
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + length);
+      src.connect(band).connect(soft).connect(gain).connect(audio.destination);
+      src.start(t);
+      src.stop(t + length);
+    } catch (_) { /* no sound is fine */ }
+  }
+
   let turnCount = 0;   // so a finished turn's clean-up never touches a newer turn
 
   function turnPage(el, direction, ghost) {
     const thisTurn = ++turnCount;
     document.querySelectorAll(".page-ghost").forEach((g) => g.remove());   // a quick second turn
     if (!ghost) { animatePage(el, "view-in"); return; }
+    pageSound(direction);
     ghost.classList.add(direction < 0 ? "ghost-under" : "ghost-turning");
     ghost.style.height = `${el.offsetHeight}px`;   // pages in a book are one size: match the new page
     el.after(ghost);
@@ -1469,23 +1506,25 @@
     return { left, top, width: right - left, height: bottom - top };
   }
 
+  // The card stays in one place (bottom centre; along the bottom on a phone), so
+  // Back and Next never move: only the spotlight travels to what each step shows.
   function placeTour() {
     const step = TOUR[tourStep];
     const el = step && step.el();
     if (!el || (Array.isArray(el) && !el.length)) return;
     const r = tourRect(el), pad = 8;
-    const spot = $("tour-spot");
-    const top = Math.max(4, r.top - pad), height = Math.min(r.height + pad * 2, window.innerHeight - top - 4);
-    Object.assign(spot.style, { top: `${top}px`, left: `${Math.max(4, r.left - pad)}px`, width: `${r.width + pad * 2}px`, height: `${height}px` });
-    const bubble = $("tour-bubble"), arrow = $("tour-arrow");
-    const bw = bubble.offsetWidth, bh = bubble.offsetHeight;
-    const below = top + height + 14 + bh < window.innerHeight || top < bh + 24;
-    const bTop = below ? Math.min(top + height + 14, window.innerHeight - bh - 8) : top - bh - 14;
-    const centre = r.left + r.width / 2;
-    const bLeft = Math.min(Math.max(12, centre - bw / 2), window.innerWidth - bw - 12);
-    Object.assign(bubble.style, { top: `${Math.max(8, bTop)}px`, left: `${bLeft}px` });
-    Object.assign(arrow.style, { left: `${Math.min(Math.max(14, centre - bLeft - 7), bw - 28)}px`,
-      top: below ? "-7px" : "", bottom: below ? "" : "-7px" });
+    const cardTop = $("tour-bubble").getBoundingClientRect().top;
+    const top = Math.max(4, r.top - pad), height = Math.max(0, Math.min(r.height + pad * 2, cardTop - 10 - top));
+    Object.assign($("tour-spot").style, { top: `${top}px`, left: `${Math.max(4, r.left - pad)}px`,
+      width: `${r.width + pad * 2}px`, height: `${height}px` });
+  }
+
+  // Bring what a step shows into the space above the card.
+  function scrollTourTo(el) {
+    if (!el) return;
+    el.scrollIntoView({ block: el === $("past") ? "start" : "center", behavior: "instant" });
+    const r = tourRect(el), room = $("tour-bubble").getBoundingClientRect().top - 16;
+    if (r.top + Math.min(r.height, room - 16) > room) window.scrollBy(0, r.top + Math.min(r.height, room - 16) - room);
   }
 
   function showTourStep(i) {
@@ -1494,25 +1533,36 @@
     $("tour-title").textContent = step.title;
     $("tour-text").textContent = typeof step.text === "function" ? step.text() : step.text;
     $("tour-next").textContent = i === TOUR.length - 1 ? "Done" : "Next";
+    $("tour-back").hidden = i === 0;
     $("tour-dots").replaceChildren(...TOUR.map((_, j) => { const d = document.createElement("i"); if (j === i) d.className = "on"; return d; }));
-    const el = [step.el()].flat()[0];
-    if (el) el.scrollIntoView({ block: el === $("past") ? "start" : "center", behavior: "instant" });
+    scrollTourTo([step.el()].flat()[0]);
     placeTour();
     setTimeout(placeTour, 400);                          // after the scroll settles
   }
 
-  function startTour() {
+  let tourFrom = null;                                   // "settings" when replayed from Settings
+
+  function startTour(from = null) {
     if (!$("tour") || $("entry-view").hidden || $("reflection").hidden) return;
+    tourFrom = from;
     hideToolbars();
     $("tour").hidden = false;
     showTourStep(0);
     $("tour-next").focus();
   }
 
+  // Back where it started: Settings, if it was replayed from there; otherwise the
+  // top of the reflection that was just written (the first tour comes with it).
   function endTour() {
     $("tour").hidden = true;
     tourStep = -1;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (tourFrom === "settings") {
+      tourFrom = null;
+      showSettings();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    } else if (!$("reflection").hidden) {
+      $("reflection").scrollIntoView({ block: "start", behavior: "smooth" });
+    }
     if (!CFG.tourDone) {
       CFG.tourDone = true;
       api("PUT", "/api/settings", { tour_done: true }, { passive: true }).catch(() => {});
@@ -1527,9 +1577,12 @@
   }
 
   if ($("tour")) {
-    $("tour-next").addEventListener("click", () => (tourStep < TOUR.length - 1 ? showTourStep(tourStep + 1) : endTour()));
+    const tourNext = () => (tourStep < TOUR.length - 1 ? showTourStep(tourStep + 1) : endTour());
+    $("tour-next").addEventListener("click", tourNext);
+    $("tour-back").addEventListener("click", () => { if (tourStep > 0) showTourStep(tourStep - 1); });
     $("tour-skip").addEventListener("click", endTour);
-    $("tour").querySelector(".tour-catch").addEventListener("click", endTour);
+    // A click on the dimmed page goes on to the next step: only Skip, Done or Escape leave.
+    $("tour").querySelector(".tour-catch").addEventListener("click", tourNext);
     document.addEventListener("keydown", (e) => {
       if ($("tour").hidden) return;
       if (e.key === "Escape") endTour();
@@ -1539,18 +1592,21 @@
       e.stopPropagation();
     }, true);
     // The page stays put during the tour (each step scrolls to what it shows), so the
-    // bubble can't be scrolled away from what it points at. The tour's own buttons still work.
+    // spotlight can't be scrolled away from what it points at. The tour's own buttons still work.
     const holdStill = (e) => { if (!$("tour").hidden) e.preventDefault(); };
     window.addEventListener("wheel", holdStill, { passive: false });
     window.addEventListener("touchmove", holdStill, { passive: false });
     window.addEventListener("resize", () => { if (!$("tour").hidden) placeTour(); });
     window.addEventListener("scroll", () => { if (!$("tour").hidden) placeTour(); }, { passive: true });
-    // Settings → Take the tour: on the newest entry that has a reflection.
+    // Settings → Take the tour: on the entry you were last reading, if it has a reflection,
+    // or else the newest one that does; afterwards, back to Settings.
     $("tour-again-btn").addEventListener("click", async () => {
-      const withReflection = [...(state.allEntries || [])].reverse().find((e) => e.reflection_status === "Done");
-      if (!withReflection) { showNotice("The tour starts with a reflection: write an entry and choose Finish & reflect first.", 5000); return; }
-      await openEntry(withReflection.id);
-      setTimeout(startTour, 700);
+      const hasReflection = (e) => e && e.reflection_status === "Done";
+      const entry = hasReflection(state.current) ? state.current
+        : [...(state.allEntries || [])].reverse().find(hasReflection);
+      if (!entry) { showNotice("The tour starts with a reflection: write an entry and choose Finish & reflect first.", 5000); return; }
+      await openEntry(entry.id);
+      setTimeout(() => startTour("settings"), 700);
     });
   }
 
@@ -2576,6 +2632,7 @@
       const res = await api("PUT", "/api/settings", out);
       CFG.userName = res.settings.user_name;
       CFG.bibleTranslation = res.settings.bible_translation || "bsb";
+      CFG.pageSound = !!res.settings.page_sound;
       $("journal-name").textContent = res.settings.journal_name || CFG.appName;
       showCoverName(res.settings.journal_name);
       CFG.autosaveSeconds = res.settings.draft_autosave_seconds;
@@ -3358,7 +3415,18 @@
       btn.className = "usage-access-btn";
       btn.textContent = r.access ? "Remove" : "Let back in";
       btn.addEventListener("click", async () => {
-        if (r.access && !confirm(`Remove access for ${r.email}? Their journal stays, should you let them back in.`)) return;
+        if (r.access) {
+          // Someone with an account: just their access, or everything.
+          const choice = r.invited_only
+            ? (confirm(`Remove ${r.email}'s invitation?`) ? "access" : null)
+            : await ask(`Remove ${r.email}?`, [
+              "Remove access: they can't sign in, but their journal stays, should you let them back in.",
+              "Delete everything: their account, journal and everything else of theirs is deleted, here and in the backups. This can't be undone."],
+              [{ label: "Cancel", value: null }, { label: "Remove access", value: "access" },
+               { label: "Delete everything", value: "everything", style: "danger" }]);
+          if (!choice) return;
+          if (choice === "everything") return deleteEverything(r);
+        }
         btn.disabled = true;
         try {
           const res = await api(r.access ? "DELETE" : "POST", "/api/admin/access", { email: r.email });
@@ -3371,6 +3439,33 @@
         }
       });
       cell.append(btn);
+      // Already removed, but their journal is still here: it can be deleted too.
+      if (!r.access && !r.invited_only && !r.me) {
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "usage-access-btn";
+        del.textContent = "Delete";
+        del.addEventListener("click", () => deleteEverything(r));
+        cell.append(" ", del);
+      }
+    }
+  }
+
+  // Admin: delete someone entirely, after a second, plainer confirmation.
+  async function deleteEverything(r) {
+    const sure = await ask(`Delete everything for ${r.email}?`, [
+      "Their account, journal entries, drafts, kept passages, prayer list, passkeys, counts, reminders, invitation requests and feedback are deleted, from the database and its backups.",
+      "This can't be undone. If they're invited again, they'll start a new journal from scratch."],
+      [{ label: "Keep them", value: false }, { label: "Delete everything", value: true, style: "danger" }]);
+    if (!sure) return;
+    try {
+      const res = await api("POST", "/api/admin/expunge", { email: r.email });
+      showNotice(res.warning || `${r.email} has been deleted.`, res.warning ? 9000 : 4000);
+      refreshUsage();
+      refreshInviteRequests();
+      refreshFeedbackList();
+    } catch (err) {
+      state.clientError = `Couldn't delete them: ${sentence(err.message)}`; renderBanner();
     }
   }
 

@@ -6,8 +6,13 @@
     "setting (default: philosophy)."
   ],
   "app_name": "A Life Well Lived",
-  "tagline": "Daily Journal",
+  "tagline": "A Private Journal",
   "page_vignettes": {"kept": "learning"},
+  "promises": [
+    "We can’t read your entries. They’re stored locked with your passphrase. Only you, with your passphrase or your recovery key, can open them.",
+    "Reflections are anonymous. Only your words are sent to Claude for reflection, not your name or email.",
+    "No ads, no tracking. Download your journal or wipe it whenever you like."
+  ],
   "tab_from_logo": true,
   "tab_logo_bold": 9,
   "description": "A private journal, with a thoughtful reflection after every entry.",
@@ -22,8 +27,8 @@
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "question", "title": "Easily explore past entries",
      "text": "Every reflection ends with a question to carry forward. Browse your favorites, search, or explore a theme."},
-    {"icon": "lock", "title": "Private, and never used to train AI",
-     "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
+    {"icon": "lock", "title": "Only you can read your journal",
+     "text": "It’s encrypted with a passphrase <em>only</em> you know. Reflections are anonymous and never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "email_vignette": "meditation-and-stillness",

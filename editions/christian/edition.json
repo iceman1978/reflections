@@ -6,7 +6,7 @@
     "Claude's instructions are in prompts/. Run it with EDITION=christian."
   ],
   "app_name": "In His Steps",
-  "tagline": "A Daily Journal",
+  "tagline": "A Private Journal",
   "tab_drawing": {
     "about": "The browser-tab icon: the sandal from the welcome page (keep these paths in step with the 'sandal' icon in templates/index.html).",
     "paths": ["M12.4 2.5c-2.8 0-4.7 2.3-4.7 5.6 0 2.3.9 3.9 1.1 5.8.2 1.9-.4 3.3-.4 4.9 0 1.8 1.6 2.7 3.6 2.7s3.6-.9 3.6-2.7c0-1.6-.6-3-.4-4.9.2-1.9 1.5-3.5 1.5-5.8 0-3.3-1.7-5.6-4.3-5.6z",
@@ -27,8 +27,8 @@
      "link": {"text": "Browse the library", "url": "/sources"}},
     {"icon": "sandal", "title": "Grow in His Steps",
      "text": "Every reflection ends with an honest question to carry with you. Easily find favorite entries and passages."},
-    {"icon": "lock", "title": "Private, and never used to train AI",
-     "text": "Entries are encrypted with a passphrase <em>only you know</em>, and are never used to train AI.",
+    {"icon": "lock", "title": "Only you can read your journal",
+     "text": "It’s encrypted with a passphrase <em>only</em> you know. Reflections are anonymous and never used to train AI.",
      "link": {"text": "How privacy works", "url": "/privacy"}}
   ],
   "email_vignette": "scripture",
@@ -60,8 +60,9 @@
   },
   "promises": [
     "Every verse checked, word for word, with a link to read it in context.",
-    "A companion for quiet contemplation, pointing you to Scripture and prayer.",
-    "Made to deepen your prayer and your quiet time, never to stand in for them."
+    "We can’t read your entries. They’re stored locked with your passphrase. Only you, with your passphrase or your recovery key, can open them.",
+    "Reflections are anonymous. Only your words are sent to Claude for reflection, not your name or email.",
+    "No ads, no tracking. Download your journal or wipe it whenever you like."
   ],
   "sample": {
     "link_text": "Read a sample reflection",

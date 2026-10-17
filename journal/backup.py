@@ -90,6 +90,19 @@ def forget_entry(entry_id):
     return failed
 
 
+def forget_everything(statements):
+    """Run a person's deletes (journal/expunge.py) on every backup.
+    Returns the names of any backups that couldn't be cleaned."""
+    failed = []
+    for path in _all_backup_files():
+        try:
+            _clean(path, statements)
+        except Exception:
+            log.exception("Could not clean backup %s", path.name)
+            failed.append(path.name)
+    return failed
+
+
 def forget_user(user_id):
     """Remove one person's entries and draft from every backup (part of wiping
     their journal); other people's entries stay. Returns names that couldn't be cleaned."""
@@ -97,7 +110,7 @@ def forget_user(user_id):
         tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
         if _has_owner_column(con):
             out = [("DELETE FROM entries WHERE user_id = ?", (user_id,))]
-            for table in ("drafts", "kept"):
+            for table in ("drafts", "kept", "prayers"):
                 if table in tables:
                     out.append((f"DELETE FROM {table} WHERE user_id = ?", (user_id,)))
             return out

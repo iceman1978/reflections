@@ -24,7 +24,7 @@ from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from flask import Flask, g, jsonify, make_response, redirect, render_template, request, send_file, session
 
-from journal import (activity, config, ratings, email_signin, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
+from journal import (activity, config, db, expunge, ratings, email_signin, export, feedback, importer, invites, kept, library, mail, migrate, reminders, share, passkeys, reflection, stats, store, tokens, usage, users, vault,
                      search, sources, themes, wipe, writing_prompts)
 from journal.config import HOSTED, LOG_DIR, ROOT, TZ, settings
 from journal.db import LOCAL_USER
@@ -258,6 +258,7 @@ def index():
         has_scripture=any(not w["author"] for w in sources.works().values()),
         bible_translation=prefs["bible_translation"],
         tour_done=prefs["tour_done"],
+        page_sound=prefs["page_sound"],
         rating_reasons=ratings.REASONS,                       # "Not quite": what missed
         background_photo=prefs["background_photo"],
         photo_blur=prefs["photo_blur"],
@@ -1584,6 +1585,33 @@ def remove_access():
                                         "Take them off that list too.")
     log.info("Access removed for an address")
     return jsonify(ok=True)
+
+
+@app.post("/api/admin/expunge")
+def expunge_person():
+    """Admin: delete someone entirely (journal, account, everything with their
+    address), from the database and its backups. Not undoable."""
+    if (resp := _need_admin()):
+        return resp
+    email = ((request.get_json(silent=True) or {}).get("email") or "").strip().lower()
+    me = ((users.get(g.user_id) or {}).get("email") or "").lower()
+    if not email or email == me:
+        return jsonify(error="That's you: delete your own account another way."), 400
+    con = db.connect()
+    try:
+        ids = [r[0] for r in con.execute("SELECT id FROM users WHERE lower(email) = ?", (email,))]
+    finally:
+        con.close()
+    if not ids:
+        return jsonify(error="There's no account for that address."), 404
+    failed = []
+    for uid in ids:
+        failed += expunge.expunge(uid)[1]
+    warning = ("Deleted, but ALLOWED_EMAILS on Render still lets them sign in again. Take them off that list too."
+               if email in config.ALLOWED_EMAILS else None)
+    if failed:
+        warning = (warning + " " if warning else "") + f"{len(failed)} backup copies couldn't be cleaned (see the log)."
+    return jsonify(ok=True, warning=warning)
 
 
 @app.post("/api/admin/invites/<int:invite_id>")

@@ -38,9 +38,9 @@
 /* (On the page, and on each Settings swatch so it can show its own colour.) */
 :root, [data-palette="lake"]   { --hue: 212; --sat: 48%; --paper-hue: 208; --paper-sat: 38%; }
 [data-palette="walnut"]         { --hue: 27;  --sat: 32%; --paper-hue: 42;  --paper-sat: 60%; }
-[data-palette="sage"]           { --hue: 140; --sat: 24%; --paper-hue: 85;  --paper-sat: 28%; }
+[data-palette="sage"]           { --hue: 131; --sat: 24%; --paper-hue: 85;  --paper-sat: 28%; }
 [data-palette="amber"]          { --hue: 24;  --sat: 72%; --paper-hue: 36;  --paper-sat: 75%; }
-[data-palette="claret"]         { --hue: 350; --sat: 46%; --paper-hue: 12;  --paper-sat: 42%; }
+[data-palette="claret"]         { --hue: 354; --sat: 46%; --paper-hue: 12;  --paper-sat: 42%; }
 [data-palette="lavender"]       { --hue: 265; --sat: 30%; --paper-hue: 270; --paper-sat: 26%; }
 [data-palette="sea-glass"]      { --hue: 182; --sat: 42%; --paper-hue: 168; --paper-sat: 26%; }
 [data-palette="graphite"]       { --hue: 215; --sat: 10%; --paper-hue: 40;  --paper-sat: 8%;  }
@@ -391,7 +391,7 @@ button.danger { background: var(--danger); border-color: var(--danger); color: #
      alternating page colour and a faint line), then the hard cover behind. */
   --leaf: var(--page-edge);
   --leaf-line: color-mix(in srgb, var(--page-edge) 82%, var(--ink));
-  --cover: hsl(var(--hue) calc(var(--sat) * 0.7) 24%);
+  --cover: hsl(var(--hue) calc(var(--sat) * 0.7) 18%);
   --book-edges:
     1px 1px 0 var(--leaf),
     2px 2px 0 var(--leaf-line),
@@ -1375,7 +1375,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
   background-color: var(--page); color: var(--ink);
   background-image: linear-gradient(to right, rgba(0, 0, 0, 0.09), rgba(0, 0, 0, 0.02) 16px, transparent 24px);   /* the binding */
   box-shadow: 1px 1px 0 var(--page-edge), 3px 3px 0 var(--page-edge), 5px 5px 0 var(--page-edge),
-              7px 7px 0 1px hsl(var(--hue) calc(var(--sat) * 0.7) 24%), 10px 16px 30px -8px rgba(0, 0, 0, 0.45);
+              7px 7px 0 1px hsl(var(--hue) calc(var(--sat) * 0.7) 18%), 10px 16px 30px -8px rgba(0, 0, 0, 0.45);
   transform: rotate(-1.5deg);
   transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
 }
@@ -1613,7 +1613,9 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
   z-index: 3;
   transform-origin: left center;
   backface-visibility: hidden;
-  animation: turn-away 0.6s cubic-bezier(0.5, 0.1, 0.7, 0.6) forwards;
+  /* A little quicker than turning back, and quicker off the mark: a page lifted away
+     starts slowly by nature, and at the same length it felt slower than turning back. */
+  animation: turn-away 0.5s cubic-bezier(0.35, 0.2, 0.6, 0.8) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1716,21 +1718,24 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 #journal-home { cursor: pointer; border-radius: 10px; }
 .book.locked #journal-home { cursor: default; }
 #journal-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-/* The tour: everything dimmed but a cut-out around one thing, and a bubble pointing at it. */
+/* The tour: everything dimmed but a cut-out around one thing, and a card that stays put
+   at the bottom (so Back and Next are always in the same place). */
 .tour { position: fixed; inset: 0; z-index: 60; }
 .tour[hidden] { display: none; }
 .tour-catch { position: absolute; inset: 0; }
 .tour-spot { position: fixed; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(15, 20, 30, 0.6);
   transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease; pointer-events: none; }
-.tour-bubble { position: fixed; width: min(340px, calc(100vw - 32px)); padding: 16px 18px 12px; border-radius: 12px;
-  background: var(--page); color: var(--ink); box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5);
-  transition: top 0.3s ease, left 0.3s ease; }
+.tour-bubble { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; width: min(460px, calc(100vw - 32px));
+  padding: 16px 20px 14px; border-radius: 12px;
+  background: var(--page); color: var(--ink); box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.5); }
+@media (max-width: 640px) {
+  .tour-bubble { left: 0; bottom: 0; translate: none; width: 100%; border-radius: 14px 14px 0 0;
+    padding: 16px 18px calc(14px + env(safe-area-inset-bottom)); }
+}
 .tour-bubble h3 { margin: 0 0 6px; font-size: 1.05rem; }
 .tour-bubble p { margin: 0 0 12px; line-height: 1.5; font-size: 0.95rem; }
-.tour-arrow { position: absolute; width: 14px; height: 14px; background: var(--page); transform: rotate(45deg); }
 .tour-foot { display: flex; align-items: center; gap: 12px; }
-.tour-foot .primary { margin-left: auto; }
-.tour-dots { display: flex; gap: 5px; }
+.tour-dots { display: flex; gap: 5px; margin-left: auto; }
 .tour-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--rule); }
 .tour-dots i.on { background: var(--accent); }
 /* Settings → Basic, first thing: the tour (a compass). */
@@ -1740,9 +1745,10 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .tour-card div { flex: 1; display: grid; gap: 1px; }
 .tour-card span { font-size: 0.88rem; color: var(--muted); }
 .tour-card button { flex: none; }
-@media (prefers-reduced-motion: reduce) { .tour-spot, .tour-bubble { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tour-spot { transition: none; } }
 /* Kept passages: how they're sorted. */
-.kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem; }
+.kept-sort { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: -4px 0 18px; font-size: 0.88rem;
+  clear: both; }   /* below the page's drawing, so the buttons have the full width */
 .kept-sort button, .kept-sort button:hover:not(:disabled) { padding: 2px 12px; border-radius: 999px; font-size: 0.88rem; }
 .kept-sort button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
 /* A passage just let go of, with Undo (it stays until they leave the page). */

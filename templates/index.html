@@ -58,7 +58,7 @@
         {% endfor %}
       </ul>
       {% if edition.promises %}
-      <!-- The worries people have about AI and faith, answered in a line each -->
+      <!-- The worries people have (privacy, and AI and faith), answered in a line each -->
       <ul class="landing-promises">
         {% for promise in edition.promises %}<li>{{ promise }}</li>{% endfor %}
       </ul>
@@ -135,13 +135,13 @@
         </div>
         <p id="signin-error" class="vault-error" hidden></p>
         <p class="subtle signin-note"><strong>New here?</strong> {{ app_name }} is invitation-only for now. Signing in for the first time creates your journal, as long as your address has been invited.</p>
-        <p class="subtle signin-note">Signing in only confirms who you are. Google, and your email, never see what you write.</p>
+        <p class="subtle signin-note">Signing in only confirms who you are. Your journal stays encrypted with a passphrase you’ll choose, and <em>nobody</em> else can read it.</p>
       </div>
       <p id="vault-account" class="vault-account subtle" hidden><span id="vault-email"></span> · <a href="/logout" class="nowrap">Not you? Sign out</a></p>
       {% endif %}
 
       <form id="vault-setup" hidden novalidate>
-        <p>Choose a passphrase for your journal. Everything you write is encrypted with it and can only be read after you unlock it.</p>
+        <p>Choose a passphrase for your journal. It’s the key to everything you write: we never see it, which is why we can’t reset it for you. Your recovery key, on the next screen, is the only other way in.</p>
         {% if hosted %}<p class="vault-note">Nobody else can read your entries, not even whoever runs this site. That also means nobody can reset this passphrase for you: keep the recovery key you'll be shown next. <a href="/privacy#why-passphrase" target="_blank" rel="noopener">Why a passphrase as well as Google?</a></p>{% endif %}
         <p id="legacy-note" class="vault-note" hidden></p>
         <label>Passphrase <input id="setup-pw" type="password" autocomplete="new-password"></label>
@@ -592,6 +592,10 @@
             </select>
           </label>
           <label class="checkbox">
+            <input name="page_sound" type="checkbox"> Page-turn sound
+            <span class="hint checkbox-hint">A soft rustle of paper when you turn to an older or newer entry.</span>
+          </label>
+          <label class="checkbox">
             <input name="background_photo" type="checkbox"> Background photo
           </label>
           <div id="photo-sliders" class="photo-sliders">
@@ -988,12 +992,12 @@
     <div class="tour-catch"></div>
     <div id="tour-spot" class="tour-spot"></div>
     <div id="tour-bubble" class="tour-bubble" role="dialog" aria-live="polite" aria-labelledby="tour-title">
-      <span id="tour-arrow" class="tour-arrow"></span>
       <h3 id="tour-title"></h3>
       <p id="tour-text"></p>
       <div class="tour-foot">
-        <span id="tour-dots" class="tour-dots" aria-hidden="true"></span>
         <button type="button" id="tour-skip" class="link-button">Skip</button>
+        <span id="tour-dots" class="tour-dots" aria-hidden="true"></span>
+        <button type="button" id="tour-back" class="quiet" hidden>Back</button>
         <button type="button" id="tour-next" class="primary">Next</button>
       </div>
     </div>
@@ -1017,6 +1021,7 @@
     prayerList: {{ (edition.prayer_list or false) | tojson }},
     hasScripture: {{ has_scripture | tojson }},
     tourDone: {{ tour_done | tojson }},
+    pageSound: {{ page_sound | tojson }},
     autosaveSeconds: {{ autosave_seconds | int }},
     timezone: {{ timezone | tojson }},
     photoBlur: {{ photo_blur | int }},
