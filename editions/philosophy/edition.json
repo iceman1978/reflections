@@ -7,6 +7,7 @@
   ],
   "app_name": "A Life Well Lived",
   "tagline": "Daily Journal",
+  "page_vignettes": {"kept": "learning"},
   "tab_from_logo": true,
   "tab_logo_bold": 9,
   "description": "A private journal, with a thoughtful reflection after every entry.",

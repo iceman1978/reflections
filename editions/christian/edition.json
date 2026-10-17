@@ -33,6 +33,7 @@
   ],
   "email_vignette": "scripture",
   "prayer_list": true,
+  "page_vignettes": {"kept": "scripture", "prayers": "gods-presence"},
   "reminder_prompts": [
     "What's one thing you're carrying into today?",
     "Where did you notice God's goodness this week, even in something small?",
@@ -54,7 +55,7 @@
     "Private and encrypted — never used to train AI"
   ],
   "welcome_quote": {
-    "text": "“Search me, O God, and know my heart; test me and know my concerns.”",
+    "text": "“Search me, O God, and know my heart;\ntest me and know my concerns.”",
     "cite_html": "Psalm 139:23 <cite>(BSB)</cite>"
   },
   "promises": [

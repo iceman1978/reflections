@@ -607,6 +607,13 @@ html[data-text-size="xlarge"] { --text: 1.5rem; --lh: 2.5rem; }
   animation: fade-in 0.5s ease-out;
 }
 .insight p { margin: 0 0 1em; }
+/* A drawing in the top right of Kept passages and the Prayer list, like the reflection's. */
+.page-vignette {
+  position: absolute; top: 26px; right: 40px; width: 190px; aspect-ratio: 2 / 1; pointer-events: none;
+  background: var(--accent); opacity: 0.85;
+  -webkit-mask: var(--vignette) center / contain no-repeat; mask: var(--vignette) center / contain no-repeat;
+}
+@media (max-width: 640px) { .page-vignette { top: 14px; right: 18px; width: 120px; } }
 /* The main theme's pencil drawing, at the top of the reflection, in the theme's color. */
 .reflection-vignette {
   width: 100%; max-width: 400px; aspect-ratio: 2 / 1; margin: 0 auto 16px;   /* a wide strip across the reflection */

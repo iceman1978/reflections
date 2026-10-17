@@ -83,7 +83,8 @@
       {% endif %}
       {% if edition.welcome_quote %}
       <figure class="landing-quote">
-        <blockquote>{{ edition.welcome_quote.text }}</blockquote>
+        {# A line break wherever the text has one (\n in edition.json). #}
+        <blockquote>{% for line in edition.welcome_quote.text.splitlines() %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</blockquote>
         <figcaption>{{ edition.welcome_quote.cite_html | safe }}</figcaption>
       </figure>
       {% endif %}
@@ -393,7 +394,10 @@
     </section>
 
     <!-- Kept passages: the quotations starred in reflections, by writer -->
-    <section id="kept-view" class="page" hidden>
+    {# A theme drawing in the top right of a page (edition.json "page_vignettes": page -> drawing). #}
+    {% macro page_vignette(page) %}{% set v = (edition.page_vignettes or {}).get(page) %}{% if v and vignettes.get(v) %}
+      <div class="page-vignette" style="--vignette: url('{{ vignettes[v] }}')" aria-hidden="true"></div>{% endif %}{% endmacro %}
+    <section id="kept-view" class="page" hidden>{{ page_vignette("kept") }}
       <nav class="entry-nav write-nav" aria-label="Back">
         <button id="kept-back-btn" type="button" class="nav-btn">‹ Back to your journal</button>
       </nav>
@@ -410,7 +414,7 @@
     </section>
 
     {% if edition.prayer_list %}
-    <section id="prayers-view" class="page" hidden>
+    <section id="prayers-view" class="page" hidden>{{ page_vignette("prayers") }}
       <nav class="entry-nav write-nav" aria-label="Back">
         <button id="prayers-back-btn" type="button" class="nav-btn">‹ Back to your journal</button>
       </nav>
