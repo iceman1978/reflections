@@ -1250,7 +1250,7 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
 /* ---- Welcome page (signed out, web version): story left, sign-in right ---- */
 .vault.landing {
   display: grid;
-  grid-template-columns: minmax(0, 60fr) minmax(0, 40fr);   /* the welcome on the left, sign-in on the right */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);   /* the welcome on the left, sign-in on the right, half each */
   align-items: stretch;
   padding: 0;
 }
@@ -1260,19 +1260,25 @@ input.invite-input:focus { border-color: var(--accent); outline: none; }
    beside it. Only where the window is tall enough to hold the whole card. (translate,
    not transform, so the card's own animations still work.) */
 @media (min-width: 861px) and (min-height: 720px) {
-  .vault.landing .vault-card { position: fixed; top: 50%; left: calc(60% + 20%); translate: -50% -50%;
-    width: min(420px, calc(40% - 48px)); margin: 0; z-index: 1; }
+  .vault.landing .vault-card { position: fixed; top: 50%; left: 75%; translate: -50% -50%;
+    width: min(420px, calc(50% - 48px)); margin: 0; z-index: 2; }
   .vault.landing .vault-card.page { box-shadow: 0 1px 3px var(--shadow), 0 30px 80px -20px rgba(0, 0, 0, 0.45); }
 }
-/* A photo of nature fills the sign-in side, still while the welcome scrolls beside it,
-   a little darker at the edges so the card stands out. A different one each visit. */
+/* A photo of nature fills the sign-in side, still while the welcome scrolls beside it.
+   It looks like the journal's own background with the default settings: blurred 3px,
+   35% visible under a veil of the Lake theme's paper color. A different one each visit.
+   (A little larger than its half, so the blur's soft edges stay out of sight.) */
 .vault.landing.has-photo::after {
-  content: ""; position: fixed; top: 0; right: 0; bottom: 0; width: 40%; z-index: 0; pointer-events: none;
+  content: ""; position: fixed; top: -12px; right: -12px; bottom: -12px; width: calc(50% + 24px);
+  z-index: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse at center, transparent 45%, hsl(0 0% 0% / 0.28) 100%),
+    linear-gradient(hsl(208 6% 90% / 0.65), hsl(208 6% 90% / 0.65)),
     var(--welcome-photo) center / cover no-repeat;
+  filter: blur(3px) saturate(0.85);
 }
-.vault.landing.has-photo .vault-card { position: relative; z-index: 1; }
+/* The blue welcome panel lies on top of the photo, casting a shadow across it. */
+.vault.landing.has-photo .landing-intro { z-index: 1; box-shadow: 10px 0 34px -6px rgba(0, 0, 0, 0.45); }
+.vault.landing.has-photo .vault-card { position: relative; z-index: 2; }
 @media (min-width: 861px) and (min-height: 720px) {
   .vault.landing.has-photo .vault-card { position: fixed; }
 }
@@ -1481,7 +1487,9 @@ a.google-btn svg { flex: none; width: 20px; height: 20px; }
 @media (max-width: 860px) {
   .vault.landing { grid-template-columns: 1fr; }
   /* On a phone the photo sits behind the sign-in card, below the welcome. */
-  .vault.landing.has-photo::after { position: static; grid-row: 2; grid-column: 1; width: auto; }
+  .vault.landing.has-photo { overflow: clip; }   /* the blurred photo is drawn a little larger than its space */
+  .vault.landing.has-photo::after { position: static; grid-row: 2; grid-column: 1; width: auto; margin: -12px; }
+  .vault.landing.has-photo .landing-intro { box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.45); }   /* the panel above casts it downward */
   .vault.landing.has-photo .vault-card { grid-row: 2; grid-column: 1; }
   .landing-intro { min-height: 0; padding: 36px 20px 32px; gap: 20px; }
   .vault.landing .vault-card { width: calc(100% - 32px); margin: 24px 0 40px; }
