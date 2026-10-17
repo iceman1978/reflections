@@ -3498,8 +3498,13 @@
   document.addEventListener("keydown", (e) => {
     // ← / → page through entries while reading (not while typing or in a dialog).
     // So do j / k, as in Gmail: j = older (down the list), k = newer.
-    if (document.querySelector("dialog[open]") || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
-    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || document.querySelector("dialog[open]")) return;
+    // On a blank writing page the cursor waits in the text box, but with nothing written
+    // there's nothing for ← to move through: it turns back to the latest entry instead.
+    const blankPage = !$("write-view").hidden && !$("editor").value && !$("title-input").value
+      && [$("editor"), $("title-input")].includes(document.activeElement);
+    if (blankPage && e.key === "ArrowLeft") { e.preventDefault(); olderFromWritingPage(); return; }
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
     const back = e.key === "ArrowLeft" || e.key === "j", on = e.key === "ArrowRight" || e.key === "k";
     if (!$("write-view").hidden && back) { e.preventDefault(); olderFromWritingPage(); return; }
     if ($("entry-view").hidden || !$("entry-editor").hidden) return;
