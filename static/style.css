@@ -1673,6 +1673,7 @@ mark.hl.prayer { border-bottom: 2px solid color-mix(in srgb, var(--gold) 70%, tr
 .share-link.question-pray { display: inline-block; margin: 6px 0 2px; }
 /* The journal's name in the header goes back to today's page. */
 #journal-home { cursor: pointer; border-radius: 10px; }
+.book.locked #journal-home { cursor: default; }
 #journal-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 /* The tour: everything dimmed but a cut-out around one thing, and a bubble pointing at it. */
 .tour { position: fixed; inset: 0; z-index: 60; }

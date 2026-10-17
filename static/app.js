@@ -131,6 +131,7 @@
 
   const VIEWS = ["write", "entry", "settings", "kept", ...(document.getElementById("prayers-view") ? ["prayers"] : [])];   // the pages of the book
   function showView(name) {
+    if ($("book").classList.contains("locked")) return;   // while locked, only the cover shows
     const el = $(`${name}-view`);
     const changed = el.hidden;
     for (const v of VIEWS) $(`${v}-view`).hidden = v !== name;
@@ -3999,6 +4000,7 @@
   });
 
   function goHome() {
+    if (!state.unlocked) return;                 // the cover stays until the journal is unlocked
     hideToolbars();
     showWrite();
     window.scrollTo({ top: 0, behavior: "smooth" });
